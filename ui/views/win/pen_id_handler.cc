@@ -49,6 +49,13 @@ PenIdHandler::ScopedPenIdStaticsForTesting::~ScopedPenIdStaticsForTesting() =
 
 PenIdHandler::PenIdHandler() {
   base::win::AssertComInitialized();
+  
+  if(!base::win::ResolveCoreWinRTDelayload()){
+	pen_device_statics_ = nullptr;
+	pointer_point_statics_ = nullptr;
+	return;
+  }
+  
   HRESULT hr = base::win::RoGetActivationFactory(
       base::win::HStringReference(RuntimeClass_Windows_Devices_Input_PenDevice)
           .Get(),

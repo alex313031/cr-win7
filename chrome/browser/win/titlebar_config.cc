@@ -4,15 +4,40 @@
 
 #include "chrome/browser/win/titlebar_config.h"
 
+#include <Windows.h>
 #include "base/command_line.h"
+#include "base/win/windows_version.h"
 #include "chrome/common/chrome_switches.h"
 
 bool ShouldCustomDrawSystemTitlebar() {
+  // Some extra code added here because those with pre-win8 and no DWM will have to fallback on the custom titlebar.
+  BOOL result = FALSE;
+	
+  typedef HRESULT(WINAPI* DwmIsCompositionEnabledFunc)(BOOL* enabled);
+
+  DwmIsCompositionEnabledFunc func_ = nullptr;
+	
+  HMODULE dwmapi_library_ = LoadLibraryW(L"dwmapi.dll");
+  if (dwmapi_library_) {
+    func_ = reinterpret_cast<DwmIsCompositionEnabledFunc>(
+        GetProcAddress(dwmapi_library_, "DwmIsCompositionEnabled"));
+  }
+  else
+	  return true;
+  
+  if (func_) {
+	  func_(&result);
+  }
+  else
+	  return true;
+  
+  
   // Cache flag lookup.
   static const bool custom_titlebar_disabled =
       base::CommandLine::InitializedForCurrentProcess() &&
       base::CommandLine::ForCurrentProcess()->HasSwitch(
           switches::kDisableWindows10CustomTitlebar);
 
-  return !custom_titlebar_disabled;
+  return (!custom_titlebar_disabled &&
+         base::win::GetVersion() >= base::win::Version::WIN10) || !result;
 }
