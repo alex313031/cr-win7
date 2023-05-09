@@ -29,13 +29,14 @@
 #import "ios/chrome/browser/drag_and_drop/table_view_url_drag_drop_handler.h"
 #import "ios/chrome/browser/favicon/favicon_loader.h"
 #import "ios/chrome/browser/favicon/ios_chrome_favicon_loader_factory.h"
-#import "ios/chrome/browser/main/browser.h"
 #import "ios/chrome/browser/metrics/new_tab_page_uma.h"
 #import "ios/chrome/browser/policy/policy_util.h"
 #import "ios/chrome/browser/shared/coordinator/alert/action_sheet_coordinator.h"
 #import "ios/chrome/browser/shared/coordinator/alert/alert_coordinator.h"
 #import "ios/chrome/browser/shared/coordinator/scene/scene_state_browser_agent.h"
+#import "ios/chrome/browser/shared/model/browser/browser.h"
 #import "ios/chrome/browser/shared/model/browser_state/chrome_browser_state.h"
+#import "ios/chrome/browser/shared/model/web_state_list/web_state_list.h"
 #import "ios/chrome/browser/shared/public/commands/application_commands.h"
 #import "ios/chrome/browser/shared/public/commands/command_dispatcher.h"
 #import "ios/chrome/browser/shared/public/commands/snackbar_commands.h"
@@ -49,7 +50,6 @@
 #import "ios/chrome/browser/shared/ui/util/pasteboard_util.h"
 #import "ios/chrome/browser/shared/ui/util/rtl_geometry.h"
 #import "ios/chrome/browser/shared/ui/util/uikit_ui_util.h"
-#import "ios/chrome/browser/sync/sync_setup_service_factory.h"
 #import "ios/chrome/browser/ui/authentication/cells/signin_promo_view_configurator.h"
 #import "ios/chrome/browser/ui/authentication/cells/table_view_signin_promo_item.h"
 #import "ios/chrome/browser/ui/bookmarks/bookmark_navigation_controller.h"
@@ -73,7 +73,6 @@
 #import "ios/chrome/browser/ui/sharing/sharing_params.h"
 #import "ios/chrome/browser/url_loading/url_loading_browser_agent.h"
 #import "ios/chrome/browser/url_loading/url_loading_params.h"
-#import "ios/chrome/browser/web_state_list/web_state_list.h"
 #import "ios/chrome/browser/window_activities/window_activity_helpers.h"
 #import "ios/chrome/common/ui/colors/semantic_color_names.h"
 #import "ios/chrome/common/ui/favicon/favicon_attributes.h"
@@ -298,12 +297,8 @@ std::vector<GURL> GetUrlsToOpen(const std::vector<const BookmarkNode*>& nodes) {
 - (NSArray<BookmarksHomeViewController*>*)cachedViewControllerStack {
   // This method is only designed to be called for the view controller
   // associated with the root node.
-  DCHECK(_profileBookmarkModel->loaded());
-  if (base::FeatureList::IsEnabled(bookmarks::kEnableBookmarksAccountStorage)) {
-    CHECK(_accountBookmarkModel->loaded());
-  } else {
-    CHECK(!_accountBookmarkModel.get());
-  }
+  CHECK(bookmark_utils_ios::AreAllAvailableBookmarkModelsLoaded(
+      _profileBookmarkModel.get(), _accountBookmarkModel.get()));
   DCHECK([self isDisplayingBookmarkRoot]);
 
   NSMutableArray<BookmarksHomeViewController*>* stack = [NSMutableArray array];
@@ -1079,7 +1074,7 @@ std::vector<GURL> GetUrlsToOpen(const std::vector<const BookmarkNode*>& nodes) {
   DCHECK(self.mediator.editingFolderNode);
   self.mediator.addingNewFolder = NO;
   if (newName.length > 0) {
-    _profileBookmarkModel->SetTitle(
+    self.mediator.displayedBookmarkModel->SetTitle(
         self.mediator.editingFolderNode, base::SysNSStringToUTF16(newName),
         bookmarks::metrics::BookmarkEditSource::kUser);
   }
@@ -1114,7 +1109,8 @@ std::vector<GURL> GetUrlsToOpen(const std::vector<const BookmarkNode*>& nodes) {
   [self.snackbarCommandsHandler
       showSnackbarMessage:bookmark_utils_ios::MoveBookmarksWithUndoToast(
                               std::move(editedNodes),
-                              _profileBookmarkModel.get(), folder,
+                              _profileBookmarkModel.get(),
+                              _accountBookmarkModel.get(), folder,
                               self.browserState)];
 }
 
@@ -1137,6 +1133,10 @@ std::vector<GURL> GetUrlsToOpen(const std::vector<const BookmarkNode*>& nodes) {
 #pragma mark - BookmarkModelBridgeObserver
 
 - (void)bookmarkModelLoaded:(bookmarks::BookmarkModel*)model {
+  if (!bookmark_utils_ios::AreAllAvailableBookmarkModelsLoaded(
+          _profileBookmarkModel.get(), _accountBookmarkModel.get())) {
+    return;
+  }
   DCHECK(!self.displayedFolderNode);
   self.displayedFolderNode = _profileBookmarkModel->root_node();
 
@@ -1364,18 +1364,17 @@ std::vector<GURL> GetUrlsToOpen(const std::vector<const BookmarkNode*>& nodes) {
   self.mediator.addingNewFolder = YES;
   std::u16string folderTitle =
       l10n_util::GetStringUTF16(IDS_IOS_BOOKMARK_NEW_GROUP_DEFAULT_NAME);
-  self.mediator.editingFolderNode = _profileBookmarkModel->AddFolder(
+  bookmarks::BookmarkModel* displayedBookmarkModel =
+      self.mediator.displayedBookmarkModel;
+  self.mediator.editingFolderNode = displayedBookmarkModel->AddFolder(
       self.mediator.displayedNode,
       self.mediator.displayedNode->children().size(), folderTitle);
 
   BookmarksHomeNodeItem* nodeItem = [[BookmarksHomeNodeItem alloc]
       initWithType:BookmarksHomeItemTypeBookmark
       bookmarkNode:self.mediator.editingFolderNode];
-  SyncSetupService* syncSetupService =
-      SyncSetupServiceFactory::GetForBrowserState(self.browserState);
-  nodeItem.shouldDisplayCloudSlashIcon =
-      bookmark_utils_ios::ShouldDisplayCloudSlashIconForProfileModel(
-          syncSetupService);
+  nodeItem.shouldDisplayCloudSlashIcon = [self.mediator
+      shouldDisplayCloudSlashIconWithBookmarkModel:displayedBookmarkModel];
   [self.tableViewModel addItem:nodeItem
        toSectionWithIdentifier:BookmarksHomeSectionIdentifierBookmarks];
 

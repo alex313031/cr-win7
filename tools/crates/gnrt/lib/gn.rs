@@ -4,14 +4,14 @@
 
 //! GN build file generation.
 
-use crate::config;
+use crate::config::{BuildConfig, CrateConfig};
 use crate::crates::*;
 use crate::deps;
 use crate::manifest::CargoPackage;
 use crate::paths;
 use crate::platforms;
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::convert::From;
 use std::fmt::{self, Display, Write};
 use std::path::Path;
@@ -48,7 +48,7 @@ pub struct RuleCommon {
     pub public_visibility: bool,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct RuleConcrete {
     pub crate_name: Option<String>,
     pub epoch: Option<Epoch>,
@@ -60,6 +60,10 @@ pub struct RuleConcrete {
     pub cargo_pkg_authors: Option<String>,
     pub cargo_pkg_name: String,
     pub cargo_pkg_description: Option<String>,
+    pub add_library_configs: Vec<String>,
+    pub remove_library_configs: Vec<String>,
+    pub add_executable_configs: Vec<String>,
+    pub remove_executable_configs: Vec<String>,
     pub deps: Vec<RuleDep>,
     pub dev_deps: Vec<RuleDep>,
     pub build_deps: Vec<RuleDep>,
@@ -67,10 +71,11 @@ pub struct RuleConcrete {
     pub features: Vec<String>,
     pub build_root: Option<String>,
     pub build_script_outputs: Vec<String>,
+    pub rustc_metadata: Option<String>,
     pub rustflags: Vec<String>,
     pub rustenv: Vec<String>,
     pub output_dir: Option<String>,
-    pub gn_variables_lib: String,
+    pub gn_variables_lib: Option<String>,
 }
 
 /// Describes a single GN build rule for a crate configuration. Each field
@@ -148,7 +153,7 @@ pub fn build_files_from_chromium_deps<'a, 'b, Iter: IntoIterator<Item = &'a deps
 pub fn build_file_from_std_deps<'a, 'b, Iter: IntoIterator<Item = &'a deps::Package>>(
     deps: Iter,
     paths: &'b paths::ChromiumPaths,
-    extra_config: &'b config::BuildConfig,
+    extra_config: &'b BuildConfig,
 ) -> BuildFile {
     let rules =
         deps.into_iter().map(|dep| build_rule_from_std_dep(dep, paths, extra_config)).collect();
@@ -159,7 +164,7 @@ pub fn build_file_from_std_deps<'a, 'b, Iter: IntoIterator<Item = &'a deps::Pack
 pub fn build_rule_from_std_dep(
     dep: &deps::Package,
     paths: &paths::ChromiumPaths,
-    extra_config: &config::BuildConfig,
+    extra_config: &BuildConfig,
 ) -> (String, Rule) {
     let lib_target = dep.lib_target.as_ref().expect("dependency had no lib target");
     let crate_root_from_src = paths.to_gn_abs_path(&lib_target.root).unwrap();
@@ -171,6 +176,15 @@ pub fn build_rule_from_std_dep(
     let default_crate_config = Default::default();
     let crate_config =
         extra_config.per_crate_config.get(&dep.package_name).unwrap_or(&default_crate_config);
+    let all_config = &extra_config.all_config;
+
+    // Helper macro to iterate over a particular config field: first the
+    // crate-specific one, then the overall one.
+    macro_rules! config_field {
+        ($field:ident) => {
+            do_concat_field(|c| &c.$field, &crate_config, &all_config)
+        };
+    }
 
     // Collect the set of rustflags for this crate. This is a combination of
     // those for the crate specifically, and any overall ones set. Additionally,
@@ -179,31 +193,28 @@ pub fn build_rule_from_std_dep(
     // This expression is complicated to avoid creating unnecessary clones. We
     // only need to clone each String once, and create one new Vec with
     // collect() at the end.
-    let rustflags = crate_config
-        .cfg
-        .iter()
-        .chain(extra_config.all_config.cfg.iter())
+    let rustflags = config_field!(cfg)
         .map(|cfg| format!("--cfg={cfg}"))
-        .chain(
-            crate_config.rustflags.iter().chain(extra_config.all_config.rustflags.iter()).cloned(),
-        )
+        .chain(config_field!(rustflags).cloned())
         .collect();
 
-    // Do the same for rustenv, which is simpler.
-    let rustenv =
-        crate_config.env.iter().chain(extra_config.all_config.env.iter()).cloned().collect();
+    let rustenv = config_field!(env).cloned().collect();
+    let exclude_deps: Vec<String> = config_field!(exclude_deps_in_gn).cloned().collect();
 
-    let extra_deps = crate_config
-        .extra_gn_deps
-        .iter()
-        .chain(extra_config.all_config.extra_gn_deps.iter())
+    let extra_deps_to_ignore: HashSet<&str> =
+        config_field!(extra_gn_deps_to_ignore).map(|s| s.as_ref()).collect();
+    let extra_deps = config_field!(extra_gn_deps)
+        .filter(|d| !extra_deps_to_ignore.contains(d.as_str()))
         .cloned()
         .map(|dep| RuleDep { cond: Condition::Always, rule: dep })
         .collect();
 
+    let rustc_metadata = config_field!(rustc_metadata).next().cloned();
+
+    let remove_library_configs: Vec<String> =
+        config_field!(remove_library_configs).cloned().collect();
+
     let mut rule = RuleConcrete {
-        crate_name: None,
-        epoch: None,
         crate_type: "rlib".to_string(),
         crate_root: format!("//{crate_root_from_src}"),
         no_std: true,
@@ -212,34 +223,29 @@ pub fn build_rule_from_std_dep(
         cargo_pkg_authors,
         cargo_pkg_name: dep.package_name.clone(),
         cargo_pkg_description: dep.description.clone(),
+        add_library_configs: Vec::new(),
+        remove_library_configs: Vec::new(),
+        add_executable_configs: Vec::new(),
+        remove_executable_configs: Vec::new(),
         deps: extra_deps,
-        dev_deps: vec![],
-        build_deps: vec![],
-        aliased_deps: vec![],
-        features: vec![],
-        build_root: None,
-        build_script_outputs: vec![],
+        rustc_metadata,
         rustflags,
         rustenv,
         output_dir: crate_config
             .output_dir
             .clone()
             .or_else(|| extra_config.all_config.output_dir.clone()),
-        gn_variables_lib: String::new(),
+        ..Default::default()
     };
+
+    apply_default_configs(&mut rule);
+    rule.remove_library_configs.extend(remove_library_configs);
 
     rule.features = dep
         .dependency_kinds
         .get(&deps::DependencyKind::Normal)
         .map(|pki| pki.features.clone())
         .unwrap_or(vec![]);
-
-    let exclude_deps: Vec<String> = crate_config
-        .exclude_deps_in_gn
-        .iter()
-        .chain(extra_config.all_config.exclude_deps_in_gn.iter())
-        .cloned()
-        .collect();
 
     // Add only normal dependencies: we don't run unit tests, and we don't run
     // build scripts (instead manually configuring build flags and env vars).
@@ -264,6 +270,22 @@ pub fn build_rule_from_std_dep(
             details: rule,
         },
     )
+}
+
+/// Combine a field from `crate_config` and `all_config`, in order. This can be
+/// used to combine config lists, or get the first set `Option<_>` of the two
+/// configs.
+fn do_concat_field<
+    'a,
+    T: 'a,
+    Field: 'a + IntoIterator<Item = T>,
+    F: Fn(&'a CrateConfig) -> Field,
+>(
+    field_mapper: F,
+    crate_config: &'a CrateConfig,
+    all_config: &'a CrateConfig,
+) -> impl Iterator<Item = T> {
+    field_mapper(crate_config).into_iter().chain(field_mapper(all_config).into_iter())
 }
 
 /// Generate the `BuildFile` for `dep`, or return `None` if no rules would be
@@ -295,28 +317,17 @@ fn make_build_file_for_chromium_dep(
     // Template for all the rules in a build file. Several fields are
     // the same for all a package's rules.
     let mut rule_template = RuleConcrete {
-        crate_name: None,
-        epoch: None,
-        crate_type: String::new(),
-        crate_root: String::new(),
-        no_std: false,
         edition: package_metadata.edition.0.clone(),
         cargo_pkg_version: package_metadata.version.to_string(),
         cargo_pkg_authors: cargo_pkg_authors,
         cargo_pkg_name: package_metadata.name.clone(),
         cargo_pkg_description,
-        deps: Vec::new(),
-        dev_deps: Vec::new(),
-        build_deps: Vec::new(),
-        aliased_deps: Vec::new(),
-        features: Vec::new(),
         build_root: dep.build_script.as_ref().map(|p| to_gn_path(p.as_path())),
         build_script_outputs: build_script_outputs.get(&crate_id).cloned().unwrap_or_default(),
-        rustflags: vec![],
-        rustenv: vec![],
-        output_dir: None,
-        gn_variables_lib: String::new(),
+        ..Default::default()
     };
+
+    apply_default_configs(&mut rule_template);
 
     // Enumerate the dependencies of each kind for the package.
     //
@@ -424,8 +435,7 @@ fn make_build_file_for_chromium_dep(
             lib_details.crate_type = lib_target.lib_type.to_string();
             lib_details.crate_root = to_gn_path(lib_target.root.as_path());
             lib_details.features = per_kind_info.features.clone();
-            lib_details.gn_variables_lib =
-                gn_variables_libs.get(&crate_id).cloned().unwrap_or_default();
+            lib_details.gn_variables_lib = gn_variables_libs.get(&crate_id).cloned();
 
             let testonly = dep_kind == deps::DependencyKind::Development;
             let visibility =
@@ -458,6 +468,17 @@ fn make_build_file_for_chromium_dep(
     }
 
     if rules.is_empty() { None } else { Some((crate_id, BuildFile { rules })) }
+}
+
+fn apply_default_configs(rule: &mut RuleConcrete) {
+    // Hard-code these for now. They should be moved into a configuration file
+    // later.
+    let chromium_code = "//build/config/compiler:chromium_code";
+    let no_chromium_code = "//build/config/compiler:no_chromium_code";
+    rule.add_library_configs.push(no_chromium_code.to_string());
+    rule.add_executable_configs.push(no_chromium_code.to_string());
+    rule.remove_library_configs.push(chromium_code.to_string());
+    rule.remove_executable_configs.push(chromium_code.to_string());
 }
 
 /// `BuildFile` wrapper with a `Display` impl. Displays the `BuildFile` as a GN
@@ -550,10 +571,26 @@ fn write_concrete<W: Write>(
         // Write implementation does not know where the end of input will be.
         writeln!(writer, "cargo_pkg_description = \"{}\"", escaped(description.trim_end()))?;
     }
-    writeln!(writer, "library_configs -= [ \"//build/config/compiler:chromium_code\" ]")?;
-    writeln!(writer, "library_configs += [ \"//build/config/compiler:no_chromium_code\" ]")?;
-    writeln!(writer, "executable_configs -= [ \"//build/config/compiler:chromium_code\" ]")?;
-    writeln!(writer, "executable_configs += [ \"//build/config/compiler:no_chromium_code\" ]")?;
+
+    if !details.remove_library_configs.is_empty() {
+        write!(writer, "library_configs -= ")?;
+        write_list(&mut writer, &details.remove_library_configs)?;
+    }
+
+    if !details.add_library_configs.is_empty() {
+        write!(writer, "library_configs += ")?;
+        write_list(&mut writer, &details.add_library_configs)?;
+    }
+
+    if !details.remove_executable_configs.is_empty() {
+        write!(writer, "executable_configs -= ")?;
+        write_list(&mut writer, &details.remove_executable_configs)?;
+    }
+
+    if !details.add_executable_configs.is_empty() {
+        write!(writer, "executable_configs += ")?;
+        write_list(&mut writer, &details.add_executable_configs)?;
+    }
 
     if !details.deps.is_empty() {
         write_deps(&mut writer, "deps", details.deps.clone())?;
@@ -582,6 +619,10 @@ fn write_concrete<W: Write>(
         }
     }
 
+    if let Some(meta) = &details.rustc_metadata {
+        writeln!(writer, "rustc_metadata = \"{meta}\"")?;
+    }
+
     if !details.rustenv.is_empty() {
         write!(writer, "rustenv = ")?;
         write_list(&mut writer, &details.rustenv)?;
@@ -596,8 +637,8 @@ fn write_concrete<W: Write>(
         writeln!(writer, "output_dir = \"{output_dir}\"")?;
     }
 
-    if !details.gn_variables_lib.is_empty() {
-        writeln!(writer, "{}", details.gn_variables_lib)?;
+    if let Some(raw_gn) = &details.gn_variables_lib {
+        writeln!(writer, "{}", raw_gn)?;
     }
 
     writeln!(writer, "}}")

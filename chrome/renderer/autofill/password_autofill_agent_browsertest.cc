@@ -432,6 +432,8 @@ class PasswordAutofillAgentTest : public ChromeRenderViewTest {
     std::string script =
         "document.getElementById('" + element_id + "').focus()";
     ExecuteJavaScriptForTests(script.c_str());
+    GetMainFrame()->NotifyUserActivation(
+        blink::mojom::UserActivationNotificationType::kTest);
     GetMainFrame()->Client()->FocusedElementChanged(GetElementByID(element_id));
     GetMainFrame()->AutofillClient()->DidCompleteFocusChangeInFrame();
   }
@@ -1157,7 +1159,8 @@ TEST_F(PasswordAutofillAgentTest, IsWebElementVisibleTest) {
   blink::WebVector<blink::WebFormControlElement> web_control_elements =
       forms[0].GetFormControlElements();
   ASSERT_EQ(1u, web_control_elements.size());
-  EXPECT_TRUE(form_util::IsWebElementFocusable(web_control_elements[0]));
+  EXPECT_TRUE(
+      form_util::IsWebElementFocusableForAutofill(web_control_elements[0]));
 
   LoadHTML(kNonVisibleFormHTML);
   frame = GetMainFrame();
@@ -1165,7 +1168,8 @@ TEST_F(PasswordAutofillAgentTest, IsWebElementVisibleTest) {
   ASSERT_EQ(1u, forms.size());
   web_control_elements = forms[0].GetFormControlElements();
   ASSERT_EQ(1u, web_control_elements.size());
-  EXPECT_FALSE(form_util::IsWebElementFocusable(web_control_elements[0]));
+  EXPECT_FALSE(
+      form_util::IsWebElementFocusableForAutofill(web_control_elements[0]));
 
   LoadHTML(kNonDisplayedFormHTML);
   frame = GetMainFrame();
@@ -1173,7 +1177,8 @@ TEST_F(PasswordAutofillAgentTest, IsWebElementVisibleTest) {
   ASSERT_EQ(1u, forms.size());
   web_control_elements = forms[0].GetFormControlElements();
   ASSERT_EQ(1u, web_control_elements.size());
-  EXPECT_FALSE(form_util::IsWebElementFocusable(web_control_elements[0]));
+  EXPECT_FALSE(
+      form_util::IsWebElementFocusableForAutofill(web_control_elements[0]));
 }
 
 TEST_F(PasswordAutofillAgentTest,
@@ -1849,8 +1854,6 @@ TEST_F(PasswordAutofillAgentTest, TouchToFillClosed) {
   // Touch to fill will be shown multiple times until TouchToFillClosed()
   // gets called.
   FocusElement(kPasswordName);
-  EXPECT_TRUE(
-      password_autofill_agent_->TryToShowTouchToFill(password_element_));
   EXPECT_TRUE(password_autofill_agent_->ShouldSuppressKeyboard());
   EXPECT_EQ(WebAutofillState::kPreviewed, password_element_.GetAutofillState());
 
@@ -1869,10 +1872,9 @@ TEST_F(PasswordAutofillAgentTest, TouchToFillClosed) {
   UpdateUrlForHTML(kFormHTML);
   UpdateUsernameAndPasswordElements();
   SimulateOnFillPasswordForm(fill_data_);
+  FocusElement(kPasswordName);
 
   // After the reload touch to fill is shown again.
-  EXPECT_TRUE(
-      password_autofill_agent_->TryToShowTouchToFill(password_element_));
   EXPECT_TRUE(password_autofill_agent_->ShouldSuppressKeyboard());
   EXPECT_EQ(WebAutofillState::kPreviewed, password_element_.GetAutofillState());
 

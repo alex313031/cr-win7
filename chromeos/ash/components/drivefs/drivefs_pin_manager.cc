@@ -77,7 +77,7 @@ struct Quoter {
 
 template <typename T>
 Quoter<T> Quote(const T& value) {
-  return {raw_ref(value)};
+  return {ToRawRef<ExperimentalAsh>(value)};
 }
 
 template <typename T>
@@ -347,6 +347,13 @@ bool PinManager::CanPin(const FileMetadata& md, const Path& path) {
     return false;
   }
 
+  // Hosted docs are heuristically cached via the Docs offline extension.
+  // Ignore explicitly pinning them and prefer caching.
+  if (md.type == Type::kHosted) {
+    VLOG(2) << "Skipped " << id << " " << Quote(path) << ": Hosted doc";
+    return false;
+  }
+
   if (md.can_pin != FileMetadata::CanPinStatus::kOk) {
     VLOG(2) << "Skipped " << id << " " << Quote(path) << ": Cannot be pinned";
     return false;
@@ -542,10 +549,15 @@ PinManager::PinManager(Path profile_path, mojom::DriveFs* const drivefs)
       drivefs_(drivefs),
       space_getter_(base::BindRepeating(&GetFreeSpace)) {
   DCHECK(drivefs_);
+  CHECK(ash::UserDataAuthClient::Get());
+  ash::UserDataAuthClient::Get()->AddObserver(this);
 }
 
 PinManager::~PinManager() {
   DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+  CHECK(ash::UserDataAuthClient::Get());
+  ash::UserDataAuthClient::Get()->RemoveObserver(this);
+
   DCHECK(!InProgress(progress_.stage))
       << "Pin manager is " << Quote(progress_.stage);
 
@@ -588,7 +600,7 @@ void PinManager::Start() {
 void PinManager::Stop() {
   DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
 
-  if (!progress_.IsError()) {
+  if (progress_.stage != Stage::kStopped && !progress_.IsError()) {
     VLOG(1) << "Stopping";
     Complete(Stage::kStopped);
   }
@@ -710,7 +722,8 @@ void PinManager::OnSearchResult(const Id dir_id,
   DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
   DCHECK_EQ(progress_.stage, Stage::kListingFiles);
 
-  if (error != drive::FILE_ERROR_OK) {
+  if (error != drive::FILE_ERROR_OK &&
+      error != drive::FILE_ERROR_OK_WITH_MORE_RESULTS) {
     LOG(ERROR) << "Cannot visit " << dir_id << " " << Quote(dir_path) << ": "
                << error;
     switch (error) {
@@ -732,7 +745,7 @@ void PinManager::OnSearchResult(const Id dir_id,
 
   progress_.time_spent_listing_items = timer_.Elapsed();
 
-  if (items.empty()) {
+  if (items.empty() && error != drive::FILE_ERROR_OK_WITH_MORE_RESULTS) {
     VLOG(1) << "Visited " << dir_id << " " << Quote(dir_path);
 
     DCHECK_LE(progress_.active_queries, progress_.max_active_queries);
@@ -756,9 +769,14 @@ void PinManager::OnSearchResult(const Id dir_id,
     return StartPinning();
   }
 
-  progress_.listed_items += items.size();
-  VLOG(2) << "Got " << items.size() << " items from " << dir_id << " "
-          << Quote(dir_path);
+  if (error == drive::FILE_ERROR_OK_WITH_MORE_RESULTS) {
+    VLOG(2) << "No items returned from " << dir_id << " " << Quote(dir_path)
+            << " need to make cloud query";
+  } else {
+    progress_.listed_items += items.size();
+    VLOG(2) << "Got " << items.size() << " items from " << dir_id << " "
+            << Quote(dir_path);
+  }
 
   for (const QueryItemPtr& item : items) {
     DCHECK(item);
@@ -915,19 +933,6 @@ void PinManager::StartPinning() {
     return Complete(Stage::kSuccess);
   }
 
-  VLOG(1) << "Enabling Docs offline";
-  drivefs_->SetDocsOfflineEnabled(
-      true, base::BindOnce(&PinManager::OnDocsOfflineEnabled, GetWeakPtr()));
-}
-
-void PinManager::OnDocsOfflineEnabled(drive::FileError error) {
-  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
-  if (error != drive::FILE_ERROR_OK) {
-    LOG(ERROR) << "Cannot enable Docs offline: " << error;
-    return Complete(Stage::kCannotEnableDocsOffline);
-  }
-
-  VLOG(1) << "Successfully enabled Docs offline";
   timer_ = base::ElapsedTimer();
   progress_.stage = Stage::kSyncing;
   NotifyProgress();
@@ -947,7 +952,7 @@ void PinManager::PinSomeFiles() {
     return NotifyProgress();
   }
 
-  while (progress_.syncing_files < 50 && !files_to_pin_.empty()) {
+  while (progress_.syncing_files < kMaxQueueSize && !files_to_pin_.empty()) {
     const Id id = files_to_pin_.extract(files_to_pin_.begin()).value();
     const Files::iterator it = files_to_track_.find(id);
     DCHECK(it != files_to_track_.end()) << "Not tracked: " << id;
@@ -1235,6 +1240,12 @@ void PinManager::NotifyProgress() {
   for (Observer& observer : observers_) {
     observer.OnProgress(progress_);
   }
+}
+
+void PinManager::LowDiskSpace(const ::user_data_auth::LowDiskSpace& status) {
+  LOG(ERROR) << "Got LowDiskSpace "
+             << HumanReadableSize(status.disk_free_bytes());
+  OnFreeSpaceRetrieved2(status.disk_free_bytes());
 }
 
 void PinManager::CheckStalledFiles() {

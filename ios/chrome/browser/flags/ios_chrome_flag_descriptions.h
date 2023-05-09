@@ -13,11 +13,6 @@
 
 namespace flag_descriptions {
 
-// Title and description for the flag to enable kAdaptiveSuggestionsCount flag
-// on iOS.
-extern const char kAdaptiveSuggestionsCountName[];
-extern const char kAdaptiveSuggestionsCountDescription[];
-
 // Title and description for the flag to enable add to home screen button in
 // share menu.
 extern const char kAddToHomeScreenName[];
@@ -277,10 +272,6 @@ extern const char kEnableFollowIPHExpParamsDescription[];
 extern const char kEnableFollowManagementInstantReloadName[];
 extern const char kEnableFollowManagementInstantReloadDescription[];
 
-// Title and description for the flag to enable DMToken deletion.
-extern const char kDmTokenDeletionName[];
-extern const char kDmTokenDeletionDescription[];
-
 // Title and description for the flag to enable kEditPasswordsInSettings flag on
 // iOS.
 extern const char kEditPasswordsInSettingsName[];
@@ -422,6 +413,10 @@ extern const char kFullscreenPromosManagerSkipInternalLimitsDescription[];
 // active fullscreen viewport adjustment mode.
 extern const char kFullscreenSmoothScrollingName[];
 extern const char kFullscreenSmoothScrollingDescription[];
+
+// Title and description for the flag to enable history-sync opt-in.
+extern const char kHistorySyncOptInName[];
+extern const char kHistorySyncOptInDescription[];
 
 // Title and description for the flag to enable HTTPS-Only Mode setting.
 extern const char kHttpsOnlyModeName[];
@@ -856,11 +851,6 @@ extern const char kTFLiteLanguageDetectionIgnoreDescription[];
 // implementation.
 extern const char kToolbarContainerName[];
 extern const char kToolbarContainerDescription[];
-
-// Title and description for the flag to enable using Lens to search for an
-// image from the long press context menu.
-extern const char kUseLensToSearchForImageName[];
-extern const char kUseLensToSearchForImageDescription[];
 
 // Title and description for the flag to enable using Lens to search using
 // the device camera from the home screen widget.

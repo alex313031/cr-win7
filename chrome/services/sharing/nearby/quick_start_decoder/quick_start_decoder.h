@@ -13,6 +13,7 @@
 #include "mojo/public/cpp/bindings/pending_receiver.h"
 #include "mojo/public/cpp/bindings/pending_remote.h"
 #include "mojo/public/cpp/bindings/receiver.h"
+#include "third_party/abseil-cpp/absl/types/optional.h"
 
 namespace ash::quick_start {
 
@@ -40,6 +41,10 @@ class QuickStartDecoder : public mojom::QuickStartDecoder {
   void DecodeWifiCredentialsResponse(
       const std::vector<uint8_t>& data,
       DecodeWifiCredentialsResponseCallback callback) override;
+
+  void DecodeNotifySourceOfUpdateResponse(
+      const std::vector<uint8_t>& data,
+      DecodeNotifySourceOfUpdateResponseCallback callback) override;
   // mojom::QuickStartDecoder:
 
  private:
@@ -48,9 +53,14 @@ class QuickStartDecoder : public mojom::QuickStartDecoder {
       const std::vector<uint8_t>& data);
   mojom::GetAssertionResponsePtr DoDecodeGetAssertionResponse(
       const std::vector<uint8_t>& data);
-  mojom::GetWifiCredentialsResponsePtr DoDecodeWifiCredentialsResponse(
-      const std::vector<uint8_t>& data);
+  void DoDecodeWifiCredentialsResponse(
+      const std::vector<uint8_t>& data,
+      DecodeWifiCredentialsResponseCallback callback);
   absl::optional<std::vector<uint8_t>> ExtractFidoDataFromJsonResponse(
+      const std::vector<uint8_t>& data);
+  // If the kNotifySourceOfUpdateAckKey boolean is present in the response, this
+  // method returns its value.
+  absl::optional<bool> DoDecodeNotifySourceOfUpdateResponse(
       const std::vector<uint8_t>& data);
   mojo::Receiver<mojom::QuickStartDecoder> receiver_;
 };

@@ -1357,7 +1357,7 @@ void ComputedStyle::LoadDeferredImages(Document& document) const {
 void ComputedStyle::ApplyTransform(
     gfx::Transform& result,
     const LayoutBox* box,
-    const LayoutSize& border_box_size,
+    PhysicalSize border_box_size,
     ApplyTransformOperations apply_operations,
     ApplyTransformOrigin apply_origin,
     ApplyMotionPath apply_motion_path,
@@ -1472,25 +1472,28 @@ gfx::PointF GetStartingPointOfThePath(const LayoutBox* box,
 
 }  // namespace
 
-PointAndTangent ComputedStyle::CalculatePointAndTangentOnCircleOrEllipse(
+PointAndTangent ComputedStyle::CalculatePointAndTangentOnBasicShape(
     const LayoutBox* box,
     const gfx::RectF& bounding_box) const {
-  const auto& shape = To<BasicShapeWithCenterAndRadii>(*OffsetPath());
+  const BasicShape& shape = *OffsetPath();
   const gfx::SizeF reference_box_size = GetReferenceBoxSize(box, bounding_box);
   Path path;
-  if (shape.HasExplicitCenter()) {
-    shape.GetPath(path, gfx::RectF(reference_box_size), EffectiveZoom());
-  } else {
+  if (const auto* circle_or_ellipse =
+          DynamicTo<BasicShapeWithCenterAndRadii>(shape);
+      circle_or_ellipse && !circle_or_ellipse->HasExplicitCenter()) {
     // If circle() or ellipse() is used, and an explicit center position is not
     // given, they default to using the offset starting position, rather than
     // their standard default.
     const gfx::PointF starting_point =
         GetStartingPointOfThePath(box, OffsetPosition(), reference_box_size);
-    shape.GetPathFromCenter(path, starting_point,
-                            gfx::RectF(reference_box_size), EffectiveZoom());
+    circle_or_ellipse->GetPathFromCenter(
+        path, starting_point, gfx::RectF(reference_box_size), EffectiveZoom());
+  } else {
+    shape.GetPath(path, gfx::RectF(reference_box_size), EffectiveZoom());
   }
   float shape_length = path.length();
   float path_length = FloatValueForLength(OffsetDistance(), shape_length);
+  // All the shapes are closed at this point.
   if (shape_length > 0) {
     path_length = fmod(path_length, shape_length);
     if (path_length < 0) {
@@ -1507,9 +1510,21 @@ PointAndTangent ComputedStyle::CalculatePointAndTangentOnRay(
   const gfx::SizeF reference_box_size = GetReferenceBoxSize(box, bounding_box);
   const gfx::PointF starting_point =
       GetStartingPointOfThePath(box, OffsetPosition(), reference_box_size);
-  const float ray_length =
+  float ray_length =
       ray.CalculateRayPathLength(starting_point, reference_box_size);
-  float path_length = FloatValueForLength(OffsetDistance(), ray_length);
+  if (ray.Contain() && box) {
+    // The length of the offset path is reduced so that the element stays
+    // within the containing block even at offset-distance: 100%.
+    // Specifically, the path’s length is reduced by half the width
+    // or half the height of the element’s border box,
+    // whichever is larger, and floored at zero.
+    const float largest_side =
+        std::max(box->BorderBoxRect().Width().ToFloat(),
+                 box->BorderBoxRect().Height().ToFloat());
+    ray_length -= largest_side / 2;
+    ray_length = std::max(ray_length, 0.f);
+  }
+  const float path_length = FloatValueForLength(OffsetDistance(), ray_length);
   return ray.PointAndNormalAtLength(path_length);
 }
 
@@ -1572,8 +1587,11 @@ void ComputedStyle::ApplyMotionPathTransform(float origin_x,
       break;
     case BasicShape::kBasicShapeCircleType:
     case BasicShape::kBasicShapeEllipseType:
-      path_position =
-          CalculatePointAndTangentOnCircleOrEllipse(box, bounding_box);
+    case BasicShape::kBasicShapeInsetType:
+    case BasicShape::kBasicShapeXYWHType:
+    case BasicShape::kBasicShapeRectType:
+    case BasicShape::kBasicShapePolygonType:
+      path_position = CalculatePointAndTangentOnBasicShape(box, bounding_box);
       break;
     default:
       NOTREACHED();
@@ -2175,7 +2193,7 @@ StyleColor ComputedStyle::DecorationColorIncludingFallback(
         visited_link ? InternalVisitedTextStrokeColor() : TextStrokeColor();
     if (!text_stroke_style_color.IsCurrentColor() &&
         text_stroke_style_color.Resolve(blink::Color(), UsedColorScheme())
-            .Alpha()) {
+            .AlphaAsInteger()) {
       return text_stroke_style_color;
     }
   }
@@ -2190,7 +2208,7 @@ bool ComputedStyle::HasBackground() const {
   blink::Color color = GetCSSPropertyBackgroundColor().ColorIncludingFallback(
       false, *this,
       /*is_current_color=*/nullptr);
-  if (color.Alpha()) {
+  if (color.AlphaAsInteger()) {
     return true;
   }
   // When background color animation is running on the compositor thread, we
@@ -2243,8 +2261,7 @@ Color ComputedStyle::VisitedDependentColor(const Longhand& color_property,
   // TODO(dazabani@igalia.com) improve behaviour where unvisited is currentColor
   return Color::FromColorSpace(visited_color.GetColorSpace(),
                                visited_color.Param0(), visited_color.Param1(),
-                               visited_color.Param2(),
-                               unvisited_color.FloatAlpha());
+                               visited_color.Param2(), unvisited_color.Alpha());
 }
 
 blink::Color ComputedStyle::ResolvedColor(const StyleColor& color,

@@ -2781,12 +2781,6 @@ void Document::SetIsXrOverlay(bool val, Element* overlay_element) {
   if (!GetLayoutView())
     return;
 
-  if (val) {
-    // The UA style sheet for the :xr-overlay pseudoclass uses lazy loading.
-    // If we get here, we need to ensure that it's present.
-    GetStyleEngine().EnsureUAStyleForXrOverlay();
-  }
-
   if (overlay_element) {
     // Now that the custom style sheet is loaded, update the pseudostyle for
     // the overlay element.
@@ -4945,6 +4939,7 @@ void Document::DynamicViewportUnitsChanged() {
 }
 
 void Document::SetHoverElement(Element* new_hover_element) {
+  HTMLElement::HoveredElementChanged(hover_element_, new_hover_element);
   hover_element_ = new_hover_element;
 }
 
@@ -8768,6 +8763,7 @@ void Document::Trace(Visitor* visitor) const {
   visitor->Trace(popover_hint_showing_);
   visitor->Trace(popover_pointerdown_target_);
   visitor->Trace(popovers_waiting_to_hide_);
+  visitor->Trace(all_open_popovers_);
   visitor->Trace(elements_with_css_toggles_);
   visitor->Trace(elements_needing_style_recalc_for_toggle_);
   visitor->Trace(css_toggle_inference_);

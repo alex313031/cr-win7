@@ -45,6 +45,7 @@
 #include "content/public/browser/web_contents_observer.h"
 #include "content/public/browser/web_contents_user_data.h"
 #include "content/public/common/content_constants.h"
+#include "net/base/schemeful_site.h"
 #include "third_party/abseil-cpp/absl/types/optional.h"
 #include "third_party/blink/public/common/associated_interfaces/associated_interface_provider.h"
 #include "third_party/blink/public/common/storage_key/storage_key.h"
@@ -62,6 +63,10 @@ using LifecycleState = content::RenderFrameHost::LifecycleState;
 
 namespace content_settings {
 namespace {
+
+// Determines which taxonomy is used to generate sample topics for the Topics
+// API.
+constexpr int kTopicsAPISampleDataTaxonomy = 1;
 
 bool WillNavigationCreateNewPageSpecificContentSettingsOnCommit(
     content::NavigationHandle* navigation_handle) {
@@ -165,6 +170,7 @@ class WebContentsHandler
       content::RenderFrameHost* frame,
       const GURL& scope,
       content::AllowServiceWorkerResult allowed) override;
+  void WebContentsDestroyed() override;
 
   std::unique_ptr<Delegate> delegate_;
 
@@ -225,10 +231,7 @@ WebContentsHandler::WebContentsHandler(content::WebContents* web_contents,
       web_contents->GetPrimaryPage(), delegate_.get());
 }
 
-WebContentsHandler::~WebContentsHandler() {
-  for (SiteDataObserver& observer : observer_list_)
-    observer.WebContentsDestroyed();
-}
+WebContentsHandler::~WebContentsHandler() = default;
 
 void WebContentsHandler::TransferNavigationContentSettingsToCommittedDocument(
     const InflightNavigationContentSettings& navigation_settings,
@@ -308,8 +311,8 @@ void WebContentsHandler::OnServiceWorkerAccessed(
     auto* inflight_navigation_settings =
         content::NavigationHandleUserData<InflightNavigationContentSettings>::
             GetOrCreateForNavigationHandle(*navigation);
-    inflight_navigation_settings->service_worker_accesses.emplace_back(
-        std::make_pair(scope, allowed));
+    inflight_navigation_settings->service_worker_accesses.emplace_back(scope,
+                                                                       allowed);
     return;
   }
   // All accesses during main frame navigations should enter the block above and
@@ -418,6 +421,12 @@ void WebContentsHandler::AddPendingCommitUpdate(
   pending_commit_updates_[id].push_back(std::move(update));
 }
 
+void WebContentsHandler::WebContentsDestroyed() {
+  for (SiteDataObserver& observer : observer_list_) {
+    observer.WebContentsDestroyed();
+  }
+}
+
 WEB_CONTENTS_USER_DATA_KEY_IMPL(WebContentsHandler);
 
 AccessDetails::AccessDetails() = default;
@@ -453,6 +462,10 @@ PageSpecificContentSettings::SiteDataObserver::~SiteDataObserver() {
 }
 
 void PageSpecificContentSettings::SiteDataObserver::WebContentsDestroyed() {
+  auto* handler = WebContentsHandler::FromWebContents(web_contents_);
+  if (handler) {
+    handler->RemoveSiteDataObserver(this);
+  }
   web_contents_ = nullptr;
 }
 
@@ -634,6 +647,8 @@ bool PageSpecificContentSettings::IsContentBlocked(
       << "ContentSettingsNotificationsImageModel";
   DCHECK_NE(ContentSettingsType::AUTOMATIC_DOWNLOADS, content_type)
       << "Automatic downloads handled by DownloadRequestLimiter";
+  CHECK_NE(ContentSettingsType::STORAGE_ACCESS, content_type)
+      << "StorageAccess handled by GetTwoOriginRequests";
 
   if (content_type == ContentSettingsType::IMAGES ||
       content_type == ContentSettingsType::JAVASCRIPT ||
@@ -660,6 +675,8 @@ bool PageSpecificContentSettings::IsContentAllowed(
     ContentSettingsType content_type) const {
   DCHECK_NE(ContentSettingsType::AUTOMATIC_DOWNLOADS, content_type)
       << "Automatic downloads handled by DownloadRequestLimiter";
+  CHECK_NE(ContentSettingsType::STORAGE_ACCESS, content_type)
+      << "StorageAccess handled by GetTwoOriginRequests";
 
   // This method currently only returns meaningful values for the types listed
   // below.
@@ -677,6 +694,16 @@ bool PageSpecificContentSettings::IsContentAllowed(
   if (it != content_settings_status_.end())
     return it->second.allowed;
   return false;
+}
+
+std::map<net::SchemefulSite, /*is_allowed*/ bool>
+PageSpecificContentSettings::GetTwoSiteRequests(
+    ContentSettingsType content_type) {
+  std::map<net::SchemefulSite, /*is_allowed*/ bool> result;
+  for (const auto& entry : content_settings_two_site_requests_[content_type]) {
+    result[entry.first] = entry.second.allowed;
+  }
+  return result;
 }
 
 void PageSpecificContentSettings::OnContentBlocked(ContentSettingsType type) {
@@ -754,6 +781,21 @@ void PageSpecificContentSettings::OnContentAllowed(ContentSettingsType type) {
     MaybeUpdateLocationBar();
     MaybeUpdateParent(&PageSpecificContentSettings::OnContentAllowed, type);
   }
+}
+
+void PageSpecificContentSettings::OnTwoSitePermissionRequested(
+    ContentSettingsType type,
+    net::SchemefulSite requesting_site,
+    bool is_allowed) {
+  ContentSettingsStatus& status =
+      content_settings_two_site_requests_[type][requesting_site];
+  if (is_allowed) {
+    status.allowed = true;
+  } else {
+    status.blocked = true;
+  }
+
+  MaybeUpdateLocationBar();
 }
 
 namespace {
@@ -1210,12 +1252,10 @@ PageSpecificContentSettings::GetAccessedTopics() const {
            .Get()) &&
       page().GetMainDocument().GetLastCommittedURL().host() == "example.com") {
     // TODO(crbug.com/1286276): Remove sample topic when API is ready.
-    return {privacy_sandbox::CanonicalTopic(
-                browsing_topics::Topic(3),
-                privacy_sandbox::CanonicalTopic::AVAILABLE_TAXONOMY),
-            privacy_sandbox::CanonicalTopic(
-                browsing_topics::Topic(4),
-                privacy_sandbox::CanonicalTopic::AVAILABLE_TAXONOMY)};
+    return {privacy_sandbox::CanonicalTopic(browsing_topics::Topic(3),
+                                            kTopicsAPISampleDataTaxonomy),
+            privacy_sandbox::CanonicalTopic(browsing_topics::Topic(4),
+                                            kTopicsAPISampleDataTaxonomy)};
   }
   return {accessed_topics_.begin(), accessed_topics_.end()};
 }

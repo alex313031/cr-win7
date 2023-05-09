@@ -22,11 +22,12 @@
 #import "components/sync/driver/sync_service.h"
 #import "components/sync/driver/sync_user_settings.h"
 #import "google_apis/gaia/gaia_auth_util.h"
-#import "ios/chrome/browser/application_context/application_context.h"
+#import "ios/chrome/browser/bookmarks/bookmarks_utils.h"
 #import "ios/chrome/browser/crash_report/crash_keys_helper.h"
 #import "ios/chrome/browser/flags/system_flags.h"
 #import "ios/chrome/browser/policy/policy_util.h"
 #import "ios/chrome/browser/prefs/pref_names.h"
+#import "ios/chrome/browser/shared/model/application_context/application_context.h"
 #import "ios/chrome/browser/signin/authentication_service_delegate.h"
 #import "ios/chrome/browser/signin/authentication_service_observer.h"
 #import "ios/chrome/browser/signin/refresh_access_token_error.h"
@@ -334,6 +335,10 @@ void AuthenticationService::SignIn(id<SystemIdentity> identity,
 
   ResetReauthPromptForSignInAndSync();
 
+  // TODO(crbug.com/1442202): Move this reset to a place more consistent with
+  // bookmarks.
+  ResetLastUsedBookmarkFolder(pref_service_);
+
   // Load all credentials from SSO library. This must load the credentials
   // for the primary account too.
   identity_manager_->GetDeviceAccountsSynchronizer()
@@ -382,7 +387,9 @@ void AuthenticationService::SignIn(id<SystemIdentity> identity) {
   SignIn(identity, signin_metrics::AccessPoint::ACCESS_POINT_UNKNOWN);
 }
 
-void AuthenticationService::GrantSyncConsent(id<SystemIdentity> identity) {
+void AuthenticationService::GrantSyncConsent(
+    id<SystemIdentity> identity,
+    signin_metrics::AccessPoint access_point) {
   DCHECK(account_manager_service_->IsValidIdentity(identity));
   DCHECK(identity_manager_->HasPrimaryAccount(signin::ConsentLevel::kSignin));
 
@@ -401,7 +408,7 @@ void AuthenticationService::GrantSyncConsent(id<SystemIdentity> identity) {
   if (!HasPrimaryIdentity(signin::ConsentLevel::kSync)) {
     const signin::PrimaryAccountMutator::PrimaryAccountError error =
         identity_manager_->GetPrimaryAccountMutator()->SetPrimaryAccount(
-            account_id, signin::ConsentLevel::kSync);
+            account_id, signin::ConsentLevel::kSync, access_point);
     CHECK_EQ(signin::PrimaryAccountMutator::PrimaryAccountError::kNoError,
              error)
         << "SetPrimaryAccount error: " << static_cast<int>(error);
@@ -422,6 +429,10 @@ void AuthenticationService::GrantSyncConsent(id<SystemIdentity> identity) {
   sync_service_->SetSyncFeatureRequested();
 }
 
+void AuthenticationService::GrantSyncConsent(id<SystemIdentity> identity) {
+  GrantSyncConsent(identity, signin_metrics::AccessPoint::ACCESS_POINT_UNKNOWN);
+}
+
 void AuthenticationService::SignOut(
     signin_metrics::ProfileSignout signout_source,
     bool force_clear_browsing_data,
@@ -431,6 +442,10 @@ void AuthenticationService::SignOut(
       completion();
     return;
   }
+
+  // TODO(crbug.com/1442202): Move this reset to a place more consistent with
+  // bookmarks.
+  ResetLastUsedBookmarkFolder(pref_service_);
 
   const bool is_managed =
       HasPrimaryIdentityManaged(signin::ConsentLevel::kSignin);

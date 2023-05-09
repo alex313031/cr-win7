@@ -5,6 +5,7 @@
 #import "ios/chrome/browser/ui/main/default_browser_promo_scene_agent.h"
 
 #import "base/test/scoped_feature_list.h"
+#import "components/signin/public/base/signin_metrics.h"
 #import "components/sync_preferences/pref_service_mock_factory.h"
 #import "components/sync_preferences/pref_service_syncable.h"
 #import "components/sync_preferences/testing_pref_service_syncable.h"
@@ -14,14 +15,14 @@
 #import "ios/chrome/app/main_application_delegate.h"
 #import "ios/chrome/browser/default_browser/utils.h"
 #import "ios/chrome/browser/default_browser/utils_test_support.h"
-#import "ios/chrome/browser/main/browser.h"
-#import "ios/chrome/browser/main/test_browser.h"
 #import "ios/chrome/browser/prefs/browser_prefs.h"
 #import "ios/chrome/browser/promos_manager/constants.h"
 #import "ios/chrome/browser/promos_manager/features.h"
 #import "ios/chrome/browser/promos_manager/mock_promos_manager.h"
 #import "ios/chrome/browser/shared/coordinator/scene/scene_state_browser_agent.h"
 #import "ios/chrome/browser/shared/coordinator/scene/test/fake_scene_state.h"
+#import "ios/chrome/browser/shared/model/browser/browser.h"
+#import "ios/chrome/browser/shared/model/browser/test/test_browser.h"
 #import "ios/chrome/browser/shared/model/browser_state/test_chrome_browser_state.h"
 #import "ios/chrome/browser/shared/public/commands/command_dispatcher.h"
 #import "ios/chrome/browser/shared/public/commands/whats_new_commands.h"
@@ -103,7 +104,7 @@ class DefaultBrowserPromoSceneAgentTest : public PlatformTest {
             GetApplicationContext()->GetSystemIdentityManager());
     system_identity_manager->AddIdentity(identity);
     AuthenticationServiceFactory::GetForBrowserState(browser_state_.get())
-        ->SignIn(identity);
+        ->SignIn(identity, signin_metrics::AccessPoint::ACCESS_POINT_UNKNOWN);
   }
 
   web::WebTaskEnvironment task_environment_;

@@ -737,7 +737,7 @@ bool BeginNavigateIframeToURL(WebContents* web_contents,
       "var iframes = document.getElementById('%s');iframes.src='%s';"
       "\",0)",
       iframe_id.c_str(), url.spec().c_str());
-  return ExecuteScriptWithoutUserGesture(web_contents, script);
+  return ExecJs(web_contents, script, EXECUTE_SCRIPT_NO_USER_GESTURE);
 }
 
 void NavigateToURLBlockUntilNavigationsComplete(
@@ -1444,12 +1444,6 @@ bool ExecuteScript(const ToRenderFrameHost& adapter,
                                              script, user_gesture);
 }
 
-bool ExecuteScriptWithoutUserGesture(const ToRenderFrameHost& adapter,
-                                     const std::string& script) {
-  return ExecuteScriptWithUserGestureControl(adapter.render_frame_host(),
-                                             script, false);
-}
-
 void ExecuteScriptAsync(const ToRenderFrameHost& adapter,
                         const std::string& script) {
   // Prerendering pages will never have user gesture.
@@ -1466,22 +1460,6 @@ void ExecuteScriptAsyncWithoutUserGesture(const ToRenderFrameHost& adapter,
                                           const std::string& script) {
   adapter.render_frame_host()->ExecuteJavaScriptForTests(
       base::UTF8ToUTF16(script), base::NullCallback());
-}
-
-bool ExecuteScriptAndExtractBool(const ToRenderFrameHost& adapter,
-                                 const std::string& script, bool* result) {
-  DCHECK(result);
-  std::unique_ptr<base::Value> value;
-  // Prerendering pages will never have user gesture.
-  bool user_gesture = adapter.render_frame_host()->GetLifecycleState() !=
-                      RenderFrameHost::LifecycleState::kPrerendering;
-  if (ExecuteScriptHelper(adapter.render_frame_host(), script, user_gesture,
-                          ISOLATED_WORLD_ID_GLOBAL, &value) &&
-      value && value->is_bool()) {
-    *result = value->GetBool();
-    return true;
-  }
-  return false;
 }
 
 // EvalJsResult methods.

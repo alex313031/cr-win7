@@ -54,9 +54,6 @@ extern const char kSessionExitType[];
 extern const char kManagedProfileSerialAllowAllPortsForUrlsDeprecated[];
 extern const char kManagedProfileSerialAllowUsbDevicesForUrlsDeprecated[];
 #endif  // !BUILDFLAG(IS_ANDROID)
-#if BUILDFLAG(ENABLE_SUPERVISED_USERS) && BUILDFLAG(ENABLE_EXTENSIONS)
-extern const char kSupervisedUserApprovedExtensions[];
-#endif  // BUILDFLAG(ENABLE_SUPERVISED_USERS) && BUILDFLAG(ENABLE_EXTENSIONS)
 
 extern const char kURLsToRestoreOnStartup[];
 extern const char kUserFeedbackAllowed[];
@@ -293,6 +290,8 @@ extern const char kHatsPrivacyHubBaselineIsSelected[];
 extern const char kHatsPrivacyHubBaselineCycleEndTs[];
 extern const char kHatsOsSettingsSearchSurveyCycleEndTs[];
 extern const char kHatsOsSettingsSearchSurveyIsSelected[];
+extern const char kHatsBorealisGamesSurveyCycleEndTs[];
+extern const char kHatsBorealisGamesSurveyIsSelected[];
 extern const char kEolStatus[];
 extern const char kEndOfLifeDate[];
 extern const char kEolNotificationDismissed[];
@@ -609,6 +608,10 @@ extern const char kOfficeFilesAlwaysMoveToDrive[];
 extern const char kOfficeFilesAlwaysMoveToOneDrive[];
 extern const char kOfficeMoveConfirmationShownForDrive[];
 extern const char kOfficeMoveConfirmationShownForOneDrive[];
+extern const char kOfficeMoveConfirmationShownForLocalToDrive[];
+extern const char kOfficeMoveConfirmationShownForLocalToOneDrive[];
+extern const char kOfficeMoveConfirmationShownForCloudToDrive[];
+extern const char kOfficeMoveConfirmationShownForCloudToOneDrive[];
 extern const char kOfficeFileMovedToOneDrive[];
 extern const char kOfficeFileMovedToGoogleDrive[];
 #endif
@@ -1253,13 +1256,12 @@ extern const char kForceMajorVersionToMinorPositionInUserAgent[];
 
 extern const char kIdleTimeout[];
 extern const char kIdleTimeoutActions[];
+extern const char kIdleTimeoutShowBubbleOnStartup[];
 
 extern const char kSCTAuditingHashdanceReportCount[];
 
 #if BUILDFLAG(IS_CHROMEOS_ASH)
 extern const char kConsumerAutoUpdateToggle[];
-extern const char kHindiInscriptLayoutEnabled[];
-extern const char kDeviceHindiInscriptLayoutEnabled[];
 #endif
 
 #if !BUILDFLAG(IS_ANDROID)

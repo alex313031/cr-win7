@@ -15,8 +15,6 @@
 #include "base/strings/utf_string_conversions.h"
 #include "base/test/gmock_callback_support.h"
 #include "base/time/time.h"
-#include "build/build_config.h"
-#include "build/buildflag.h"
 #include "components/aggregation_service/aggregation_service.mojom.h"
 #include "components/attribution_reporting/aggregatable_dedup_key.h"
 #include "components/attribution_reporting/aggregatable_trigger_data.h"
@@ -25,15 +23,20 @@
 #include "components/attribution_reporting/event_trigger_data.h"
 #include "components/attribution_reporting/filters.h"
 #include "components/attribution_reporting/source_registration_error.mojom.h"
+#include "components/attribution_reporting/source_registration_time_config.mojom.h"
 #include "components/attribution_reporting/source_type.mojom.h"
 #include "components/attribution_reporting/suitable_origin.h"
 #include "components/attribution_reporting/trigger_registration.h"
 #include "content/browser/attribution_reporting/attribution_debug_report.h"
+#include "content/browser/attribution_reporting/attribution_input_event.h"
 #include "content/browser/attribution_reporting/attribution_manager.h"
+#include "content/browser/attribution_reporting/attribution_os_level_manager.h"
 #include "content/browser/attribution_reporting/attribution_report.h"
+#include "content/browser/attribution_reporting/attribution_reporting.mojom.h"
 #include "content/browser/attribution_reporting/attribution_test_utils.h"
 #include "content/browser/attribution_reporting/attribution_trigger.h"
 #include "content/browser/attribution_reporting/create_report_result.h"
+#include "content/browser/attribution_reporting/os_registration.h"
 #include "content/browser/attribution_reporting/send_result.h"
 #include "content/browser/attribution_reporting/storable_source.h"
 #include "content/browser/attribution_reporting/store_source_result.h"
@@ -54,17 +57,10 @@
 #include "content/shell/browser/shell.h"
 #include "net/base/net_errors.h"
 #include "net/base/schemeful_site.h"
-#include "services/network/public/cpp/trigger_attestation.h"
+#include "services/network/public/cpp/trigger_verification.h"
 #include "testing/gmock/include/gmock/gmock.h"
 #include "third_party/abseil-cpp/absl/types/optional.h"
 #include "url/origin.h"
-
-#if BUILDFLAG(IS_ANDROID)
-#include "content/browser/attribution_reporting/attribution_input_event.h"
-#include "content/browser/attribution_reporting/attribution_os_level_manager_android.h"
-#include "content/browser/attribution_reporting/attribution_reporting.mojom.h"
-#include "content/browser/attribution_reporting/os_registration.h"
-#endif
 
 namespace content {
 
@@ -420,7 +416,6 @@ IN_PROC_BROWSER_TEST_F(AttributionInternalsWebUiBrowserTest,
   EXPECT_EQ(kCompleteTitle, title_watcher.WaitAndGetTitle());
 }
 
-#if BUILDFLAG(IS_ANDROID)
 IN_PROC_BROWSER_TEST_F(AttributionInternalsWebUiBrowserTest,
                        OsRegistrationsShown) {
   ASSERT_TRUE(NavigateToURL(shell(), GURL(kAttributionInternalsUrl)));
@@ -454,7 +449,6 @@ IN_PROC_BROWSER_TEST_F(AttributionInternalsWebUiBrowserTest,
       attribution_reporting::mojom::OsRegistrationResult::kPassedToOs);
   EXPECT_EQ(kCompleteTitle, title_watcher.WaitAndGetTitle());
 }
-#endif  // BUILDFLAG(IS_ANDROID)
 
 IN_PROC_BROWSER_TEST_F(AttributionInternalsWebUiBrowserTest,
                        WebUIShownWithNoReports_NoReportsDisplayed) {
@@ -545,7 +539,6 @@ IN_PROC_BROWSER_TEST_F(AttributionInternalsWebUiBrowserTest,
   EXPECT_EQ(kCompleteTitle, title_watcher.WaitAndGetTitle());
 }
 
-#if BUILDFLAG(IS_ANDROID)
 IN_PROC_BROWSER_TEST_F(AttributionInternalsWebUiBrowserTest,
                        WebUIShownWithManager_OsSupportEnabled) {
   ASSERT_TRUE(NavigateToURL(shell(), GURL(kAttributionInternalsUrl)));
@@ -569,15 +562,13 @@ IN_PROC_BROWSER_TEST_F(AttributionInternalsWebUiBrowserTest,
   )";
   ASSERT_TRUE(ExecJsInWebUI(JsReplace(kScript, kCompleteTitle)));
 
-  AttributionOsLevelManagerAndroid::ScopedApiStateForTesting
-      scoped_api_state_setting(
-          AttributionOsLevelManagerAndroid::ApiState::kEnabled);
+  AttributionOsLevelManager::ScopedApiStateForTesting scoped_api_state_setting(
+      AttributionOsLevelManager::ApiState::kEnabled);
 
   TitleWatcher title_watcher(shell()->web_contents(), kCompleteTitle);
   ClickRefreshButton();
   EXPECT_EQ(kCompleteTitle, title_watcher.WaitAndGetTitle());
 }
-#endif  // BUILDFLAG(IS_ANDROID)
 
 IN_PROC_BROWSER_TEST_F(AttributionInternalsWebUiBrowserTest,
                        WebUIShownWithPendingReports_ReportsDisplayed) {
@@ -1016,7 +1007,7 @@ IN_PROC_BROWSER_TEST_F(
                     SourceBuilder(now).BuildStored())
           .SetReportTime(now + base::Hours(3))
           .SetAggregatableHistogramContributions(contributions)
-          .SetAttestationToken("abc")
+          .SetVerificationToken("abc")
           .BuildAggregatableAttribution(),
       /*is_debug_report=*/false,
       SendResult(SendResult::Status::kSent, net::OK,
@@ -1111,8 +1102,8 @@ IN_PROC_BROWSER_TEST_F(AttributionInternalsWebUiBrowserTest,
                        TriggersDisplayed) {
   ASSERT_TRUE(NavigateToURL(shell(), GURL(kAttributionInternalsUrl)));
 
-  const auto create_trigger = [](absl::optional<network::TriggerAttestation>
-                                     attestation) {
+  const auto create_trigger = [](absl::optional<network::TriggerVerification>
+                                     verification) {
     return AttributionTrigger(
         /*reporting_origin=*/*SuitableOrigin::Deserialize("https://r.test"),
         attribution_reporting::TriggerRegistration(
@@ -1148,13 +1139,15 @@ IN_PROC_BROWSER_TEST_F(AttributionInternalsWebUiBrowserTest,
             *attribution_reporting::AggregatableValues::Create(
                 {{"a", 123}, {"b", 456}}),
             /*debug_reporting=*/false,
-            ::aggregation_service::mojom::AggregationCoordinator::kDefault),
-        *SuitableOrigin::Deserialize("https://d.test"), std::move(attestation),
+            ::aggregation_service::mojom::AggregationCoordinator::kDefault,
+            attribution_reporting::mojom::SourceRegistrationTimeConfig::
+                kInclude),
+        *SuitableOrigin::Deserialize("https://d.test"), std::move(verification),
         /*is_within_fenced_frame=*/false);
   };
 
   static constexpr char kScript[] = R"(
-    const expectedAttestation =
+    const expectedVerification =
       '<dl><dt>Token</dt><dd>abc</dd>' +
       '<dt>Report ID</dt><dd>a2ab30b9-d664-4dfc-a9db-85f9729b9a30</dd></dl>';
 
@@ -1169,7 +1162,7 @@ IN_PROC_BROWSER_TEST_F(AttributionInternalsWebUiBrowserTest,
           table.children[0].children[3]?.innerText.includes('{') &&
           table.children[0].children[4]?.innerText === '' &&
           table.children[1].children[4]?.innerText === '123' &&
-          table.children[1].children[7]?.innerHTML === expectedAttestation) {
+          table.children[1].children[7]?.innerHTML === expectedVerification) {
         obs.disconnect();
         document.title = $1;
       }
@@ -1198,11 +1191,11 @@ IN_PROC_BROWSER_TEST_F(AttributionInternalsWebUiBrowserTest,
             cleared_debug_key);
       };
 
-  notify_trigger_handled(create_trigger(/*attestation=*/absl::nullopt),
+  notify_trigger_handled(create_trigger(/*verification=*/absl::nullopt),
                          AttributionTrigger::EventLevelResult::kSuccess,
                          AttributionTrigger::AggregatableResult::kSuccess);
 
-  notify_trigger_handled(create_trigger(network::TriggerAttestation::Create(
+  notify_trigger_handled(create_trigger(network::TriggerVerification::Create(
                              "abc", "a2ab30b9-d664-4dfc-a9db-85f9729b9a30")),
                          AttributionTrigger::EventLevelResult::kSuccess,
                          AttributionTrigger::AggregatableResult::kSuccess,

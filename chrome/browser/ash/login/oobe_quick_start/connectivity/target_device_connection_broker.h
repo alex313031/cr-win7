@@ -11,12 +11,12 @@
 #include "base/memory/raw_ptr.h"
 #include "base/values.h"
 #include "chrome/browser/ash/login/oobe_quick_start/connectivity/random_session_id.h"
+#include "chromeos/ash/services/nearby/public/mojom/quick_start_decoder_types.mojom.h"
 #include "third_party/abseil-cpp/absl/types/optional.h"
 
 namespace ash::quick_start {
 
 struct FidoAssertionInfo;
-struct WifiCredentials;
 
 // TargetDeviceConnectionBroker is the entrypoint for consuming the Quick Start
 // connectivity component. Calling code is expected to get an instance of this
@@ -43,15 +43,25 @@ class TargetDeviceConnectionBroker {
     kAuthenticationFailed,
     kConnectionLost,
     kRequestTimedOut,
+    kTargetDeviceUpdate,
     kUnknownError,
   };
 
   class AuthenticatedConnection {
    public:
     using RequestWifiCredentialsCallback =
-        base::OnceCallback<void(absl::optional<WifiCredentials>)>;
+        base::OnceCallback<void(absl::optional<mojom::WifiCredentials>)>;
+    // The ack_successful bool indicates whether the ack was successfully
+    // received by the source device. If true, then the target device will
+    // prepare to resume the Quick Start connection after it updates.
+    using NotifySourceOfUpdateCallback =
+        base::OnceCallback<void(/*ack_successful=*/bool)>;
     using RequestAccountTransferAssertionCallback =
         base::OnceCallback<void(absl::optional<FidoAssertionInfo>)>;
+
+    // Close the connection.
+    virtual void Close(
+        TargetDeviceConnectionBroker::ConnectionClosedReason reason) = 0;
 
     // Request wifi credentials from target Android device. The session_id is
     // used to identify this QuickStart session and is distinct from the
@@ -61,8 +71,11 @@ class TargetDeviceConnectionBroker {
         RequestWifiCredentialsCallback callback) = 0;
 
     // Notify Android device that the Chromebook will download an update and
-    // reboot.
-    virtual void NotifySourceOfUpdate(int32_t session_id) = 0;
+    // reboot. The session_id should be the same as the one sent in
+    // RequestWifiCredentials().
+    virtual void NotifySourceOfUpdate(
+        int32_t session_id,
+        NotifySourceOfUpdateCallback callback) = 0;
 
     // Begin the account transfer process and retrieve
     // an Assertion from the source device. The user will be asked to confirm

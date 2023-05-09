@@ -1265,8 +1265,6 @@ component("platform") {
     "mojo/kurl_mojom_traits.h",
     "mojo/mojo_binding_context.h",
     "mojo/security_origin_mojom_traits.h",
-    "mojo/shared_storage_mojom_traits.cc",
-    "mojo/shared_storage_mojom_traits.h",
     "mojo/string16_mojom_traits.cc",
     "mojo/string16_mojom_traits.h",
     "p2p/empty_network_manager.cc",
@@ -1580,6 +1578,10 @@ component("platform") {
     }
   }
 
+  if (is_apple) {
+    configs += [ "//build/config/compiler:enable_arc" ]
+  }
+
   if (is_mac) {
     sources += [
       "audio/mac/fft_frame_mac.cc",
@@ -1593,8 +1595,6 @@ component("platform") {
       "fonts/mac/font_matcher_mac.mm",
       "fonts/mac/font_platform_data_mac.h",
       "fonts/mac/font_platform_data_mac.mm",
-      "mac/block_exceptions.h",
-      "mac/block_exceptions.mm",
       "mac/color_mac.h",
       "mac/color_mac.mm",
       "mac/graphics_context_canvas.h",
@@ -1609,7 +1609,6 @@ component("platform") {
   if (is_ios) {
     sources += [ "fonts/ios/font_cache_ios.mm" ]
   }
-
   if (is_linux || is_chromeos) {
     sources += [
       "fonts/linux/font_cache_linux.cc",
@@ -2228,6 +2227,10 @@ source_set("blink_platform_unittests_sources") {
     "widget/input/prediction/filter_factory_unittests.cc",
     "widget/input/scroll_predictor_unittest.cc",
   ]
+
+  if (is_apple) {
+    configs += [ "//build/config/compiler:enable_arc" ]
+  }
 
   if (is_android) {
     sources += [ "fonts/android/font_cache_android_test.cc" ]

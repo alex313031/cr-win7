@@ -21,6 +21,7 @@ if (current_toolchain == default_toolchain) {
 assert(is_android)
 
 default_android_sdk_dep = "//third_party/android_sdk:android_sdk_java"
+_kotlin_stdlib_dep = "//third_party/kotlin_stdlib:kotlin_stdlib_java"
 _jacoco_dep = "//third_party/jacoco:jacocoagent_java"
 _jacoco_host_jar =
     "$root_build_dir/lib.java/third_party/jacoco/jacocoagent_java.jar"
@@ -943,6 +944,13 @@ template("test_runner_script") {
       ]
     } else {
       assert(false, "Invalid test type: $_test_type.")
+    }
+
+    # Devil does not reliably work with component builds of its tools.
+    # There's no benefit to them, so fall back to prebuilts for component builds.
+    # https://crbug.com/1404180
+    if (_test_type != "junit" && !is_component_build) {
+      executable_args += [ "--use-local-devil-tools" ]
     }
 
     if (defined(invoker.additional_apks)) {
@@ -3811,6 +3819,8 @@ if (enable_java_templates) {
         _kotlinc_jar_path = "$target_out_dir/$_output_name.kotlinc.jar"
         _kotlin_interface_jar_path =
             "$target_out_dir/$_output_name.kt-jvm-abi.jar"
+        assert(filter_include(_lib_deps, [ _kotlin_stdlib_dep ]) != [],
+               "${_main_target_name} is missing dep: $_kotlin_stdlib_dep")
         compile_kt(_compile_kt_target_name) {
           deps = _header_classpath_deps
           output_jar_path = _kotlinc_jar_path
@@ -4152,10 +4162,6 @@ if (enable_java_templates) {
           # new SDK classes, so providing our normal SDK will allow these
           # classes to resolve. For an example, see crbug.com/1350963.
           extra_classpath_jars = [ android_sdk_jar ]
-
-          # Mockito bug with JDK17 requires us to use JDK11 until we find a fix
-          # for crbug.com/1409661.
-          use_jdk_11 = true
         }
       }
     }

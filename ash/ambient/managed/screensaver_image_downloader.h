@@ -28,10 +28,16 @@ enum class ScreensaverImageDownloadResult {
   kNetworkError,
   kFileSaveError,
   kFileSystemWriteError,
+  kCancelled,
 };
 
-// Provides a service to download external image files that will be displayed in
-// the managed screensaver feature.
+// Provides a cache service to download and store external image files that will
+// be displayed in the managed screensaver feature. This cache will operate in a
+// specific file directory, specified on instantiation.
+//
+// Each image will be downloaded and stored with a unique name based on its URL
+// address. This cache assumes that the remote contents of the URL will not
+// change, i.e. once downloaded, it will not attempt to refresh its content.
 class ASH_EXPORT ScreensaverImageDownloader {
  private:
   // Expresses the state of the downloading job queue. It only has two possible
@@ -51,18 +57,19 @@ class ASH_EXPORT ScreensaverImageDownloader {
                               absl::optional<base::FilePath> path)>;
 
   // Represents a single image download request from `image_url` to
-  // `download_directory_` with name `file_name`. Once this job has been
-  // completed, `result_callback` will be invoked with the actual result, and
-  // the path to the downloaded file if the operation suceeded.
+  // `download_directory_`. Once this job has been completed, `result_callback`
+  // will be invoked with the actual result, and the path to the downloaded file
+  // if the operation succeeded.
   struct Job {
     Job() = delete;
-    Job(const std::string& image_url,
-        const std::string& file_name,
-        ResultCallback result_callback);
+    Job(const std::string& image_url, ResultCallback result_callback);
     ~Job();
 
+    // Creates a unique name based on a hash operation on the image URL to
+    // be used for the file stored in disk.
+    std::string file_name() const;
+
     const std::string image_url;
-    std::string file_name;
     ResultCallback result_callback;
   };
 
@@ -83,22 +90,37 @@ class ASH_EXPORT ScreensaverImageDownloader {
   // if the operation succeeded.
   void QueueDownloadJob(std::unique_ptr<Job> download_job);
 
+  // Empties the downloading queue, and replies to pending requests to indicate
+  // that they have been cancelled.
+  void ClearRequestQueue();
+
+  // Clears out the download folder.
+  void DeleteDownloadedImages();
+
+  base::FilePath GetDowloadDirForTesting();
+
  private:
   friend class ScreensaverImageDownloaderTest;
 
   // Verifies that the download directory is present and writable, or attempts
   // to create it otherwise. The result of this operation is passed along to
-  // `StartDownloadJobInternal`.
+  // `OnVerifyDownloadDirectoryCompleted`.
   void StartDownloadJob(std::unique_ptr<Job> download_job);
 
-  // Triggers a new URL request to download an image, if `can_download_file` is
-  // true. Otherwise, it completes the job with an error result.
-  void StartDownloadJobInternal(std::unique_ptr<Job> download_job,
-                                bool can_download_file);
+  // Starts a new job if the download folder is present and writable.
+  // Otherwise, it completes the request with an error result.
+  void OnVerifyDownloadDirectoryCompleted(std::unique_ptr<Job> download_job,
+                                          bool can_download_to_dir);
 
-  // Moves the downloaded image to its desired path. To avoid reading errors,
-  // every image is initially downloaded to a temporary file. On network error,
-  // `callback` is invoked.
+  // Resolves the download request if the file is already cached, otherwise
+  // triggers a new URL request to download the file.
+  void OnCheckIsFileIsInCache(const base::FilePath& file_path,
+                              std::unique_ptr<Job> download_job,
+                              bool is_file_present);
+
+  // Moves the downloaded image to its desired path. To avoid reading
+  // errors, every image is initially downloaded to a temporary file. On
+  // network error, `callback` is invoked.
   void OnUrlDownloadedToTempFile(
       std::unique_ptr<network::SimpleURLLoader> simple_loader,
       std::unique_ptr<Job> download_job,

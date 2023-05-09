@@ -147,7 +147,6 @@
 <translation id="2056550196601855911">IPv4/IPv6</translation>
 <translation id="2080070583977670716">Lagi tetapan</translation>
 <translation id="2085089206770112532">Kurangkan kecerahan paparan</translation>
-<translation id="209751264101900360">Subuh sehingga gelap - Aliran Awan</translation>
 <translation id="2102231663024125441">Pengeditan teks</translation>
 <translation id="2105810540595158374">Peranti ialah pengawal permainan.</translation>
 <translation id="2119172414412204879"><ph name="BOARD_NAME" />, versi <ph name="MILESTONE_VERSION" /></translation>
@@ -293,6 +292,7 @@
 <translation id="3484914941826596830">Semasa perisian tegar sedang dikemas kini, jangan cabut palam peranti luaran ini atau matikan komputer anda. Anda boleh meminimumkan tetingkap ini. Kemaskinian ini mungkin mengambil masa beberapa minit dan peranti luaran anda mungkin tidak berfungsi pada masa ini.</translation>
 <translation id="3486220673238053218">takrif</translation>
 <translation id="3488065109653206955">Diaktifkan sebahagian</translation>
+<translation id="3502426834823382181">lihat semua apl</translation>
 <translation id="3510890413042482857">Hantar <ph name="BEGIN_LINK1" />data surih prestasi<ph name="END_LINK1" /></translation>
 <translation id="3517001332549868749">Kemaskinian ChromeOS</translation>
 <translation id="3527036260304016759">Gagal - Ralat tidak diketahui</translation>
@@ -346,7 +346,6 @@
 <translation id="3967822245660637423">Muat turun selesai</translation>
 <translation id="3969602104473960991">Kata laluan Chrome OS dikemas kini</translation>
 <translation id="397105322502079400">Mengira...</translation>
-<translation id="3974175076798940554">Aset Chromebook Plus yang eksklusif kini tersedia</translation>
 <translation id="39823212440917567">Tugas cetak yang melebihi <ph name="NUMBER_OF_DAYS" /> hari akan dialih keluar</translation>
 <translation id="3993704782688964914">Kini <ph name="DEVICE_NAME" /> anda terkini</translation>
 <translation id="4003384961948020559">Gagal - Output penuh</translation>
@@ -387,7 +386,6 @@
 <translation id="4275663329226226506">Media</translation>
 <translation id="4289540628985791613">Gambaran keseluruhan</translation>
 <translation id="4289849978083912975">Tayangan slaid</translation>
-<translation id="4293621540182258188">Subuh sehingga gelap - Aliran Bumi</translation>
 <translation id="4297501883039923494">Dihentikan - Ralat tidak diketahui</translation>
 <translation id="4300073214558989"><ph name="IMAGE_COUNT" /> Imej</translation>
 <translation id="4311195029067684288">Penuh</translation>
@@ -571,7 +569,6 @@
 <translation id="576835345334454681">Tingkatkan kecerahan paparan</translation>
 <translation id="57838592816432529">Redam</translation>
 <translation id="5784136236926853061">Kependaman HTTP tinggi</translation>
-<translation id="5809090008577139505">Aurora</translation>
 <translation id="5826644637650799838">Perihal seni</translation>
 <translation id="5832805196449965646">Tambah Orang</translation>
 <translation id="583281660410589416">Tidak diketahui</translation>
@@ -590,7 +587,6 @@
 <translation id="5907649332524363701">warna utama</translation>
 <translation id="5916084858004523819">Dilarang</translation>
 <translation id="5916664084637901428">Hidupkan</translation>
-<translation id="5918201491776799918">Pilih kerja seni eksklusif Chromebook Plus</translation>
 <translation id="5921506667911082617">{COUNT,plural, =1{Fail anda telah berjaya diimbas dan disimpan pada <ph name="LINK_BEGIN" /><ph name="FOLDER_NAME" /><ph name="LINK_END" />.}other{Fail anda telah berjaya diimbas dan disimpan pada <ph name="LINK_BEGIN" /><ph name="FOLDER_NAME" /><ph name="LINK_END" />.}}</translation>
 <translation id="5931523347251946569">Fail tidak dijumpai</translation>
 <translation id="5939518447894949180">Tetapkan semula</translation>
@@ -636,6 +632,7 @@
 <translation id="6278428485366576908">Tema</translation>
 <translation id="6280912520669706465">ARC</translation>
 <translation id="6284632978374966585">Hidupkan tema gelap</translation>
+<translation id="6285899124799306373">buka pelancar</translation>
 <translation id="6302401976930124515">Ujian <ph name="TEST_NAME" /> telah dibatalkan</translation>
 <translation id="631063167932043783">Teroka apl</translation>
 <translation id="6319207335391420837">Kemas kini perisian tegar pada <ph name="DEVICE_NAME" /></translation>
@@ -651,6 +648,7 @@
 <translation id="6382182670717268353">Pratonton penyelamat skrin</translation>
 <translation id="6388847657025262518">Penyuap dokumen pengimbas tersekat. Semak penyuap dan cuba lagi.</translation>
 <translation id="6394634179843537518">Tambah fail</translation>
+<translation id="6401427872449207797">carian penyemak imbas</translation>
 <translation id="6410257289063177456">Fail Imej</translation>
 <translation id="641081527798843608">Padanan subjek</translation>
 <translation id="6412715219990689313">Papan kekunci terbina dalam</translation>
@@ -799,7 +797,6 @@
 <translation id="7656388927906093505">Peranti ialah tetikus.</translation>
 <translation id="7658239707568436148">Batal</translation>
 <translation id="7665800271478495366">Tukar avatar</translation>
-<translation id="7675241868020048622">Aurora (eksklusif Plus)</translation>
 <translation id="7690294790491645610">Sahkan kata laluan baharu</translation>
 <translation id="7701040980221191251">Tiada</translation>
 <translation id="7705524343798198388">VPN</translation>
@@ -857,7 +854,6 @@
 <translation id="8138405288920084977">LTEAdvanced</translation>
 <translation id="8143951647992294073">Pilih <ph name="TOPIC_SOURCE" /> <ph name="TOPIC_SOURCE_DESC" /></translation>
 <translation id="8151185429379586178">Alat pembangun</translation>
-<translation id="8153923300383192510">Chromebook Plus eksklusif</translation>
 <translation id="8179976553408161302">Enter</translation>
 <translation id="8183974620058026102">Lampir</translation>
 <translation id="8206859287963243715">Selular</translation>
@@ -876,6 +872,7 @@
 <translation id="8312330582793120272">mainkan media</translation>
 <translation id="8318753676953949627">Tiada Imej</translation>
 <translation id="8329018942023753850">apl kalkulator</translation>
+<translation id="8335869473001018124">buka carian</translation>
 <translation id="8336739000755212683">Tukar imej akaun peranti</translation>
 <translation id="8347227221149377169">Tugas cetak</translation>
 <translation id="8351855506390808906">Titik sentuhan pemetaan kunci</translation>

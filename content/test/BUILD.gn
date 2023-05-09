@@ -1267,6 +1267,7 @@ test("content_browsertests") {
     "../browser/attribution_reporting/attribution_internals_browsertest.cc",
     "../browser/attribution_reporting/attribution_src_browsertest.cc",
     "../browser/attribution_reporting/attributions_browsertest.cc",
+    "../browser/attribution_reporting/cross_app_web_attribution_browsertest.cc",
     "../browser/attribution_reporting/privacy_sandbox_ads_apis_browsertest.cc",
     "../browser/attribution_reporting/source_declaration_browsertest.cc",
     "../browser/attribution_reporting/trigger_registration_browsertest.cc",
@@ -1295,6 +1296,7 @@ test("content_browsertests") {
     "../browser/browsing_topics/browsing_topics_browsertest.cc",
     "../browser/child_process_launcher_browsertest.cc",
     "../browser/child_process_security_policy_browsertest.cc",
+    "../browser/compute_pressure/compute_pressure_origin_trial_browsertest.cc",
     "../browser/content_index/content_index_browsertest.cc",
     "../browser/content_security_policy_browsertest.cc",
     "../browser/cross_origin_opener_policy_browsertest.cc",
@@ -1524,6 +1526,8 @@ test("content_browsertests") {
     "../browser/web_package/signed_exchange_subresource_prefetch_browsertest.cc",
     "../browser/webid/test/mock_mdoc_provider.cc",
     "../browser/webid/test/mock_mdoc_provider.h",
+    "../browser/webid/test/mock_modal_dialog_view_delegate.cc",
+    "../browser/webid/test/mock_modal_dialog_view_delegate.h",
     "../browser/webid/test/webid_test_content_browser_client.cc",
     "../browser/webid/test/webid_test_content_browser_client.h",
     "../browser/webid/webid_browsertest.cc",
@@ -1605,7 +1609,6 @@ test("content_browsertests") {
     ":test_interfaces",
     ":web_ui_mojo_test_resources",
     "//content:content_resources",
-    "//content:dev_ui_content_resources",
   ]
 
   deps = [
@@ -2221,6 +2224,7 @@ test("content_unittests") {
     "../browser/attribution_reporting/attribution_storage_unittest.cc",
     "../browser/attribution_reporting/attribution_utils_unittest.cc",
     "../browser/attribution_reporting/combinatorics_unittest.cc",
+    "../browser/attribution_reporting/destination_throttler_unittest.cc",
     "../browser/attribution_reporting/rate_limit_table_unittest.cc",
     "../browser/background_fetch/background_fetch_cross_origin_filter_unittest.cc",
     "../browser/background_fetch/background_fetch_data_manager_unittest.cc",
@@ -2786,10 +2790,7 @@ test("content_unittests") {
 
   configs += [ "//build/config:precompiled_headers" ]
 
-  public_deps = [
-    "//content:content_resources",
-    "//content:dev_ui_content_resources",
-  ]
+  public_deps = [ "//content:content_resources" ]
 
   deps = [
     ":content_test_mojo_bindings",
@@ -2976,10 +2977,7 @@ test("content_unittests") {
   }
 
   if (is_fuchsia) {
-    deps += [
-      "//third_party/fuchsia-sdk/sdk/fidl/fuchsia.accessibility.semantics:fuchsia.accessibility.semantics_cpp",
-      "//third_party/fuchsia-sdk/sdk/fidl/fuchsia.accessibility.semantics:fuchsia.accessibility.semantics_hlcpp",
-    ]
+    deps += [ "//third_party/fuchsia-sdk/sdk/fidl/fuchsia.accessibility.semantics:fuchsia.accessibility.semantics_cpp" ]
   }
 
   if (enable_printing || enable_printing_unittests) {

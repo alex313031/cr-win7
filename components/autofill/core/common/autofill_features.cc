@@ -95,13 +95,6 @@ BASE_FEATURE(kAutofillConsiderPhoneNumberSeparatorsValidLabels,
              "AutofillConsiderPhoneNumberSeparatorsValidLabels",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
-// If enabled, the last blur votes per form signature are sent not the first
-// ones.
-// TODO(crbug.com/1383502): Cleanup when this has proven on stable.
-BASE_FEATURE(kAutofillDelayBlurVotes,
-             "AutofillDelayBlurVotes",
-             base::FEATURE_ENABLED_BY_DEFAULT);
-
 // FormStructure::RetrieveFromCache used to preserve an AutofillField's
 // is_autofilled from the cache of previously parsed forms. This makes little
 // sense because the renderer sends us the autofill state and has the most
@@ -422,13 +415,6 @@ BASE_FEATURE(kAutofillPopupUseThresholdForKeyboardAndMobileAccept,
 // TODO(crbug/1117451): Remove once it works.
 BASE_FEATURE(kAutofillProbableFormSubmissionInBrowser,
              "AutofillProbableFormSubmissionInBrowser",
-             base::FEATURE_DISABLED_BY_DEFAULT);
-
-// If we observe a sequence of fields of (street address, house number), these
-// get rationalized to (street name, house number).
-// TODO(crbug.com/1326425): Remove once feature is launched.
-BASE_FEATURE(kAutofillRationalizeStreetAddressAndHouseNumber,
-             "AutofillRationalizeStreetAddressAndHouseNumber",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
 // Removes setting-inaccessible field types from existing profiles on startup.

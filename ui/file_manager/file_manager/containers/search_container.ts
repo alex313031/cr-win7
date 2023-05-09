@@ -227,6 +227,8 @@ export class SearchContainer extends EventTarget {
 
     // The button that allows the user to clear the query.
     this.clearButton_ = this.searchBox_.querySelector('.clear') as HTMLElement;
+    // Hide clear button when created.
+    this.updateClearButton_('');
 
     // The list showing possible matches to the current query.
     this.autocompleteList_ =
@@ -637,6 +639,7 @@ export class SearchContainer extends EventTarget {
       this.searchWrapper_.classList.add('has-cursor', 'has-text');
       this.searchBox_.classList.add('has-cursor', 'has-text');
       this.searchButton_.tabIndex = -1;
+      this.updateClearButton_(this.getQuery());
     }
   }
 
@@ -660,10 +663,20 @@ export class SearchContainer extends EventTarget {
         this.inputState_ = SearchInputState.CLOSED;
         this.searchWrapper_.setAttribute('collapsed', '');
       }, {once: true, passive: true, capture: true});
+      this.inputElement_.value = '';
       this.searchWrapper_.classList.remove('has-cursor', 'has-text');
       this.searchBox_.classList.remove('has-cursor', 'has-text');
       this.searchButton_.tabIndex = 0;
       this.currentOptions_ = getDefaultSearchOptions();
+    }
+  }
+
+  /**
+   * Updates the visibility of clear button.
+   */
+  private updateClearButton_(query: string) {
+    if (util.isSearchV2Enabled()) {
+      this.clearButton_.hidden = (query.length <= 0);
     }
   }
 
@@ -673,6 +686,7 @@ export class SearchContainer extends EventTarget {
    */
   private onQueryChanged_() {
     const query = this.inputElement_.value.trimStart();
+    this.updateClearButton_(query);
     this.dispatchEvent(new CustomEvent(SEARCH_QUERY_CHANGED, {
       bubbles: true,
       composed: true,

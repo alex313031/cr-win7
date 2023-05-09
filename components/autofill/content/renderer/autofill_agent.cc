@@ -1071,14 +1071,6 @@ void AutofillAgent::DidCompleteFocusChangeInFrame() {
     SendFocusedInputChangedNotificationToBrowser(focused_element);
   }
 
-  // PasswordGenerationAgent needs to know about focus changes, even if there is
-  // no focused element.
-  if (password_generation_agent_ &&
-      password_generation_agent_->FocusedNodeHasChanged(focused_element)) {
-    is_generation_popup_possibly_visible_ = true;
-    is_popup_possibly_visible_ = true;
-  }
-
   if (!IsKeyboardAccessoryEnabled() && focus_requires_scroll_)
     HandleFocusChangeComplete();
 
@@ -1220,6 +1212,12 @@ void AutofillAgent::HandleFocusChangeComplete() {
 
   focused_node_was_last_clicked_ = false;
 
+  if (password_generation_agent_ &&
+      password_generation_agent_->HandleFocusChangeComplete(focused_element)) {
+    is_generation_popup_possibly_visible_ = true;
+    is_popup_possibly_visible_ = true;
+  }
+
   SendPotentiallySubmittedFormToBrowser();
 }
 
@@ -1283,7 +1281,8 @@ void AutofillAgent::OnProvisionallySaveForm(
               WebFormControlElement field =
                   form_util::FindFormControlElementByUniqueRendererId(
                       doc, field_id, /*form_to_be_searched =*/FormRendererId());
-              return !field.IsNull() && form_util::IsWebElementFocusable(field);
+              return !field.IsNull() &&
+                     form_util::IsWebElementFocusableForAutofill(field);
             });
       }
       formless_elements_user_edited_.insert(

@@ -155,13 +155,6 @@ const char kManagedProfileSerialAllowUsbDevicesForUrlsDeprecated[] =
     "profile.managed.serial_allow_usb_devices_for_urls";
 #endif  // !BUILDFLAG(IS_ANDROID)
 
-#if BUILDFLAG(ENABLE_SUPERVISED_USERS) && BUILDFLAG(ENABLE_EXTENSIONS)
-// DictionaryValue that maps extension ids to the approved version of this
-// extension for a supervised user. Missing extensions are not approved.
-const char kSupervisedUserApprovedExtensions[] =
-    "profile.managed.approved_extensions";
-#endif  // BUILDFLAG(ENABLE_SUPERVISED_USERS) && BUILDFLAG(ENABLE_EXTENSIONS)
-
 #if BUILDFLAG(ENABLE_RLZ)
 // Integer. RLZ ping delay in seconds.
 const char kRlzPingDelaySeconds[] = "rlz_ping_delay";
@@ -816,6 +809,16 @@ const char kHatsPrivacyHubBaselineIsSelected[] =
 // indicated the end of the most recent Privacy Hub baseline cycle.
 const char kHatsPrivacyHubBaselineCycleEndTs[] =
     "hats_privacy_hub_baseline_end_timestamp";
+
+// A boolean pref. Indicated if the device is selected for the Borealis games
+// survey.
+const char kHatsBorealisGamesSurveyIsSelected[] =
+    "hats_borealis_games_is_selected";
+
+// An int64 pref. This is the timestamp, microseconds after epoch, that
+// indicated the end of the most recent Borealis games survey cycle.
+const char kHatsBorealisGamesSurveyCycleEndTs[] =
+    "hats_borealis_games_end_timestamp";
 
 // A boolean pref. Indicates if we've already shown a notification to inform the
 // current user about the quick unlock feature.
@@ -1681,6 +1684,10 @@ const char kIdleTimeout[] = "idle_timeout";
 // IdleTimeoutActions policy.
 const char kIdleTimeoutActions[] = "idle_timeout_actions";
 
+// If true, show the IdleTimeout bubble when Chrome starts.
+const char kIdleTimeoutShowBubbleOnStartup[] =
+    "idle_timeout_show_bubble_on_startup";
+
 // *************** LOCAL STATE ***************
 // These are attached to the machine/installation
 
@@ -1856,6 +1863,26 @@ const char kOfficeMoveConfirmationShownForDrive[] =
 // Whether the move confirmation dialog has been shown before for OneDrive.
 const char kOfficeMoveConfirmationShownForOneDrive[] =
     "filebrowser.office.move_confirmation_shown_for_onedrive";
+
+// Whether the move confirmation dialog has been shown before for uploading
+// local files to Drive.
+const char kOfficeMoveConfirmationShownForLocalToDrive[] =
+    "filebrowser.office.move_confirmation_shown_for_local_to_drive";
+
+// Whether the move confirmation dialog has been shown before for uploading
+// local files to OneDrive.
+const char kOfficeMoveConfirmationShownForLocalToOneDrive[] =
+    "filebrowser.office.move_confirmation_shown_for_local_to_onedrive";
+
+// Whether the move confirmation dialog has been shown before for uploading
+// cloud files to Drive.
+const char kOfficeMoveConfirmationShownForCloudToDrive[] =
+    "filebrowser.office.move_confirmation_shown_for_cloud_to_drive";
+
+// Whether the move confirmation dialog has been shown before for uploading
+// cloud files to OneDrive.
+const char kOfficeMoveConfirmationShownForCloudToOneDrive[] =
+    "filebrowser.office.move_confirmation_shown_for_cloud_to_onedrive";
 
 // The timestamp of the latest office file automatically moved to OneDrive.
 const char kOfficeFileMovedToOneDrive[] =
@@ -3539,17 +3566,6 @@ const char kSCTAuditingHashdanceReportCount[] =
 
 #if BUILDFLAG(IS_CHROMEOS_ASH)
 const char kConsumerAutoUpdateToggle[] = "settings.consumer_auto_update_toggle";
-
-// A boolean pref that controls whether or not Hindi Inscript keyboard layout
-// is available.
-// This is set by a user policy, but the user policy does not work to
-// control the availability of the Hindi Inscript layout.
-// TODO(jungshik): Deprecate it.
-const char kHindiInscriptLayoutEnabled[] =
-    "settings.input.hindi_inscript_layout_enabled";
-// This is set by a device policy and does actually work.
-const char kDeviceHindiInscriptLayoutEnabled[] =
-    "settings.input.device_hindi_inscript_layout_enabled";
 #endif
 
 #if !BUILDFLAG(IS_ANDROID)

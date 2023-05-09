@@ -392,6 +392,20 @@ testcase.searchWithRecencyOptions = async () => {
 };
 
 /**
+ * Checks that when searching Google Drive we correctly match on name, not on
+ * contents.
+ */
+testcase.matchDriveFilesByName = async () => {
+  const appId =
+      await setupAndWaitUntilReady(RootPath.DRIVE, BASIC_LOCAL_ENTRY_SET, [
+        ENTRIES.image2,
+      ]);
+  await remoteCall.typeSearchText(appId, 'image2');
+  await remoteCall.waitForFiles(
+      appId, TestEntryInfo.getExpectedRows([ENTRIES.image2]));
+};
+
+/**
  * Checks that changing recency options correctly filters search results on
  * drive.
  */
@@ -625,7 +639,6 @@ testcase.showSearchResultMessageWhenSearching = async () => {
 
   // Clear and close search.
   await remoteCall.waitAndClickElement(appId, '#search-box .clear');
-  await remoteCall.waitAndClickElement(appId, '#search-button');
 
   // Wait for the search to fully close.
   await remoteCall.waitForElement(appId, '#search-wrapper[collapsed]');

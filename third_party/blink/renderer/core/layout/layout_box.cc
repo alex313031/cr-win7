@@ -243,13 +243,12 @@ LayoutUnit FileUploadControlIntrinsicInlineSize(const HTMLInputElement& input,
   const Font& font = box.StyleRef().GetFont();
   const float min_default_label_width =
       kDefaultWidthNumChars *
-      font.Width(ConstructTextRun(character_as_string, box.StyleRef(),
-                                  TextRun::kAllowTrailingExpansion));
+      font.Width(ConstructTextRun(character_as_string, box.StyleRef()));
 
   const String label =
       input.GetLocale().QueryString(IDS_FORM_FILE_NO_FILE_LABEL);
-  float default_label_width = font.Width(ConstructTextRun(
-      label, box.StyleRef(), TextRun::kAllowTrailingExpansion));
+  float default_label_width =
+      font.Width(ConstructTextRun(label, box.StyleRef()));
   if (HTMLInputElement* button = input.UploadButton()) {
     if (auto* button_box = button->GetLayoutBox()) {
       LayoutUnit max;
@@ -1569,8 +1568,10 @@ PhysicalRect LayoutBox::PhysicalBackgroundRect(
     } else {
       // Ignore invisible background layers for kBackgroundPaintedExtent.
       DCHECK_EQ(rect_type, kBackgroundPaintedExtent);
-      if (!cur->GetImage() && (cur->Next() || background_color.Alpha() == 0))
+      if (!cur->GetImage() &&
+          (cur->Next() || background_color.AlphaAsInteger() == 0)) {
         continue;
+      }
       // A content-box clipped fill layer can be scrolled into the padding box
       // of the overflow container.
       if (current_clip == EFillBox::kContent &&
@@ -6212,7 +6213,8 @@ BackgroundPaintLocation LayoutBox::ComputeBackgroundPaintLocationIfComposited()
     // The background color is either the only background or it's the
     // bottommost value from the background property (see final-bg-layer in
     // https://drafts.csswg.org/css-backgrounds/#the-background).
-    if (!layer->GetImage() && !layer->Next() && background_color.Alpha() > 0 &&
+    if (!layer->GetImage() && !layer->Next() &&
+        background_color.AlphaAsInteger() > 0 &&
         StyleRef().IsScrollbarGutterAuto()) {
       // Solid color layers with an effective background clip of the padding box
       // can be treated as local.

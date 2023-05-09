@@ -82,11 +82,16 @@ class CONTENT_EXPORT PrefetchContainer {
   // The type of this prefetch. Controls how the prefetch is handled.
   const PrefetchType& GetPrefetchType() const { return prefetch_type_; }
 
+  // Whether or not the prefetch proxy would be required to fetch the given url
+  // based on |prefetch_type_|.
+  bool IsProxyRequiredForURL(const GURL& url) const;
+
   const blink::mojom::Referrer& GetReferrer() const { return referrer_; }
 
-  const absl::optional<net::HttpNoVarySearchData>& GetNoVarySearchExpected()
-      const {
-    return no_vary_search_expected_;
+  const net::SchemefulSite& GetReferringSite() const { return referring_site_; }
+
+  const absl::optional<net::HttpNoVarySearchData>& GetNoVarySearchHint() const {
+    return no_vary_search_hint_;
   }
 
   base::WeakPtr<PrefetchContainer> GetWeakPtr() {
@@ -355,8 +360,12 @@ class CONTENT_EXPORT PrefetchContainer {
   // The referrer to use for the request.
   const blink::mojom::Referrer referrer_;
 
+  // The origin and site of the page that requested the prefetched.
+  url::Origin referring_origin_;
+  net::SchemefulSite referring_site_;
+
   // The No-Vary-Search hint of the prefetch.
-  const absl::optional<net::HttpNoVarySearchData> no_vary_search_expected_;
+  const absl::optional<net::HttpNoVarySearchData> no_vary_search_hint_;
 
   // The |PrefetchDocumentManager| that requested |this|. Initially it owns
   // |this|, but once the network request for the prefetch is started,
@@ -432,8 +441,8 @@ class CONTENT_EXPORT PrefetchContainer {
 
   // A DevTools token used to identify initiator document if the prefetch is
   // triggered by SpeculationRules.
-  const absl::optional<base::UnguessableToken>
-      initiator_devtools_navigation_token_;
+  absl::optional<base::UnguessableToken> initiator_devtools_navigation_token_ =
+      absl::nullopt;
 
   // The time at which |PrefetchService| started blocking until the head of
   // |this| was received.

@@ -19,6 +19,7 @@
 
 namespace policy {
 class BrowserDMTokenStorage;
+class CloudPolicyStore;
 }  // namespace policy
 
 namespace enterprise_connectors {
@@ -32,13 +33,15 @@ class DesktopAttestationService : public AttestationService {
  public:
   explicit DesktopAttestationService(
       policy::BrowserDMTokenStorage* dm_token_storage,
-      DeviceTrustKeyManager* key_manager);
+      DeviceTrustKeyManager* key_manager,
+      policy::CloudPolicyStore* browser_cloud_policy_store);
   ~DesktopAttestationService() override;
 
   // AttestationService:
   void BuildChallengeResponseForVAChallenge(
       const std::string& challenge,
       base::Value::Dict signals,
+      const std::set<DTCPolicyLevel>& levels,
       AttestationCallback callback) override;
 
  private:
@@ -48,6 +51,7 @@ class DesktopAttestationService : public AttestationService {
 
   void OnPublicKeyExported(const std::string& serialized_signed_challenge,
                            base::Value::Dict signals,
+                           const std::set<DTCPolicyLevel>& levels,
                            AttestationCallback callback,
                            absl::optional<std::string> exported_key);
 
@@ -55,6 +59,7 @@ class DesktopAttestationService : public AttestationService {
       const SignedData& signed_data,
       const absl::optional<std::string>& exported_public_key,
       base::Value::Dict signals,
+      const std::set<DTCPolicyLevel>& levels,
       AttestationCallback callback,
       bool is_va_challenge);
 
@@ -74,6 +79,9 @@ class DesktopAttestationService : public AttestationService {
   // process. Since the current service is owned at the profile level, this
   // respects the browser shutdown sequence.
   raw_ptr<DeviceTrustKeyManager> key_manager_;
+
+  // Used for retrieving a managed devices customer ID.
+  const raw_ptr<policy::CloudPolicyStore> browser_cloud_policy_store_;
 
   // Runner for tasks needed to be run in the background.
   scoped_refptr<base::TaskRunner> background_task_runner_;

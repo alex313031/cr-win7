@@ -147,7 +147,6 @@
 <translation id="2056550196601855911">IPv4/IPv6</translation>
 <translation id="2080070583977670716">تنظیمات بیشتر</translation>
 <translation id="2085089206770112532">کاهش روشنایی نمایشگر</translation>
-<translation id="209751264101900360">از بامداد تا شامگاه - گردش ابرها</translation>
 <translation id="2102231663024125441">ویرایش نوشتار</translation>
 <translation id="2105810540595158374">دستگاه کنترل بازی است.</translation>
 <translation id="2119172414412204879"><ph name="BOARD_NAME" />، نسخه <ph name="MILESTONE_VERSION" /></translation>
@@ -293,6 +292,7 @@
 <translation id="3484914941826596830">وقتی سفت‌افزار درحال به‌روزرسانی است، این دستگاه خارجی را جدا نکنید و رایانه را خاموش نکنید. می‌توانید این پنجره را کمینه کنید. این به‌روزرسانی ممکن است چند دقیقه طول بکشد و در این مدت ممکن است دستگاه خارجی‌تان کار نکند.</translation>
 <translation id="3486220673238053218">معنی</translation>
 <translation id="3488065109653206955">به‌طور نسبی فعال شده است</translation>
+<translation id="3502426834823382181">مشاهده همه برنامه‌ها</translation>
 <translation id="3510890413042482857">ارسال <ph name="BEGIN_LINK1" />داده‌های ردیابی عملکرد<ph name="END_LINK1" /></translation>
 <translation id="3517001332549868749">‏به‌روزرسانی ChromeOS</translation>
 <translation id="3527036260304016759">انجام نشد - خطای نامشخص</translation>
@@ -346,7 +346,6 @@
 <translation id="3967822245660637423">بارگیری کامل شد</translation>
 <translation id="3969602104473960991">‏گذرواژه ChromeOS به‌روزرسانی شد</translation>
 <translation id="397105322502079400">در حال محاسبه…</translation>
-<translation id="3974175076798940554">‏دارایی‌های Chromebook Plus اختصاصی اکنون دردسترس است</translation>
 <translation id="39823212440917567">کارهای چاپ قدیمی‌تر از <ph name="NUMBER_OF_DAYS" /> روز برداشته می‌شوند</translation>
 <translation id="3993704782688964914">اکنون <ph name="DEVICE_NAME" /> شما به‌روز است</translation>
 <translation id="4003384961948020559">انجام نشد - خروجی پُر است</translation>
@@ -387,7 +386,6 @@
 <translation id="4275663329226226506">رسانه</translation>
 <translation id="4289540628985791613">نمای کلی</translation>
 <translation id="4289849978083912975">نمایش اسلاید</translation>
-<translation id="4293621540182258188">از بامداد تا شامگاه - گردش زمین</translation>
 <translation id="4297501883039923494">متوقف شد - خطای نامشخص</translation>
 <translation id="4300073214558989"><ph name="IMAGE_COUNT" /> تصویر</translation>
 <translation id="4311195029067684288">پر</translation>
@@ -571,7 +569,6 @@
 <translation id="576835345334454681">افزایش روشنایی نمایشگر</translation>
 <translation id="57838592816432529">بی‌صدا کردن</translation>
 <translation id="5784136236926853061">‏تأخیر زیاد HTTP</translation>
-<translation id="5809090008577139505">شفق قطبی</translation>
 <translation id="5826644637650799838">درباره اثر هنری</translation>
 <translation id="5832805196449965646">افزودن شخص</translation>
 <translation id="583281660410589416">ناشناس</translation>
@@ -590,7 +587,6 @@
 <translation id="5907649332524363701">رنگ کلید</translation>
 <translation id="5916084858004523819">ممنوع</translation>
 <translation id="5916664084637901428">روشن</translation>
-<translation id="5918201491776799918">‏انتخاب کار هنری Chromebook Plus اختصاصی</translation>
 <translation id="5921506667911082617">{COUNT,plural, =1{فایل شما باموفقیت اسکن شد و در <ph name="LINK_BEGIN" /><ph name="FOLDER_NAME" /><ph name="LINK_END" /> ذخیره شد.}one{فایل شما باموفقیت اسکن شد و در <ph name="LINK_BEGIN" /><ph name="FOLDER_NAME" /><ph name="LINK_END" /> ذخیره شد.}other{فایل‌های شما باموفقیت اسکن شد و در <ph name="LINK_BEGIN" /><ph name="FOLDER_NAME" /><ph name="LINK_END" /> ذخیره شد.}}</translation>
 <translation id="5931523347251946569">فایل پیدا نشد</translation>
 <translation id="5939518447894949180">بازنشانی</translation>
@@ -636,6 +632,7 @@
 <translation id="6278428485366576908">زمینه</translation>
 <translation id="6280912520669706465">ARC</translation>
 <translation id="6284632978374966585">روشن کردن زمینه تیره</translation>
+<translation id="6285899124799306373">باز کردن راه‌انداز</translation>
 <translation id="6302401976930124515">آزمایش <ph name="TEST_NAME" /> لغو شده است</translation>
 <translation id="631063167932043783">برنامه کاوش</translation>
 <translation id="6319207335391420837">به‌روزرسانی سفت‌افزار در <ph name="DEVICE_NAME" /></translation>
@@ -651,6 +648,7 @@
 <translation id="6382182670717268353">پیش‌نمایش محافظ صفحه‌نمایش</translation>
 <translation id="6388847657025262518">تغذیه‌کننده سند اسکنر گیر کرده است. تغذیه‌کننده را بررسی کنید و دوباره امتحان کنید.</translation>
 <translation id="6394634179843537518">افزودن فایل</translation>
+<translation id="6401427872449207797">جستجوی مرورگر</translation>
 <translation id="6410257289063177456">فایل‌های تصویری</translation>
 <translation id="641081527798843608">مطابقت موضوع</translation>
 <translation id="6412715219990689313">صفحه‌کلید داخلی</translation>
@@ -799,7 +797,6 @@
 <translation id="7656388927906093505">دستگاه موش‌واره است.</translation>
 <translation id="7658239707568436148">لغو</translation>
 <translation id="7665800271478495366">تغییر چهره‌نما</translation>
-<translation id="7675241868020048622">شفق قطبی (فوق‌اختصاصی)</translation>
 <translation id="7690294790491645610">تأیید گذرواژه جدید</translation>
 <translation id="7701040980221191251">هیچ‌کدام</translation>
 <translation id="7705524343798198388">VPN</translation>
@@ -857,7 +854,6 @@
 <translation id="8138405288920084977">LTEAdvanced</translation>
 <translation id="8143951647992294073">انتخاب <ph name="TOPIC_SOURCE" /> <ph name="TOPIC_SOURCE_DESC" /></translation>
 <translation id="8151185429379586178">ابزارهای برنامه‌نویس</translation>
-<translation id="8153923300383192510">‏Chromebook Plus اختصاصی</translation>
 <translation id="8179976553408161302">ورود</translation>
 <translation id="8183974620058026102">پیوست</translation>
 <translation id="8206859287963243715">سلولی</translation>
@@ -876,6 +872,7 @@
 <translation id="8312330582793120272">پخش رسانه</translation>
 <translation id="8318753676953949627">تصویری وجود ندارد</translation>
 <translation id="8329018942023753850">برنامه ماشین حساب</translation>
+<translation id="8335869473001018124">باز کردن جستجو</translation>
 <translation id="8336739000755212683">تغییر تصویر حساب دستگاه</translation>
 <translation id="8347227221149377169">کارهای چاپی</translation>
 <translation id="8351855506390808906">نگاشتن کلید نقطه لمسی</translation>

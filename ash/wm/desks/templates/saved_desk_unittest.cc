@@ -102,8 +102,8 @@ class SavedDeskTest : public OverviewTestBase {
                 const std::string& name,
                 base::Time created_time,
                 DeskTemplateType type) {
-    AddEntry(uuid, name, created_time, DeskTemplateSource::kUser, type,
-             std::make_unique<app_restore::RestoreData>());
+    AddSavedDeskEntry(ash_test_helper()->saved_desk_test_helper()->desk_model(),
+                      uuid, name, created_time, type);
   }
 
   void AddEntry(const base::Uuid& uuid,
@@ -112,26 +112,15 @@ class SavedDeskTest : public OverviewTestBase {
                 DeskTemplateSource source,
                 DeskTemplateType type,
                 std::unique_ptr<app_restore::RestoreData> restore_data) {
-    auto saved_desk =
-        std::make_unique<DeskTemplate>(uuid, source, name, created_time, type);
-    saved_desk->set_desk_restore_data(std::move(restore_data));
-
-    AddEntry(std::move(saved_desk));
+    AddSavedDeskEntry(ash_test_helper()->saved_desk_test_helper()->desk_model(),
+                      uuid, name, created_time, source, type,
+                      std::move(restore_data));
   }
 
   // Adds a captured desk entry to the desks model.
   void AddEntry(std::unique_ptr<DeskTemplate> saved_desk) {
-    base::RunLoop loop;
-    desk_model()->AddOrUpdateEntry(
-        std::move(saved_desk),
-        base::BindLambdaForTesting(
-            [&](desks_storage::DeskModel::AddOrUpdateEntryStatus status,
-                std::unique_ptr<ash::DeskTemplate> new_entry) {
-              EXPECT_EQ(desks_storage::DeskModel::AddOrUpdateEntryStatus::kOk,
-                        status);
-              loop.Quit();
-            }));
-    loop.Run();
+    AddSavedDeskEntry(ash_test_helper()->saved_desk_test_helper()->desk_model(),
+                      std::move(saved_desk));
   }
 
   // Creates an app_restore::RestoreData object with `num_windows.size()` apps,
@@ -629,9 +618,9 @@ TEST_F(SavedDeskTest, NoAppSplitScreenLabelOnSavedDeskGridShow) {
   OverviewItem* unsnappable_overview_item =
       GetOverviewItemForWindow(unsnappable_window.get());
 
-  // Note: `cannot_snap_widget_` will be created on demand.
-  EXPECT_FALSE(snappable_overview_item->cannot_snap_widget_for_testing());
-  ASSERT_FALSE(unsnappable_overview_item->cannot_snap_widget_for_testing());
+  // Note: Cannot snap widget will be created on demand.
+  EXPECT_FALSE(GetCannotSnapWidget(snappable_overview_item));
+  ASSERT_FALSE(GetCannotSnapWidget(unsnappable_overview_item));
 
   // Snap the extra snappable window to enter split view mode.
   SplitViewController* split_view_controller =
@@ -640,14 +629,14 @@ TEST_F(SavedDeskTest, NoAppSplitScreenLabelOnSavedDeskGridShow) {
   split_view_controller->SnapWindow(
       test_window.get(), SplitViewController::SnapPosition::kPrimary);
   ASSERT_TRUE(split_view_controller->InSplitViewMode());
-  ASSERT_TRUE(unsnappable_overview_item->cannot_snap_widget_for_testing());
-  ui::Layer* unsnappable_layer =
-      unsnappable_overview_item->cannot_snap_widget_for_testing()->GetLayer();
-  EXPECT_EQ(1.f, unsnappable_layer->opacity());
+  views::Widget* cannot_snap_widget =
+      GetCannotSnapWidget(unsnappable_overview_item);
+  ASSERT_TRUE(cannot_snap_widget);
+  EXPECT_EQ(1.f, cannot_snap_widget->GetLayer()->opacity());
 
   // Entering the saved desk grid will hide the unsnappable label.
   ShowSavedDeskLibrary();
-  EXPECT_EQ(0.f, unsnappable_layer->opacity());
+  EXPECT_EQ(0.f, cannot_snap_widget->GetLayer()->opacity());
 }
 
 // Tests when user enter saved desk, a11y alert being sent.

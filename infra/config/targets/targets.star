@@ -432,11 +432,6 @@ targets.console_test_launcher(
 )
 
 targets.console_test_launcher(
-    name = "chrome_cleaner_unittests",
-    label = "//chrome/chrome_cleaner:chrome_cleaner_unittests",
-)
-
-targets.console_test_launcher(
     name = "chrome_elf_unittests",
     label = "//chrome/chrome_elf:chrome_elf_unittests",
 )
@@ -515,6 +510,10 @@ targets.console_test_launcher(
 targets.generated_script(
     name = "chrome_public_wpt",
     label = "//chrome/android:chrome_public_wpt",
+    args = [
+        "--results-directory",
+        "${ISOLATED_OUTDIR}",
+    ],
 )
 
 targets.compile_target(
@@ -583,16 +582,28 @@ targets.generated_script(
 targets.generated_script(
     name = "wpt_tests_isolate",
     label = "//:wpt_tests_isolate",
+    args = [
+        "--results-directory",
+        "${ISOLATED_OUTDIR}",
+    ],
 )
 
 targets.generated_script(
     name = "wpt_tests_isolate_content_shell",
     label = "//:wpt_tests_isolate_content_shell",
+    args = [
+        "--results-directory",
+        "${ISOLATED_OUTDIR}",
+    ],
 )
 
 targets.generated_script(
     name = "wpt_tests_ios",
     label = "//ios/chrome/test/wpt:wpt_tests_ios",
+    args = [
+        "--results-directory",
+        "${ISOLATED_OUTDIR}",
+    ],
 )
 
 targets.compile_target(
@@ -1657,8 +1668,8 @@ targets.generated_script(
 )
 
 targets.generated_script(
-    name = "performance_test_suite_android_clank_chrome",
-    label = "//chrome/test:performance_test_suite_android_clank_chrome",
+    name = "performance_test_suite_android_clank_monochrome",
+    label = "//chrome/test:performance_test_suite_android_clank_monochrome",
 )
 
 targets.generated_script(
@@ -1932,6 +1943,10 @@ targets.console_test_launcher(
 targets.generated_script(
     name = "system_webview_wpt",
     label = "//android_webview/test:system_webview_wpt",
+    args = [
+        "--results-directory",
+        "${ISOLATED_OUTDIR}",
+    ],
 )
 
 targets.script(

@@ -20,7 +20,6 @@
 #include "base/system/sys_info.h"
 #include "base/task/single_thread_task_runner.h"
 #include "base/timer/elapsed_timer.h"
-#include "chrome/browser/ash/login/active_directory_migration_utils.h"
 #include "chrome/browser/ash/login/configuration_keys.h"
 #include "chrome/browser/ash/login/enrollment/enrollment_uma.h"
 #include "chrome/browser/ash/login/screen_manager.h"
@@ -38,7 +37,6 @@
 #include "chrome/browser/ash/policy/handlers/tpm_auto_update_mode_policy_handler.h"
 #include "chrome/browser/browser_process.h"
 #include "chrome/browser/browser_process_platform_part.h"
-#include "chrome/browser/lifetime/application_lifetime.h"
 #include "chrome/browser/lifetime/browser_shutdown.h"
 #include "chrome/browser/ui/webui/ash/login/error_screen_handler.h"
 #include "chromeos/ash/components/dbus/dbus_thread_manager.h"
@@ -83,21 +81,6 @@ constexpr char kUserActionSkipDialogConfirmation[] = "skip-confirmation";
 
 // Max number of retries to check install attributes state.
 constexpr int kMaxInstallAttributesStateCheckRetries = 60;
-
-bool ShouldAttemptRestart() {
-  // Restart browser to switch from DeviceCloudPolicyManagerAsh to
-  // DeviceActiveDirectoryPolicyManager.
-  if (g_browser_process->platform_part()
-          ->browser_policy_connector_ash()
-          ->IsActiveDirectoryManaged()) {
-    // TODO(tnagel): Refactor BrowserPolicyConnectorAsh so that device
-    // policy providers are only registered after enrollment has finished and
-    // thus the correct one can be picked without restarting the browser.
-    return true;
-  }
-
-  return false;
-}
 
 // Returns the manager of the domain (either the domain name or the email of the
 // admin of the domain) after enrollment, or an empty string.
@@ -168,10 +151,6 @@ EnrollmentScreen::EnrollmentScreen(base::WeakPtr<EnrollmentScreenView> view,
   retry_policy_.entry_lifetime_ms = -1;
   retry_policy_.always_use_initial_delay = true;
   retry_backoff_ = std::make_unique<net::BackoffEntry>(&retry_policy_);
-
-  ad_migration_utils::CheckChromadMigrationOobeFlow(
-      base::BindOnce(&EnrollmentScreen::UpdateChromadMigrationOobeFlow,
-                     weak_ptr_factory_.GetWeakPtr()));
 
   network_state_informer_ = base::MakeRefCounted<NetworkStateInformer>();
   network_state_informer_->Init();
@@ -327,10 +306,10 @@ void EnrollmentScreen::UpdateFlowType() {
     if (context()->enrollment_preference_ ==
         WizardContext::EnrollmentPreference::kKiosk) {
       view_->SetGaiaButtonsType(
-          EnrollmentScreenView::GaiaButtonsType::kKioskPreffered);
+          EnrollmentScreenView::GaiaButtonsType::kKioskPreferred);
     } else {
       view_->SetGaiaButtonsType(
-          EnrollmentScreenView::GaiaButtonsType::kEnterprisePreffered);
+          EnrollmentScreenView::GaiaButtonsType::kEnterprisePreferred);
     }
   }
 }
@@ -583,9 +562,6 @@ void EnrollmentScreen::OnConfirmationClosed() {
   // wrapped in a callback bound to a weak pointer from `weak_ptr_factory_` - in
   // either case, passing exit_callback_ directly should be safe.
   ClearAuth(base::BindRepeating(exit_callback_, Result::COMPLETED));
-
-  if (ShouldAttemptRestart())
-    chrome::AttemptRestart();
 }
 
 void EnrollmentScreen::OnAuthError(const GoogleServiceAuthError& error) {
@@ -826,13 +802,8 @@ void EnrollmentScreen::OnUserAction(const base::Value::List& args) {
   BaseScreen::OnUserAction(args);
 }
 
-void EnrollmentScreen::UpdateChromadMigrationOobeFlow(bool exists) {
-  is_chromad_migration_oobe_flow_ = exists;
-}
-
 bool EnrollmentScreen::IsAutomaticEnrollmentFlow() {
-  return is_chromad_migration_oobe_flow_ ||
-         WizardController::IsZeroTouchHandsOffOobeFlow() || is_rollback_flow_;
+  return WizardController::IsZeroTouchHandsOffOobeFlow() || is_rollback_flow_;
 }
 
 bool EnrollmentScreen::IsEnrollmentScreenHiddenByError() {

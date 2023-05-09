@@ -822,7 +822,6 @@ TEST_F(OmniboxEditModelPopupTest, PopupStepSelection) {
            Selection(2, Selection::KEYWORD_MODE),
            Selection(3, Selection::NORMAL),
            Selection(3, Selection::KEYWORD_MODE),
-           Selection(3, Selection::FOCUSED_BUTTON_TAB_SWITCH),
            Selection(3, Selection::FOCUSED_BUTTON_REMOVE_SUGGESTION),
            Selection(4, Selection::FOCUSED_BUTTON_HEADER),
            Selection(4, Selection::NORMAL),
@@ -839,7 +838,6 @@ TEST_F(OmniboxEditModelPopupTest, PopupStepSelection) {
            Selection(4, Selection::NORMAL),
            Selection(4, Selection::FOCUSED_BUTTON_HEADER),
            Selection(3, Selection::FOCUSED_BUTTON_REMOVE_SUGGESTION),
-           Selection(3, Selection::FOCUSED_BUTTON_TAB_SWITCH),
            Selection(3, Selection::KEYWORD_MODE),
            Selection(3, Selection::NORMAL),
            Selection(2, Selection::KEYWORD_MODE),
@@ -948,13 +946,11 @@ TEST_F(OmniboxEditModelPopupTest, PopupStepSelectionWithActions) {
     matches.push_back(match);
   }
   // The second match has a normal action.
-  matches[1].actions.push_back(
-      base::MakeRefCounted<OmniboxAction>(OmniboxAction::LabelStrings(), GURL(),
-                                          /*takes_over_match=*/false));
+  matches[1].actions.push_back(base::MakeRefCounted<OmniboxAction>(
+      OmniboxAction::LabelStrings(), GURL()));
   // The fourth match has an action that takes over the match.
-  matches[3].actions.push_back(
-      base::MakeRefCounted<OmniboxAction>(OmniboxAction::LabelStrings(), GURL(),
-                                          /*takes_over_match=*/true));
+  matches[3].takeover_action = base::MakeRefCounted<OmniboxAction>(
+      OmniboxAction::LabelStrings(), GURL());
 
   auto* result = &model()->autocomplete_controller()->result_;
   result->AppendMatches(matches);
@@ -1112,9 +1108,8 @@ TEST_F(OmniboxEditModelPopupTest, TestFocusFixing) {
   EXPECT_EQ(Selection::NORMAL, model()->GetPopupSelection().state);
 
   // Focus the selection.
-  model()->SetPopupSelection(
-      Selection(0, Selection::FOCUSED_BUTTON_TAB_SWITCH));
-  EXPECT_EQ(Selection::FOCUSED_BUTTON_TAB_SWITCH,
+  model()->SetPopupSelection(Selection(0, Selection::FOCUSED_BUTTON_ACTION));
+  EXPECT_EQ(Selection::FOCUSED_BUTTON_ACTION,
             model()->GetPopupSelection().state);
 
   // Adding a match at end won't change that we selected first suggestion, so
@@ -1127,7 +1122,7 @@ TEST_F(OmniboxEditModelPopupTest, TestFocusFixing) {
   result->SortAndCull(input, /*template_url_service=*/nullptr,
                       triggered_feature_service());
   model()->OnPopupResultChanged();
-  EXPECT_EQ(Selection::FOCUSED_BUTTON_TAB_SWITCH,
+  EXPECT_EQ(Selection::FOCUSED_BUTTON_ACTION,
             model()->GetPopupSelection().state);
 
   // Changing selection should change focused state.
@@ -1137,7 +1132,7 @@ TEST_F(OmniboxEditModelPopupTest, TestFocusFixing) {
   // Adding a match at end will reset selection to first, so should change
   // selected line, and thus focus.
   model()->SetPopupSelection(Selection(model()->GetPopupSelection().line,
-                                       Selection::FOCUSED_BUTTON_TAB_SWITCH));
+                                       Selection::FOCUSED_BUTTON_ACTION));
   matches[0].relevance = 999;
   matches[0].contents = u"match3.com";
   matches[0].destination_url = GURL("http://match3.com");
@@ -1151,7 +1146,7 @@ TEST_F(OmniboxEditModelPopupTest, TestFocusFixing) {
   // Prepending a match won't change selection, but since URL is different,
   // should clear the focus state.
   model()->SetPopupSelection(Selection(model()->GetPopupSelection().line,
-                                       Selection::FOCUSED_BUTTON_TAB_SWITCH));
+                                       Selection::FOCUSED_BUTTON_ACTION));
   matches[0].relevance = 1100;
   matches[0].contents = u"match4.com";
   matches[0].destination_url = GURL("http://match4.com");
@@ -1164,7 +1159,7 @@ TEST_F(OmniboxEditModelPopupTest, TestFocusFixing) {
 
   // Selecting |kNoMatch| should clear focus.
   model()->SetPopupSelection(Selection(model()->GetPopupSelection().line,
-                                       Selection::FOCUSED_BUTTON_TAB_SWITCH));
+                                       Selection::FOCUSED_BUTTON_ACTION));
   model()->SetPopupSelection(Selection(Selection::kNoMatch));
   model()->OnPopupResultChanged();
   EXPECT_EQ(Selection::NORMAL, model()->GetPopupSelection().state);

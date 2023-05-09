@@ -658,25 +658,6 @@ experimental domain Audits
       boolean isWarning
       SharedArrayBufferIssueType type
 
-  type TwaQualityEnforcementViolationType extends string
-    enum
-      kHttpError
-      kUnavailableOffline
-      kDigitalAssetLinks
-
-  type TrustedWebActivityIssueDetails extends object
-    properties
-      # The url that triggers the violation.
-      string url
-      TwaQualityEnforcementViolationType violationType
-      optional integer httpStatusCode
-      # The package name of the Trusted Web Activity client app. This field is
-      # only used when violation type is kDigitalAssetLinks.
-      optional string packageName
-      # The signature of the Trusted Web Activity client app. This field is only
-      # used when violation type is kDigitalAssetLinks.
-      optional string signature
-
   type LowTextContrastIssueDetails extends object
     properties
       DOM.BackendNodeId violatingNodeId
@@ -707,8 +688,6 @@ experimental domain Audits
       # TODO(apaseltiner): Rename this to InvalidRegisterSourceHeader
       InvalidHeader
       InvalidRegisterTriggerHeader
-      # TODO(apaseltiner): Remove this issue once DevTools stops referencing it.
-      InvalidEligibleHeader
       SourceAndTriggerHeaders
       SourceIgnored
       TriggerIgnored
@@ -857,7 +836,6 @@ experimental domain Audits
       HeavyAdIssue
       ContentSecurityPolicyIssue
       SharedArrayBufferIssue
-      TrustedWebActivityIssue
       LowTextContrastIssue
       CorsIssue
       AttributionReportingIssue
@@ -880,7 +858,6 @@ experimental domain Audits
       optional HeavyAdIssueDetails heavyAdIssueDetails
       optional ContentSecurityPolicyIssueDetails contentSecurityPolicyIssueDetails
       optional SharedArrayBufferIssueDetails sharedArrayBufferIssueDetails
-      optional TrustedWebActivityIssueDetails twaQualityEnforcementDetails
       optional LowTextContrastIssueDetails lowTextContrastIssueDetails
       optional CorsIssueDetails corsIssueDetails
       optional AttributionReportingIssueDetails attributionReportingIssueDetails
@@ -945,6 +922,30 @@ experimental domain Audits
   event issueAdded
     parameters
       InspectorIssue issue
+
+# Defines commands and events for Autofill.
+experimental domain Autofill
+  type CreditCard extends object
+    properties
+      # 16-digit credit card number.
+      string number
+      # Name of the credit card owner.
+      string name
+      # 2-digit expiry month.
+      string expiryMonth
+      # 4-digit expiry year.
+      string expiryYear
+      # 3-digit card verification code.
+      string cvc
+
+  # Trigger autofill on a form identified by the fieldId.
+  # If the field and related form cannot be autofilled, returns an error.
+  command trigger
+    parameters
+      # Identifies a field that serves as an anchor for autofill.
+      DOM.BackendNodeId fieldId
+      # Credit card information to fill out the form. Credit card data is not saved.
+      CreditCard card
 
 # Defines events for background web platform features.
 experimental domain BackgroundService

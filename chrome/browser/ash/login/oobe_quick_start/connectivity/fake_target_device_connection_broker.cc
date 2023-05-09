@@ -6,11 +6,11 @@
 
 #include "base/functional/callback_helpers.h"
 #include "base/memory/weak_ptr.h"
-#include "chrome/browser/ash/login/oobe_quick_start/connectivity/fake_quick_start_decoder.h"
 #include "chrome/browser/ash/login/oobe_quick_start/connectivity/random_session_id.h"
 #include "chrome/browser/ash/login/oobe_quick_start/connectivity/target_device_connection_broker.h"
 #include "chrome/browser/nearby_sharing/fake_nearby_connection.h"
 #include "chrome/browser/nearby_sharing/public/cpp/nearby_connection.h"
+#include "chromeos/ash/components/quick_start/fake_quick_start_decoder.h"
 #include "chromeos/ash/services/nearby/public/mojom/quick_start_decoder.mojom.h"
 
 namespace ash::quick_start {
@@ -41,7 +41,8 @@ FakeTargetDeviceConnectionBroker::Factory::~Factory() = default;
 std::unique_ptr<TargetDeviceConnectionBroker>
 FakeTargetDeviceConnectionBroker::Factory::CreateInstance(
     base::WeakPtr<NearbyConnectionsManager> nearby_connections_manager,
-    RandomSessionId session_id) {
+    mojo::SharedRemote<mojom::QuickStartDecoder> quick_start_decoder,
+    bool is_resume_after_update) {
   auto connection_broker = std::make_unique<FakeTargetDeviceConnectionBroker>();
   connection_broker->set_feature_support_status(
       initial_feature_support_status_);
@@ -103,7 +104,11 @@ void FakeTargetDeviceConnectionBroker::AuthenticateConnection(
       .secondary_shared_secret = kSecondarySharedSecret};
   connection_factory_ = std::make_unique<Connection::Factory>();
   connection_ = connection_factory_->Create(
-      nearby_connection, session_context, base::DoNothing(),
+      nearby_connection, session_context,
+      mojo::SharedRemote<ash::quick_start::mojom::QuickStartDecoder>(
+          fake_quick_start_decoder_->GetRemote()),
+      base::BindOnce(&FakeTargetDeviceConnectionBroker::OnConnectionClosed,
+                     weak_ptr_factory_.GetWeakPtr()),
       base::BindOnce(
           &FakeTargetDeviceConnectionBroker::OnConnectionAuthenticated,
           weak_ptr_factory_.GetWeakPtr()));

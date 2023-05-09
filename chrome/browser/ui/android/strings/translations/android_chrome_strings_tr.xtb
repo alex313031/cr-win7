@@ -30,7 +30,6 @@ Sadece parolanıza sahip olan kişiler şifrelenmiş verilerinizi okuyabilir. Pa
 <translation id="1145536944570833626">Mevcut verileri silin.</translation>
 <translation id="1149401351239820326">Son kullanım tarihinin ayı</translation>
 <translation id="1150263420752757504"><ph name="APP_NAME" />, Chrome'da açılacak. Devam ederek <ph name="BEGIN_LINK1" />Google Hizmet Şartları<ph name="END_LINK1" /> ile <ph name="BEGIN_LINK2" />Google Chrome ve ChromeOS Ek Hizmet Şartları<ph name="END_LINK2" />'nı kabul etmiş olursunuz.</translation>
-<translation id="1154704303112745282">Sayfa çevrimdışı kullanılamaz: <ph name="VIOLATED_URL" /></translation>
 <translation id="1173894706177603556">Yeniden adlandır</translation>
 <translation id="1177863135347784049">Özel</translation>
 <translation id="1181037720776840403">Kaldır</translation>
@@ -151,6 +150,7 @@ Belirli bir siteye ait veya tüm tarama geçmişinizi sildiğinizde bununla ili�
 <translation id="1810845389119482123">İlk senkronizasyon kurulumu tamamlanmadı</translation>
 <translation id="1829244130665387512">Sayfada bul</translation>
 <translation id="1832459821645506983">Evet, kabul ediyorum</translation>
+<translation id="185383612275551373">Google'daki en alakalı içeriklere ulaşmak için senkronize edin</translation>
 <translation id="1854311313115643875">Reklam ölçümü, denemeler açıkken ziyaret ettiğiniz sitelerin Chrome'dan bilgi istemesine olanak tanır. Bu bilgiler de sitenin, reklamlarının performansını ölçmesine yardımcı olur. Reklam ölçümü, siteler arasında mümkün olduğunca az bilgi aktararak siteler arası izlemeyi kısıtlar.
 
 Belirli bir siteye ait veya tüm tarama geçmişinizi sildiğinizde bununla ilişkilendirilmiş ölçüm bilgilerini de silmiş olursunuz. <ph name="BEGIN_LINK" />Tarama geçmişinize<ph name="END_LINK" /> bakın.</translation>
@@ -242,7 +242,6 @@ Belirli bir siteye ait veya tüm tarama geçmişinizi sildiğinizde bununla ili�
 <translation id="2386938421315164605">Konuları gizle ve göster</translation>
 <translation id="2390510615457643724"><ph name="FILE_NAME" /><ph name="FILE_SIZE" /> dosyasını tekrar indirmek istiyor musunuz?</translation>
 <translation id="2394602618534698961">İndirdiğiniz dosyalar burada görünür</translation>
-<translation id="2407481962792080328">Google Hesabınızda oturum açtığınızda bu özellik devreye girer</translation>
 <translation id="2410754283952462441">Bir hesap seçin</translation>
 <translation id="2414886740292270097">Koyu</translation>
 <translation id="2426805022920575512">Başka hesap seç</translation>
@@ -299,6 +298,7 @@ Gizlilik jetonları, web'deki gizliliği artırırken kim olduğunuzu bulmak iç
 <translation id="265156376773362237">Standart önceden yükleme</translation>
 <translation id="2656405586795711023">Web uygulamaları</translation>
 <translation id="2669454659051515572">Bu cihazı kullanan herkes indirilen dosyaları görebilir</translation>
+<translation id="2688382350024736268">Chrome şu anda sitelerin gösterdikleri reklamların performansını ölçmesine yardımcı olmak için siteler ve uygulamalar arasında çok sınırlı bilgi (ör. bir reklamın size gösterildiği saat) paylaşıyor.</translation>
 <translation id="2702516483241149200">Yeni: bu metne kaydıran bir bağlantı paylaşın</translation>
 <translation id="2707726405694321444">Sayfayı yenile</translation>
 <translation id="271033894570825754">Yeni</translation>
@@ -693,7 +693,6 @@ Diğer Google hizmetlerinden yapılan aramalar ve etkinlikler gibi Google hesab�
 Bu ayarı değiştirmek için <ph name="BEGIN_LINK" />senkronizasyonu sıfırlayın<ph name="END_LINK" /></translation>
 <translation id="4807098396393229769">Kartın üzerindeki ad</translation>
 <translation id="481574578487123132">Bağlı cihazlar</translation>
-<translation id="4818017973810341238">Digital Assert Links, <ph name="VIOLATED_URL" /> adresinde doğrulanamadı</translation>
 <translation id="4826163340425232009">Oturum açma alt sayfası.</translation>
 <translation id="4831037795716408498">İçeriği indir</translation>
 <translation id="4834007576107377210">Arama geçmişinizi silmek için arama motorunuzun bununla ilgili talimatlarını (varsa) inceleyin</translation>
@@ -847,6 +846,7 @@ Bu ayarı değiştirmek için <ph name="BEGIN_LINK" />senkronizasyonu sıfırlay
 <translation id="562289928968387744">Tepkileri yönetin</translation>
 <translation id="5626134646977739690">Adı:</translation>
 <translation id="5628604359369369630">Okunmadı; Çevrimdışı kullanılabilir</translation>
+<translation id="5635091213277904818">Chrome 30 günden daha uzun süre önce ziyaret edilmiş siteleri otomatik olarak siler. Tekrar ziyaret ettiğiniz siteler yine listede görünebilir. Alternatif olarak bir sitenin size reklam önermesini de engelleyebilirsiniz.</translation>
 <translation id="5639724618331995626">Tüm sitelere izin ver</translation>
 <translation id="5641456720590409793"><ph name="BEGIN_LINK1" />Arama geçmişi<ph name="END_LINK1" /> ve <ph name="BEGIN_LINK2" />diğer etkinlik biçimleri<ph name="END_LINK2" /> Google Hesabınıza kaydedilmiş olabilir</translation>
 <translation id="564667659802381754">Gizlilik Rehberi <ph name="BEGIN_NEW" />Yeni<ph name="END_NEW" /></translation>
@@ -888,7 +888,6 @@ Bu ayarı değiştirmek için <ph name="BEGIN_LINK" />senkronizasyonu sıfırlay
 <translation id="5833984609253377421">Bağlantıyı paylaş</translation>
 <translation id="5834764604050996579">QR Kodu taramak için Chrome'un kameranızı kullanmasına izin verin</translation>
 <translation id="5839058148541733625">Chrome Dinozor</translation>
-<translation id="5842437907245493289">Takip edilen ürünlerinizi yer işaretlerindeki klasör simgesinden düzenleyin</translation>
 <translation id="5853623416121554550">duraklatıldı</translation>
 <translation id="5854512288214985237">Google'a hiçbir istatistik veya kilitlenme raporu gönderilmez</translation>
 <translation id="5855546874025048181">Hassaslaştır: <ph name="REFINE_TEXT" /></translation>
@@ -990,7 +989,6 @@ Bu ayarı değiştirmek için <ph name="BEGIN_LINK" />senkronizasyonu sıfırlay
 <translation id="6395288395575013217">BAĞLANTI</translation>
 <translation id="6397616442223433927">İnternete yeniden bağlanıldı</translation>
 <translation id="6401458660421980302">Bu sekmeyi başka bir cihaza göndermek için ilgili cihazda Chrome'da oturum açın.</translation>
-<translation id="6402652558933147609"><ph name="VIOLATED_URL" /> adresinde <ph name="ERROR_CODE" /></translation>
 <translation id="6404511346730675251">Yer işaretini düzenle</translation>
 <translation id="6406506848690869874">Senkronizasyon</translation>
 <translation id="6407224748847589805">Bilgisayarınıza bağlanılamıyor. Başka bir doğrulama seçeneğini deneyin.</translation>
@@ -1173,6 +1171,7 @@ Bu ayarı değiştirmek için <ph name="BEGIN_LINK" />senkronizasyonu sıfırlay
 <translation id="7291910923717764901">Bu sayfa için resim açıklamaları eklendi</translation>
 <translation id="7293429513719260019">Dil seç</translation>
 <translation id="729975465115245577">Cihazınızda şifreler dosyasını depolayacak bir uygulama yok.</translation>
+<translation id="7304072650267745798">Android cihazınızda benzer bir ayar olabilir. Chrome'da ve Android cihazınızda bu ayar etkinse bir şirket, ziyaret ettiğiniz web siteleri ve kullandığınız uygulamalardaki reklamların etkinliğini ölçebilir.</translation>
 <translation id="7304873321153398381">Çevrimdışı. Chrome, şifrelerinizi kontrol edemiyor.</translation>
 <translation id="7313188324932846546">Senkronizasyonu ayarlamak için dokunun</translation>
 <translation id="7332075081379534664">Oturum açma başarılı oldu</translation>
@@ -1255,6 +1254,7 @@ Bu ayarı değiştirmek için <ph name="BEGIN_LINK" />senkronizasyonu sıfırlay
 <translation id="7682724950699840886">Şu ipuçlarını deneyin: Cihazınızda yeterli alan bulunduğundan emin olun, daha sonra dışa aktarmayı tekrar deneyin.</translation>
 <translation id="7686086654630106285">Site tarafından önerilen reklamlar hakkında daha fazla bilgi</translation>
 <translation id="768618399695552958">Ziyaret ettiğiniz sayfaların bazıları önceden yüklenir. Bir Google sitesinden bağlantı verildiğinde sayfalar Google sunucuları aracılığıyla önceden yüklenebilir.</translation>
+<translation id="7690596512217303514">Cihazınız Chrome'u açamadı. Sorunu düzeltmek için uygulama mağazanızdan en son Chrome güncellemesini indirin.</translation>
 <translation id="7691043218961417207">Takip edilecek içerikleri keşfedin</translation>
 <translation id="7697383401610880082">Sürükleme tutamacı</translation>
 <translation id="7698359219371678927"><ph name="APP_NAME" /> adlı uygulamada e-posta oluşturun</translation>
@@ -1263,6 +1263,7 @@ Bu ayarı değiştirmek için <ph name="BEGIN_LINK" />senkronizasyonu sıfırlay
 <translation id="7709918231054955894">Tüm sekmelerinize ulaşın</translation>
 <translation id="772434085369393266">Gezinmeleri HTTPS'ye yükseltip bu uzantıyı desteklemeyen siteleri yüklemeden önce sizi uyarır. Gelişmiş Koruma'yı etkinleştirdiğiniz için bu ayarı değiştiremezsiniz.</translation>
 <translation id="7725024127233776428">Yer işareti koyduğunuz sayfalar burada görünür</translation>
+<translation id="7733878270780732638">Cihazda yeterli alan yok.</translation>
 <translation id="7757787379047923882">Metin, <ph name="DEVICE_NAME" /> cihazından paylaşıldı</translation>
 <translation id="7762668264895820836">SD Kart <ph name="SD_CARD_NUMBER" /></translation>
 <translation id="7764225426217299476">Adres ekle</translation>
@@ -1365,6 +1366,7 @@ Bu ayarı değiştirmek için <ph name="BEGIN_LINK" />senkronizasyonu sıfırlay
 <translation id="8209050860603202033">Resmi aç</translation>
 <translation id="8216351761227087153">İzle</translation>
 <translation id="8218622182176210845">Hesabınızı yönetin</translation>
+<translation id="8221401890884589479">İstemediğiniz siteleri engelleyebilirsiniz. Chrome 30 günden daha uzun süre önce ziyaret edilmiş siteleri de otomatik olarak siler. <ph name="BEGIN_LINK" />Daha fazla bilgi<ph name="END_LINK" /></translation>
 <translation id="8223642481677794647">Akış kartı menüsü</translation>
 <translation id="8236097722223016103">Yer işaretlerine ekle</translation>
 <translation id="8250920743982581267">Dokümanlar</translation>

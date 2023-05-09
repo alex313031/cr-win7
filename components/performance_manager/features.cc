@@ -102,9 +102,26 @@ const base::FeatureParam<base::TimeDelta>
         &kMemorySavingsReportingImprovements,
         "expanded_high_efficiency_chip_discarded_duration", base::Hours(6)};
 
-const base::FeatureParam<int> kDiscardedTabTreatmenOption{
+const base::FeatureParam<int> kHighEfficiencyChartPmf25PercentileBytes{
+    &kMemorySavingsReportingImprovements,
+    "high_efficiency_chart_pmf_25_percentile_bytes", 62 * 1024 * 1024};
+const base::FeatureParam<int> kHighEfficiencyChartPmf50PercentileBytes{
+    &kMemorySavingsReportingImprovements,
+    "high_efficiency_chart_pmf_50_percentile_bytes", 112 * 1024 * 1024};
+const base::FeatureParam<int> kHighEfficiencyChartPmf75PercentileBytes{
+    &kMemorySavingsReportingImprovements,
+    "high_efficiency_chart_pmf_75_percentile_bytes", 197 * 1024 * 1024};
+
+const base::FeatureParam<double> kDiscardedTabTreatmentOpacity{
+    &kDiscardedTabTreatment, "discard_tab_treatment_opacity", 0.3};
+
+const base::FeatureParam<int> kDiscardedTabTreatmentOption{
     &kDiscardedTabTreatment, "discard_tab_treatment_option",
     static_cast<int>(DiscardTabTreatmentOptions::kFadeFullsizedFavicon)};
+
+BASE_FEATURE(kUseDeviceBatterySaverChromeOS,
+             "UseDeviceBatterySaverChromeOS",
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 #endif
 

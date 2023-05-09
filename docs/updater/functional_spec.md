@@ -209,6 +209,10 @@ To maintain backwards compatibility with
 [Keystone](https://code.google.com/archive/p/update-engine/), the updater
 installs small versions of those programs that implement a subset of their APIs.
 
+The updater also imports the properties and state of the apps that have been
+registered with Omaha and Keystone, so they show up as registered with the
+updater.
+
 #### Keystone Shims
 The updater installs a Keystone-like application that contains these shims:
 
@@ -602,19 +606,29 @@ for any policy value. When a policy value is configured in multiple providers,
 the service always returns the first active valid value.
 
 The policy searching order:
-#### Windows
+##### Windows
 * Policy dictionary defined in
  [External constants](#external-constants-overrides)(testing overrides)
 * Group Policy
 * Device Management policy
 * Policy from default value provider
 
-#### macOS
+##### macOS
 * Policy dictionary defined in
  [External constants](#external-constants-overrides)(testing overrides)
 * Device management policy
 * Policy from Managed Preferences
 * Policy from default value provider
+
+#### COM interfaces (Windows only)
+The updater exposes
+[IPolicyStatus3](https://source.chromium.org/chromium/chromium/src/+/main:chrome/updater/app/server/win/updater_legacy_idl.template;l=555?q=IPolicyStatus3&ss=chromium)
+and the corresponding `IDispatch` implementation to provide clients such as
+Chrome the ability to query the updater enterprise policies.
+
+A client can `CoCreateInstance` the `PolicyStatusUserClass` or the
+`PolicyStatusSystemClass` to get the corresponding policy status object and
+query it via the `IPolicyStatus3` methods.
 
 #### Deploying enterprise applications via updater policy
 For each application that needs to be deployed via the updater, the policy for
@@ -925,10 +939,13 @@ any piece of software it manages is permitted to send usage stats.
 
 #### Windows:
 *   Applications enable usage stats by writing:
-    `HKCU\SOFTWARE\{Company}\Update\ClientState\{APPID}` → usagestats (DWORD): 1
-    or
+    `HKCU\SOFTWARE\{Company}\Update\ClientState\{APPID}` → usagestats
+    (DWORD): 1 for user install,
+    and either
     `HKLM\SOFTWARE\{Company}\Update\ClientStateMedium\{APPID}` → usagestats
-    (DWORD): 1
+    (DWORD): 1 or
+    `HKLM\SOFTWARE\{Company}\Update\ClientState\{APPID}` → usagestats
+    (DWORD): 1 for system install.
 *   Applications rescind this permission by writing a value of 0.
 
 #### macOS:

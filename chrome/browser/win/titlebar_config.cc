@@ -41,3 +41,7 @@ bool ShouldCustomDrawSystemTitlebar() {
   return (!custom_titlebar_disabled &&
          base::win::GetVersion() >= base::win::Version::WIN10) || !result;
 }
+
+bool SystemTitlebarSupportsDarkMode() {
+  return base::win::GetVersion() >= base::win::Version::WIN11;
+}

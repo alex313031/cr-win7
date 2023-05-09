@@ -119,6 +119,12 @@
 namespace content {
 namespace {
 
+// TODO(https://crbug.com/1439948): Remove this base::Feature kill switch once
+// the feature safely rolls out.
+BASE_FEATURE(kUpdateSessionHistoryIndexBeforeNavigationStateChanged,
+             "UpdateSessionHistoryIndexBeforeNavigationStateChanged",
+             base::FEATURE_ENABLED_BY_DEFAULT);
+
 // Invoked when entries have been pruned, or removed. For example, if the
 // current entries are [google, digg, yahoo], with the current entry google,
 // and the user types in cnet, then digg and yahoo are pruned.
@@ -1176,9 +1182,14 @@ void NavigationControllerImpl::GoToOffsetFromRenderer(
     RenderFrameHostImpl* initiator_rfh,
     absl::optional<blink::scheduler::TaskAttributionId>
         soft_navigation_heuristics_task_id) {
-  // Note: This is actually reached in unit tests.
-  if (!CanGoToOffset(offset))
+  // If the renderer sent an out-of-bounds offset, cancel and notify the
+  // renderer.
+  if (!CanGoToOffset(offset)) {
+    initiator_rfh->GetAssociatedLocalFrame()->TraverseCancelled(
+        /*navigation_api_key=*/std::string(),
+        blink::mojom::TraverseCancelledReason::kNotFound);
     return;
+  }
 
   GoToIndex(GetIndexForOffset(offset), initiator_rfh,
             soft_navigation_heuristics_task_id,
@@ -2178,6 +2189,16 @@ void NavigationControllerImpl::RendererDidNavigateToExistingEntry(
   if (ui::PageTransitionIsRedirect(params.transition) && !is_same_document)
     entry->GetFavicon() = FaviconStatus();
 
+  // Update the last committed index to reflect the committed entry. Do this
+  // before calling DiscardNonCommittedEntriesWithCommitDetails, so that the
+  // delegate sees the correct committed index when notified of navigation
+  // state changes. (Otherwise CanGoBack may incorrectly return true, as in
+  // https://crbug.com/1439948.)
+  if (base::FeatureList::IsEnabled(
+          kUpdateSessionHistoryIndexBeforeNavigationStateChanged)) {
+    last_committed_entry_index_ = GetIndexOfEntry(entry);
+  }
+
   // We should also usually discard the pending entry if it corresponds to a
   // different navigation, since that one is now likely canceled.  In rare
   // cases, we leave the pending entry for another navigation in place when we
@@ -2189,8 +2210,12 @@ void NavigationControllerImpl::RendererDidNavigateToExistingEntry(
   if (!keep_pending_entry)
     DiscardNonCommittedEntriesWithCommitDetails(commit_details);
 
-  // Update the last committed index to reflect the committed entry.
-  last_committed_entry_index_ = GetIndexOfEntry(entry);
+  if (!base::FeatureList::IsEnabled(
+          kUpdateSessionHistoryIndexBeforeNavigationStateChanged)) {
+    // Update the last committed index to reflect the committed entry.
+    // (This is legacy behavior, in case the kill-switch needs to be used.)
+    last_committed_entry_index_ = GetIndexOfEntry(entry);
+  }
 }
 
 void NavigationControllerImpl::RendererDidNavigateNewSubframe(

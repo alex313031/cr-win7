@@ -16,6 +16,7 @@
 #import "ios/chrome/browser/ui/authentication/signin_earl_grey.h"
 #import "ios/chrome/browser/ui/authentication/signin_earl_grey_ui_test_util.h"
 #import "ios/chrome/browser/ui/infobars/banners/infobar_banner_constants.h"
+#import "ios/chrome/browser/ui/passwords/bottom_sheet/password_suggestion_bottom_sheet_app_interface.h"
 #import "ios/chrome/grit/ios_strings.h"
 #import "ios/chrome/test/earl_grey/chrome_actions.h"
 #import "ios/chrome/test/earl_grey/chrome_earl_grey.h"
@@ -214,6 +215,10 @@ BOOL WaitForKeyboardToAppear() {
 }
 
 - (void)testShowAccountStorageNoticeBeforeFillingBottomSheet {
+  [PasswordSuggestionBottomSheetAppInterface setUpMockReauthenticationModule];
+  [PasswordSuggestionBottomSheetAppInterface
+      mockReauthenticationModuleExpectedResult:ReauthenticationResult::
+                                                   kSuccess];
   [PasswordManagerAppInterface
       storeCredentialWithUsername:@"user"
                          password:@"password"
@@ -236,8 +241,8 @@ BOOL WaitForKeyboardToAppear() {
                      IDS_IOS_PASSWORDS_ACCOUNT_STORAGE_NOTICE_BUTTON_TEXT))]
       performAction:grey_tap()];
 
-  [ChromeEarlGrey waitForUIElementToAppearWithMatcher:grey_accessibilityID(
-                                                          @"user ••••••••")];
+  [ChromeEarlGrey
+      waitForUIElementToAppearWithMatcher:grey_accessibilityID(@"user")];
 
   [[EarlGrey
       selectElementWithMatcher:grey_accessibilityLabel(l10n_util::GetNSString(

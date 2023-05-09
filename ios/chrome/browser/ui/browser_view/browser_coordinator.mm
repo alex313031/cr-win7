@@ -31,9 +31,6 @@
 #import "ios/chrome/browser/find_in_page/java_script_find_tab_helper.h"
 #import "ios/chrome/browser/follow/follow_browser_agent.h"
 #import "ios/chrome/browser/follow/followed_web_site.h"
-#import "ios/chrome/browser/main/browser.h"
-#import "ios/chrome/browser/main/browser_provider.h"
-#import "ios/chrome/browser/main/browser_provider_interface.h"
 #import "ios/chrome/browser/metrics/tab_usage_recorder_browser_agent.h"
 #import "ios/chrome/browser/ntp/features.h"
 #import "ios/chrome/browser/ntp/new_tab_page_tab_helper.h"
@@ -49,6 +46,9 @@
 #import "ios/chrome/browser/shared/coordinator/default_browser_promo/non_modal_default_browser_promo_scheduler_scene_agent.h"
 #import "ios/chrome/browser/shared/coordinator/layout_guide/layout_guide_util.h"
 #import "ios/chrome/browser/shared/coordinator/scene/scene_state_browser_agent.h"
+#import "ios/chrome/browser/shared/model/browser/browser.h"
+#import "ios/chrome/browser/shared/model/browser/browser_provider.h"
+#import "ios/chrome/browser/shared/model/browser/browser_provider_interface.h"
 #import "ios/chrome/browser/shared/model/browser_state/chrome_browser_state.h"
 #import "ios/chrome/browser/shared/public/commands/activity_service_commands.h"
 #import "ios/chrome/browser/shared/public/commands/application_commands.h"
@@ -850,7 +850,6 @@ enum class ToolbarKind {
   _voiceSearchController =
       ios::provider::CreateVoiceSearchController(self.browser);
 
-  _viewControllerDependencies.prerenderService = prerenderService;
   _viewControllerDependencies.bubblePresenter = _bubblePresenter;
   _viewControllerDependencies.toolbarAccessoryPresenter =
       _toolbarAccessoryPresenter;
@@ -894,10 +893,6 @@ enum class ToolbarKind {
   _viewControllerDependencies.webStateList =
       self.browser->GetWebStateList()->AsWeakPtr();
   _viewControllerDependencies.voiceSearchController = _voiceSearchController;
-  _viewControllerDependencies.secondaryToolbarContainerCoordinator =
-      [[ToolbarContainerCoordinator alloc]
-          initWithBrowser:self.browser
-                     type:ToolbarContainerType::kSecondary];
   _viewControllerDependencies.safeAreaProvider =
       [[SafeAreaProvider alloc] initWithBrowser:self.browser];
   _viewControllerDependencies.pagePlaceholderBrowserAgent =
@@ -945,7 +940,6 @@ enum class ToolbarKind {
 
 // Destroys the browser view controller dependencies.
 - (void)destroyViewControllerDependencies {
-  _viewControllerDependencies.prerenderService = nil;
   _viewControllerDependencies.bubblePresenter = nil;
   _viewControllerDependencies.toolbarAccessoryPresenter = nil;
   _viewControllerDependencies.popupMenuCoordinator = nil;
@@ -965,7 +959,6 @@ enum class ToolbarKind {
   _viewControllerDependencies.browserCoordinatorCommandsHandler = nil;
   _viewControllerDependencies.findInPageCommandsHandler = nil;
   _viewControllerDependencies.voiceSearchController = nil;
-  _viewControllerDependencies.secondaryToolbarContainerCoordinator = nil;
   _viewControllerDependencies.safeAreaProvider = nil;
   _viewControllerDependencies.pagePlaceholderBrowserAgent = nil;
 
@@ -2675,6 +2668,7 @@ enum class ToolbarKind {
 
 #pragma mark - NewTabPageTabHelperDelegate
 
+// TODO(crbug.com/1427128): Have the TabEventsMediator implement this.
 - (void)newTabPageHelperDidChangeVisibility:(NewTabPageTabHelper*)NTPHelper
                                 forWebState:(web::WebState*)webState {
   DCHECK(self.browser);
@@ -2688,16 +2682,15 @@ enum class ToolbarKind {
   }
   NewTabPageCoordinator* NTPCoordinator = self.NTPCoordinator;
   DCHECK(NTPCoordinator);
+  // Handle NTP visibility changes within a web state.
   if (NTPHelper->IsActive()) {
-    // Starting the NTPCoordinator triggers its visibility, so we only
-    // explicitly call `didNavigateToNTP` if the NTP was already started.
-    if (NTPCoordinator.started) {
-      [NTPCoordinator didNavigateToNTP];
-    } else {
+    if (!NTPCoordinator.started) {
       [NTPCoordinator start];
     }
+    [NTPCoordinator didNavigateToNTPInWebState:webState];
   } else {
     [NTPCoordinator didNavigateAwayFromNTP];
+    [NTPCoordinator stopIfNeeded];
   }
   if (self.isActive) {
     [self.viewController displayCurrentTab];

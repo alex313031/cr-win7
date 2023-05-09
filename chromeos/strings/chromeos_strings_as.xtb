@@ -147,7 +147,6 @@
 <translation id="2056550196601855911">IPv4/IPv6</translation>
 <translation id="2080070583977670716">অধিক ছেটিং</translation>
 <translation id="2085089206770112532">ডিছপ্লে’ৰ উজ্জ্বলতা ডাউন</translation>
-<translation id="209751264101900360">কাহিলি পুৱাৰ পৰা আন্ধাৰ হোৱালৈকে - ডাৱৰৰ প্ৰবাহ</translation>
 <translation id="2102231663024125441">পাঠ সম্পাদনা</translation>
 <translation id="2105810540595158374">ডিভাইচটো এটা গে’ম নিয়ন্ত্ৰক।</translation>
 <translation id="2119172414412204879"><ph name="BOARD_NAME" />, সংস্কৰণ <ph name="MILESTONE_VERSION" /></translation>
@@ -293,6 +292,7 @@
 <translation id="3484914941826596830">ফাৰ্মৱেৰটো আপডে’ট হৈ থকাৰ সময়ত, এই বাহ্যিক ডিভাইচটো আনপ্লাগ অথবা আপোনাৰ কম্পিউটাৰটো শ্বাট ডাউন নকৰিব। আপুনি এই ৱিণ্ড’খন মিনিমাইজ কৰিব পাৰে। এই আপডে’টটোৰ বাবে কেইমিনিটমান সময় লাগিব পাৰে আৰু এই সময়খিনিত আপোনাৰ বাহ্যিক ডিভাইচটোৱে কাম নকৰিব পাৰে।</translation>
 <translation id="3486220673238053218">সংজ্ঞা</translation>
 <translation id="3488065109653206955">আংশিকভাৱে সক্ৰিয় কৰা হৈছে</translation>
+<translation id="3502426834823382181">আটাইবোৰ এপ্‌ চাওক</translation>
 <translation id="3510890413042482857"><ph name="BEGIN_LINK1" />কাৰ্যদক্ষতাৰ ট্ৰে’চ ডেটা<ph name="END_LINK1" /> পঠিয়াওক</translation>
 <translation id="3517001332549868749">ChromeOSৰ আপডে’ট</translation>
 <translation id="3527036260304016759">বিফল হৈছে - অজ্ঞাত আসোঁৱাহ</translation>
@@ -346,7 +346,6 @@
 <translation id="3967822245660637423">ডাউনল’ড সম্পূৰ্ণ হ’ল</translation>
 <translation id="3969602104473960991">ChromeOSৰ পাছৱৰ্ড আপডে’ট কৰা হৈছে</translation>
 <translation id="397105322502079400">গণনা কৰি থকা হৈছে…</translation>
-<translation id="3974175076798940554">এতিয়া Chromebook Plusৰ বিশেষ সম্পদসমূহ উপলব্ধ</translation>
 <translation id="39823212440917567"><ph name="NUMBER_OF_DAYS" /> দিনতকৈ পুৰণি প্ৰিণ্টৰ কামসমূহ আঁতৰোৱা হ’ব</translation>
 <translation id="3993704782688964914">আপোনাৰ <ph name="DEVICE_NAME" />টো এতিয়া আপ টু ডে’ট হৈ আছে</translation>
 <translation id="4003384961948020559">বিফল হৈছে - আউটপুট ভৰ্তি হৈ গৈছে</translation>
@@ -387,7 +386,6 @@
 <translation id="4275663329226226506">মিডিয়া</translation>
 <translation id="4289540628985791613">ৰূপৰেখা</translation>
 <translation id="4289849978083912975">শ্লাইড শ্ব’</translation>
-<translation id="4293621540182258188">কাহিলি পুৱাৰ পৰা আন্ধাৰ হোৱালৈকে - পৃথিৱীৰ প্ৰবাহ</translation>
 <translation id="4297501883039923494">বন্ধ হৈছে - অজ্ঞাত আসোঁৱাহ</translation>
 <translation id="4300073214558989"><ph name="IMAGE_COUNT" /> খন প্ৰতিচ্ছবি</translation>
 <translation id="4311195029067684288">পূৰ্ণ</translation>
@@ -571,7 +569,6 @@
 <translation id="576835345334454681">ডিছপ্লে’ৰ উজ্জ্বলতা আপ</translation>
 <translation id="57838592816432529">মিউট কৰক</translation>
 <translation id="5784136236926853061">HTTPৰ উচ্চ বিলম্বতা</translation>
-<translation id="5809090008577139505">Aurora</translation>
 <translation id="5826644637650799838">কলাটোৰ বিষয়ে</translation>
 <translation id="5832805196449965646">অন্য লোক যোগ কৰক</translation>
 <translation id="583281660410589416">অজ্ঞাত</translation>
@@ -590,7 +587,6 @@
 <translation id="5907649332524363701">কীৰ ৰং</translation>
 <translation id="5916084858004523819">নিষিদ্ধ</translation>
 <translation id="5916664084637901428">অন আছে</translation>
-<translation id="5918201491776799918">Chromebook Plusৰ বিশেষ শিল্পকৰ্ম বাছনি কৰক</translation>
 <translation id="5921506667911082617">{COUNT,plural, =1{আপোনাৰ ফাইলটো সফলভাৱে স্কেন আৰু <ph name="LINK_BEGIN" /><ph name="FOLDER_NAME" /><ph name="LINK_END" />ত ছেভ কৰা হৈছে।}one{আপোনাৰ ফাইলসমূহ সফলভাৱে স্কেন আৰু <ph name="LINK_BEGIN" /><ph name="FOLDER_NAME" /><ph name="LINK_END" />ত ছেভ কৰা হৈছে।}other{আপোনাৰ ফাইলসমূহ সফলভাৱে স্কেন আৰু <ph name="LINK_BEGIN" /><ph name="FOLDER_NAME" /><ph name="LINK_END" />ত ছেভ কৰা হৈছে।}}</translation>
 <translation id="5931523347251946569">ফাইলটো পোৱা নগ’ল</translation>
 <translation id="5939518447894949180">ৰিছেট কৰক</translation>
@@ -636,6 +632,7 @@
 <translation id="6278428485366576908">থীম</translation>
 <translation id="6280912520669706465">এআৰচি</translation>
 <translation id="6284632978374966585">গাঢ় ৰঙৰ থীম অন কৰক</translation>
+<translation id="6285899124799306373">লঞ্চাৰ খোলক</translation>
 <translation id="6302401976930124515"><ph name="TEST_NAME" /> পৰীক্ষাটো বাতিল কৰা হৈছে</translation>
 <translation id="631063167932043783">Explore এপ্‌</translation>
 <translation id="6319207335391420837"><ph name="DEVICE_NAME" />ত ফাৰ্মৱেৰ আপডে’ট কৰক</translation>
@@ -651,6 +648,7 @@
 <translation id="6382182670717268353">স্ক্ৰীন ছেভাৰৰ পূৰ্বদৰ্শন</translation>
 <translation id="6388847657025262518">স্কেনাৰৰ নথিৰ ফীডাৰটো জাম লাগিছে। ফীডাৰটো পৰীক্ষা কৰি পুনৰ চেষ্টা কৰক।</translation>
 <translation id="6394634179843537518">ফাইল যোগ দিয়ক</translation>
+<translation id="6401427872449207797">ব্ৰাউজাৰ সন্ধান</translation>
 <translation id="6410257289063177456">প্ৰতিচ্ছবিৰ ফাইল</translation>
 <translation id="641081527798843608">বিষয়ৰ মিল</translation>
 <translation id="6412715219990689313">বিল্ট-ইন কীব’ৰ্ড</translation>
@@ -799,7 +797,6 @@
 <translation id="7656388927906093505">ডিভাইচটো এটা মাউচ।</translation>
 <translation id="7658239707568436148">বাতিল কৰক</translation>
 <translation id="7665800271478495366">অৱতাৰ সলনি কৰক</translation>
-<translation id="7675241868020048622">Aurora (Plus বিশেষ)</translation>
 <translation id="7690294790491645610">নতুন পাছৱর্ড নিশ্চিত কৰক</translation>
 <translation id="7701040980221191251">নাই</translation>
 <translation id="7705524343798198388">VPN</translation>
@@ -808,7 +805,7 @@
 <translation id="7747039790905080783">পূৰ্বতে শ্বেয়াৰ কৰা চাবি</translation>
 <translation id="7762130827864645708">আপোনাৰ পাছৱৰ্ড সলনি কৰাৰ প্ৰক্ৰিয়াটো সফল হৈছে। অনুগ্ৰহ কৰি এতিয়াৰ পৰা নতুন পাছৱৰ্ডটো ব্যৱহাৰ কৰক।</translation>
 <translation id="7763470514545477072">ডমেইন চাফিক্সৰ সৈতে মিলা</translation>
-<translation id="7769672763586021400">ম’ডেল আইডি:</translation>
+<translation id="7769672763586021400">মডেল আইডি:</translation>
 <translation id="7770834998503326261">আপুনি কৰা বাছনিৰ সৈতে সম্পৰ্কিত অতিৰিক্ত তথ্য</translation>
 <translation id="7778717409420828014">আপোনাৰ মতামতে আমাক Chromebook ব্যৱহাৰৰ অভিজ্ঞতা উন্নত কৰাত সহায় কৰে আৰু আমাৰ দলে সেয়া পৰ্যালোচনা কৰিব। ৰিপ’ৰ্টৰ সংখ্যা বেছি হোৱাৰ বাবে আমি কোনো প্ৰত্যুত্তৰ পঠিয়াব নোৱাৰিম।</translation>
 <translation id="7784116172884276937">কোনো DNS ছাৰ্ভাৰ ছেট আপ কৰা হোৱা নাই</translation>
@@ -857,7 +854,6 @@
 <translation id="8138405288920084977">LTEAdvanced</translation>
 <translation id="8143951647992294073"><ph name="TOPIC_SOURCE" /> বাছনি কৰক <ph name="TOPIC_SOURCE_DESC" /></translation>
 <translation id="8151185429379586178">বিকাশকৰ্তাৰ সঁজুলি</translation>
-<translation id="8153923300383192510">Chromebook Plusৰ বিশেষ</translation>
 <translation id="8179976553408161302">Enter</translation>
 <translation id="8183974620058026102">সংলগ্ন কৰক</translation>
 <translation id="8206859287963243715">চেলুলাৰ</translation>
@@ -876,6 +872,7 @@
 <translation id="8312330582793120272">মিডিয়া প্লে’ কৰক</translation>
 <translation id="8318753676953949627">কোনো প্ৰতিচ্ছবি নাই</translation>
 <translation id="8329018942023753850">কেলকুলেটৰ এপ্</translation>
+<translation id="8335869473001018124">সন্ধান খোলক</translation>
 <translation id="8336739000755212683">ডিভাইচ একাউণ্টৰ প্ৰতিচ্ছবি সলনি কৰক</translation>
 <translation id="8347227221149377169">প্ৰিণ্টিঙৰ কামসমূহ</translation>
 <translation id="8351855506390808906">কীমেপিং টাচ্চ পইণ্ট</translation>

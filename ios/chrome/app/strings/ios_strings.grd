@@ -2269,7 +2269,10 @@ While in Incognito, sites can't use cookies to see your browsing activity across
       <message name="IDS_IOS_PINNED_TAB_OVERFLOW_ACTION_IPH_TEXT" desc="Text for the In Product Help displayed after the user pinned a tab using the overflow menu indicating where the pinned tab is.">
         You can find your pinned tabs here.
       </message>
-      <message name="IDS_IOS_PHOTO_LIBRARY_ADD_USAGE_DESCRIPTION" desc="Specifies the reason for writing to the user's photo library while the app is in use [Length: unlimited] [iOS only].">
+      <message name="IDS_IOS_PINNED_TAB_OVERFLOW_ACTION_IPH_VOICE_OVER_ANNOUNCEMENT" desc="Voiceover announcement for the In Product Help displayed after the user pinned a tab using the overflow menu indicating where the pinned tab is.">
+        You can find your pinned tabs by tapping Show Tabs button.
+      </message>
+       <message name="IDS_IOS_PHOTO_LIBRARY_ADD_USAGE_DESCRIPTION" desc="Specifies the reason for writing to the user's photo library while the app is in use [Length: unlimited] [iOS only].">
         This lets you save photos to your photo library.
       </message>
       <message name="IDS_IOS_PLACEHOLDER_FIND_IN_PAGE" desc="The iOS placeholder for searching in the current page [Length: 30em] [iOS only]">
@@ -2745,9 +2748,6 @@ While in Incognito, sites can't use cookies to see your browsing activity across
       <message name="IDS_IOS_LEAK_CHECK_SWITCH" desc="Title for the switch toggling whether Chrome should check that entered credentials have been part of a leak.">
         Warn You if Passwords Are Exposed in a Data Breach
       </message>
-      <message name="IDS_IOS_LEAK_CHECK_SIGNED_OUT_ENABLED_DESC" desc="Text that describes the 'Password Leak Detection' functionality to signed-out users who have not disabled the feature.">
-        When you sign in to your Google Account, this feature is turned on.
-      </message>
       <message name="IDS_IOS_PASSWORDS" desc="Title for the view in Settings for managing saved passwords. [Length: 15em] [iOS only]">
         Passwords
       </message>
@@ -3122,6 +3122,18 @@ Try to use a unique password for every site.
       </message>
       <message name="IDS_IOS_DEFAULT_PAGE_MODE_TIP_VOICE_OVER" desc="The text of the tip explaining to the user how to change the mode (desktop/mobile) in which the websites will be requested. [Read by Text-to-Speech]">
         You can change the default site view to desktop in Settings then Content Settings
+      </message>
+      <message name="IDS_IOS_WEB_INSPECTOR_LABEL" desc="The label of the cell used to display whether Web Inspector support is enabled">
+        Web Inspector
+      </message>
+      <message name="IDS_IOS_WEB_INSPECTOR_TITLE" desc="The title of the screen in which the user can enable Web Inspector support, to allow debugging web pages">
+        Web Inspector
+      </message>
+      <message name="IDS_IOS_WEB_INSPECTOR_SUBTITLE_IPAD" desc="The subtitle explaining how to use Web Inspector">
+        To use the Web Inspector, connect to Safari on your computer using a cable and access your iPad from the Develop menu. You can enable the develop menu in the Advanced section of Safari settings on your computer.
+      </message>
+      <message name="IDS_IOS_WEB_INSPECTOR_SUBTITLE_IPHONE" desc="The subtitle explaining how to use Web Inspector">
+        To use the Web Inspector, connect to Safari on your computer using a cable and access your iPhone from the Develop menu. You can enable the develop menu in the Advanced section of Safari settings on your computer.
       </message>
       <message name="IDS_IOS_SEARCH_ENGINE_SETTING_CUSTOM_SECTION_HEADER" desc="The header for custom search engines section in Search Engine selection setting [iOS only]">
         Recently Visited

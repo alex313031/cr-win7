@@ -14,10 +14,10 @@
 #import "components/sync/test/mock_sync_service.h"
 #import "components/sync_preferences/pref_service_mock_factory.h"
 #import "components/sync_preferences/pref_service_syncable.h"
-#import "ios/chrome/browser/application_context/application_context.h"
 #import "ios/chrome/browser/consent_auditor/consent_auditor_factory.h"
 #import "ios/chrome/browser/consent_auditor/consent_auditor_test_utils.h"
-#import "ios/chrome/browser/main/test_browser.h"
+#import "ios/chrome/browser/shared/model/application_context/application_context.h"
+#import "ios/chrome/browser/shared/model/browser/test/test_browser.h"
 #import "ios/chrome/browser/shared/model/browser_state/test_chrome_browser_state.h"
 #import "ios/chrome/browser/signin/authentication_service.h"
 #import "ios/chrome/browser/signin/authentication_service_factory.h"
@@ -142,8 +142,6 @@ class UserSigninMediatorTest : public PlatformTest {
                              browserStatePrefs:browser_state_->GetPrefs()])
           .andReturn(NO);
       NSLog(@" shouldHandleMergeCaseForIdentity ");
-      OCMExpect(
-          [performer_mock_ commitSyncForBrowserState:browser_state_.get()]);
     }
   }
 
@@ -479,6 +477,8 @@ TEST_F(UserSigninMediatorTest,
 // Tests a user sign-in operation cancel and dismiss without animation when
 // authentication is in progress.
 TEST_F(UserSigninMediatorTest, CancelSyncAndStaySignin) {
+  EXPECT_CALL(*sync_service_mock_, StopAndClear()).Times(0);
+
   CreateAuthenticationFlow(PostSignInAction::kCommitSync);
   SetPerformerSigninExpectations(PostSignInAction::kCommitSync);
 
@@ -509,6 +509,7 @@ TEST_F(UserSigninMediatorTest, CancelSyncAndStaySignin) {
   EXPECT_TRUE(completion_called);
   EXPECT_TRUE(authentication_service()->HasPrimaryIdentity(
       signin::ConsentLevel::kSignin));
+  EXPECT_FALSE(sync_setup_service_mock_->IsSyncRequested());
 }
 
 // Tests the following scenario:

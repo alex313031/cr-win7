@@ -274,28 +274,9 @@ class VideoEncoderTest : public ::testing::Test {
       return bitstream_processors;
     }
 
-    switch (codec) {
-      case VideoCodec::kH264:
-        bitstream_processors.emplace_back(new H264Validator(
-            config.output_profile, visible_rect, config.num_temporal_layers));
-        break;
-      case VideoCodec::kVP8:
-        bitstream_processors.emplace_back(
-            new VP8Validator(visible_rect, config.num_temporal_layers));
-        break;
-      case VideoCodec::kVP9:
-        bitstream_processors.emplace_back(new VP9Validator(
-            config.output_profile, visible_rect, config.num_spatial_layers,
-            config.num_temporal_layers));
-        break;
-      case VideoCodec::kAV1:
-        bitstream_processors.emplace_back(new AV1Validator(visible_rect));
-        break;
-      default:
-        LOG(ERROR) << "Unsupported profile: "
-                   << GetProfileName(config.output_profile);
-        break;
-    }
+    bitstream_processors.emplace_back(DecoderBufferValidator::Create(
+        config.output_profile, visible_rect, config.num_spatial_layers,
+        config.num_temporal_layers));
 
     raw_data_helper_ = RawDataHelper::Create(video, g_env->Reverse());
     if (!raw_data_helper_) {
@@ -879,8 +860,6 @@ int main(int argc, char** argv) {
   base::FilePath video_metadata_path =
       (args.size() >= 2) ? base::FilePath(args[1]) : base::FilePath();
   std::string codec = "h264";
-  size_t num_temporal_layers = 1u;
-  size_t num_spatial_layers = 1u;
   std::string svc_mode = "L1T1";
   bool output_bitstream = false;
   absl::optional<uint32_t> output_bitrate;
@@ -901,19 +880,15 @@ int main(int argc, char** argv) {
       continue;
     }
 
+    if (it->first == "num_temporal_layers" ||
+        it->first == "num_spatial_layers") {
+      std::cout << "--num_temporal_layers and --num_spatial_layers have been "
+                << "removed. Please use --svc_mode";
+      return EXIT_FAILURE;
+    }
+
     if (it->first == "codec") {
       codec = it->second;
-    } else if (it->first == "num_temporal_layers") {
-      if (!base::StringToSizeT(it->second, &num_temporal_layers)) {
-        std::cout << "invalid number of temporal layers: " << it->second
-                  << "\n";
-        return EXIT_FAILURE;
-      }
-    } else if (it->first == "num_spatial_layers") {
-      if (!base::StringToSizeT(it->second, &num_spatial_layers)) {
-        std::cout << "invalid number of spatial layers: " << it->second << "\n";
-        return EXIT_FAILURE;
-      }
     } else if (it->first == "svc_mode") {
       svc_mode = it->second;
     } else if (it->first == "bitrate_mode") {
@@ -984,9 +959,8 @@ int main(int argc, char** argv) {
   media::test::VideoEncoderTestEnvironment* test_environment =
       media::test::VideoEncoderTestEnvironment::Create(
           video_path, video_metadata_path, enable_bitstream_validator,
-          output_folder, codec, svc_mode, num_temporal_layers,
-          num_spatial_layers, output_bitstream, output_bitrate, bitrate_mode,
-          reverse, frame_output_config,
+          output_folder, codec, svc_mode, output_bitstream, output_bitrate,
+          bitrate_mode, reverse, frame_output_config,
           /*enabled_features=*/{}, disabled_features);
 
   if (!test_environment)

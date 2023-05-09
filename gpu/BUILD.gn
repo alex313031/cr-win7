@@ -452,6 +452,11 @@ test("gl_tests") {
     }
   }
 
+  # Simply loading the Vulkan driver leaks crbug.com/1134681
+  if (is_linux && !is_lsan) {
+    sources += [ "command_buffer/service/shared_image/angle_vulkan_image_backing_factory_unittest.cc" ]
+  }
+
   if (use_dawn) {
     deps += [
       "//third_party/dawn/src/dawn:cpp",

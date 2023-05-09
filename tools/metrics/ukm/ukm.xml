@@ -3189,6 +3189,12 @@ be describing additional metrics about the same event.
     All information about a specific field, recorded at form submission or form
     destruction time (whatever comes first).
   </summary>
+  <metric name="AutocompleteState" enum="AutofillAutocompleteState">
+    <summary>
+      The field's autocomplete attribute value, the values are from
+      |AutofillMetrics::AutocompleteState|.
+    </summary>
+  </metric>
   <metric name="AutofillSkippedStatus">
     <summary>
       Whether filling the field was skipped during autofill, and if it was
@@ -6680,6 +6686,11 @@ be describing additional metrics about the same event.
   <metric name="CQ.LastEvent" enum="Companion.UiEvent">
     <summary>
       The last event on the CQ surface.
+    </summary>
+  </metric>
+  <metric name="OpenTrigger" enum="Companion.OpenTrigger">
+    <summary>
+      The UI location from which the companion page was opened.
     </summary>
   </metric>
   <metric name="PH.Feedback" enum="Companion.PhFeedback">
@@ -23327,6 +23338,9 @@ be describing additional metrics about the same event.
 </event>
 
 <event name="TrustedWebActivity.QualityEnforcementViolation" singular="True">
+  <obsolete>
+    Deprecated 05/2023.
+  </obsolete>
   <owner>eirage@chromium.org</owner>
   <owner>peconn@chromium.org</owner>
   <summary>
@@ -24272,7 +24286,8 @@ be describing additional metrics about the same event.
   </metric>
 </event>
 
-<event name="V8CompileHints.Version4">
+<event name="V8CompileHints.Version5"
+    skip_proto_reason="Too many metrics causing scalability issue b/275678348">
   <owner>marja@chromium.org</owner>
   <owner>v8-loading@google.com</owner>
   <summary>

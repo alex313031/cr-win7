@@ -5,6 +5,7 @@
 <translation id="1018219910092211213">DNS ಅನ್ನು ಬಗೆಹರಿಸಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ</translation>
 <translation id="1018656279737460067">ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ</translation>
 <translation id="1022433422498218992">ಸಾಮಾನ್ಯ ಕಂಟ್ರೋಲ್‌ಗಳು</translation>
+<translation id="1022628058306505708">ಅರ್ಥ್ ಫ್ಲೋ</translation>
 <translation id="1047458377670401304"><ph name="CPU_NAME" /> (<ph name="THREAD_COUNT" /> ಥ್ರೆಡ್‌ಗಳು, <ph name="CPU_MAX_CLOCK_SPEED" />GHz)</translation>
 <translation id="1047773237499189053">ಹೊಸ ಫೀಚರ್ ಲಭ್ಯವಿದೆ, ಇನ್ನಷ್ಟು ತಿಳಿಯಲು ಅಪ್ ಆ್ಯರೋ ಕೀ ಬಳಸಿ.</translation>
 <translation id="1059913517121127803">ಸ್ಕ್ಯಾನ್ ಮಾಡುವುದನ್ನು ಪ್ರಾರಂಭಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ</translation>
@@ -147,7 +148,6 @@
 <translation id="2056550196601855911">IPv4/IPv6</translation>
 <translation id="2080070583977670716">ಇನ್ನಷ್ಟು ಸೆಟ್ಟಿಂಗ್‌ಗಳು</translation>
 <translation id="2085089206770112532">ಡಿಸ್‌ಪ್ಲೇ ಪ್ರಖರತೆಯನ್ನು ಕಡಿಮೆ ಮಾಡಿ</translation>
-<translation id="209751264101900360">ಡಾನ್ ಟು ಡಾರ್ಕ್ - ಕ್ಲೌಡ್ ಫ್ಲೋ</translation>
 <translation id="2102231663024125441">ಪಠ್ಯ ಎಡಿಟ್ ಮಾಡುವಿಕೆ</translation>
 <translation id="2105810540595158374">ಸಾಧನವು ಗೇಮ್ ಕಂಟ್ರೋಲ್ ಆಗಿದೆ.</translation>
 <translation id="2119172414412204879"><ph name="BOARD_NAME" />, ಆವೃತ್ತಿ <ph name="MILESTONE_VERSION" /></translation>
@@ -235,6 +235,7 @@
 <translation id="2902312830803030883">ಇನ್ನಷ್ಟು ಕ್ರಿಯೆಗಳು</translation>
 <translation id="2926057806159140518">ನಿಮ್ಮ ಬಳಕೆದಾರರ ಹೆಸರು ಮತ್ತು ಪಾಸ್‌ವರ್ಡ್ ಅನ್ನು ನಮೂದಿಸಿ ಅಥವಾ ನಿಮ್ಮ QR ಕೋಡ್ ಅನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಿ</translation>
 <translation id="2940811910881150316">ಸಾಧನವನ್ನು ಪರೀಕ್ಷಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಪರೀಕ್ಷಿಸಲು ಮುಚ್ಚಳವನ್ನು ಮತ್ತೆ ತೆರೆಯಿರಿ.</translation>
+<translation id="2981143481017883351">ಎಕ್ಸ್‌ಕ್ಲೂಸಿವ್ Chromebook ಸ್ವತ್ತುಗಳು ಈಗ ಲಭ್ಯವಿದೆ</translation>
 <translation id="3008341117444806826">ರಿಫ್ರೆಶ್ ಮಾಡಿ</translation>
 <translation id="3009958530611748826">ಉಳಿಸಲು ಫೋಲ್ಡರ್ ಆಯ್ಕೆ ಮಾಡಿ</translation>
 <translation id="3017079585324758401">ಹಿನ್ನೆಲೆ</translation>
@@ -279,6 +280,7 @@
 <translation id="3360306038446926262">Windows</translation>
 <translation id="3368922792935385530">ಕನೆಕ್ಟ್ ಆಗಿದೆ</translation>
 <translation id="3369013195428705271">ಎಲ್ಲಾ ಪ್ರಿಂಟ್ ಇತಿಹಾಸವನ್ನು ತೆರವುಗೊಳಿಸಲು ನೀವು ಬಯಸುವಿರಾ? ಪ್ರಸ್ತುತ ಚಾಲನೆಯಲ್ಲಿರುವ ನಿಮ್ಮ ಪ್ರಿಂಟ್ ಕಾರ್ಯವನ್ನು ತೆರವುಗೊಳಿಸುವುದಿಲ್ಲ.</translation>
+<translation id="3386675685417744672">Chromebook ಎಕ್ಸ್‌ಕ್ಲೂಸಿವ್</translation>
 <translation id="3404249063913988450">ಸ್ಕ್ರೀನ್ ಸೇವರ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ</translation>
 <translation id="3413935475507503304">ಅಪ್‌ಡೇಟ್ ಪ್ರಕ್ರಿಯೆಯನ್ನು ಮುಂದುವರಿಸಲು, ಮುಂದಿನದು ಕ್ಲಿಕ್ ಮಾಡಿ.</translation>
 <translation id="3434107140712555581"><ph name="BATTERY_PERCENTAGE" />%</translation>
@@ -293,6 +295,7 @@
 <translation id="3484914941826596830">ಫರ್ಮ್‌ವೇರ್ ಅಪ್‌ಡೇಟ್ ಆಗುತ್ತಿರುವ ಸಮಯದಲ್ಲಿ, ಈ ಬಾಹ್ಯ ಸಾಧನವನ್ನು ಅನ್‌ಪ್ಲಗ್ ಮಾಡಬೇಡಿ ಅಥವಾ ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್ ಅನ್ನು ಸ್ಥಶಟ್ ಡೌನ್ ಮಾಡಬೇಡಿ. ನೀವು ಈ ವಿಂಡೋವನ್ನು ಕುಗ್ಗಿಸಬಹುದು. ಈ ಅಪ್‌ಡೇಟ್, ಕೆಲವು ನಿಮಿಷಗಳನ್ನು ತೆಗೆದುಕೊಳ್ಳಬಹುದು ಮತ್ತು ಈ ಸಮಯದಲ್ಲಿ ನಿಮ್ಮ ಬಾಹ್ಯ ಸಾಧನವು ಕಾರ್ಯನಿರ್ವಹಿಸದೇ ಇರಬಹುದು.</translation>
 <translation id="3486220673238053218">ವಿವರಣೆ</translation>
 <translation id="3488065109653206955">ಭಾಗಶಃ ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ</translation>
+<translation id="3502426834823382181">ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಿ</translation>
 <translation id="3510890413042482857"><ph name="BEGIN_LINK1" />ಕಾರ್ಯಕ್ಷಮತೆ ಟ್ರೇಸ್ ಡೇಟಾ<ph name="END_LINK1" /> ಕಳುಹಿಸಿ</translation>
 <translation id="3517001332549868749">ChromeOS ಅಪ್‌ಡೇಟ್</translation>
 <translation id="3527036260304016759">ವಿಫಲವಾಗಿದೆ - ಅಪರಿಚಿತ ದೋಷ</translation>
@@ -346,7 +349,6 @@
 <translation id="3967822245660637423">ಡೌನ್‌ಲೋಡ್‌‌ ಪೂರ್ಣಗೊಂಡಿದೆ</translation>
 <translation id="3969602104473960991">ChromeOS ಪಾಸ್‌ವರ್ಡ್ ಅಪ್‌ಡೇಟ್ ಮಾಡಲಾಗಿದೆ</translation>
 <translation id="397105322502079400">ಎಣಿಸಲಾಗುತ್ತಿದೆ...</translation>
-<translation id="3974175076798940554">ವಿಶಿಷ್ಟ Chromebook Plus ಸ್ವತ್ತುಗಳು ಈಗ ಲಭ್ಯವಿವೆ</translation>
 <translation id="39823212440917567"><ph name="NUMBER_OF_DAYS" /> ದಿನಗಳಿಗಿಂತ ಹಳೆಯದಾದ ಮುದ್ರಣ ಕಾರ್ಯಗಳನ್ನು ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ</translation>
 <translation id="3993704782688964914">ನಿಮ್ಮ <ph name="DEVICE_NAME" /> ಈಗ ಅಪ್‌ ಟು ಡೇಟ್‌‌ ಆಗಿದೆ</translation>
 <translation id="4003384961948020559">ವಿಫಲವಾಗಿದೆ - ಔಟ್‌ಪುಟ್ ಭರ್ತಿಯಾಗಿದೆ</translation>
@@ -357,6 +359,7 @@
 <translation id="404928562651467259">ಎಚ್ಚರಿಕೆ</translation>
 <translation id="4054683689023980771">ಚಿತ್ರವನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ</translation>
 <translation id="4060260348856573701">ಹೊಸ APN</translation>
+<translation id="4079743696465895866">Chromebook ಎಕ್ಸ್‌ಕ್ಲೂಸಿವ್ ಆರ್ಟ್‌ವರ್ಕ್ ಅನ್ನು ಆಯ್ಕೆಮಾಡಿ</translation>
 <translation id="4093865285251893588">ಪ್ರೊಫೈಲ್ ಚಿತ್ರ</translation>
 <translation id="409427325554347132">ಪರೀಕ್ಷಾ ವಿವರಗಳನ್ನು ಉಳಿಸಿ</translation>
 <translation id="4095829376260267438">WPA2WPA3</translation>
@@ -387,7 +390,6 @@
 <translation id="4275663329226226506">ಮಾದ್ಯಮ</translation>
 <translation id="4289540628985791613">ಅವಲೋಕನ</translation>
 <translation id="4289849978083912975">ಸ್ಲೈಡ್ ಶೋ</translation>
-<translation id="4293621540182258188">ಡಾನ್ ಟು ಡಾರ್ಕ್ - ಅರ್ಥ್ ಫ್ಲೋ</translation>
 <translation id="4297501883039923494">ನಿಲ್ಲಿಸಲಾಗಿದೆ - ಅಪರಿಚಿತ ದೋಷ</translation>
 <translation id="4300073214558989"><ph name="IMAGE_COUNT" /> ಚಿತ್ರಗಳು</translation>
 <translation id="4311195029067684288">ಪೂರ್ಣ</translation>
@@ -571,7 +573,6 @@
 <translation id="576835345334454681">ಡಿಸ್‌ಪ್ಲೇ ಪ್ರಖರತೆಯನ್ನು ಹೆಚ್ಚಿಸಿ</translation>
 <translation id="57838592816432529">ಮ್ಯೂಟ್</translation>
 <translation id="5784136236926853061">ಅಧಿಕ HTTP ವಿಳಂಬ</translation>
-<translation id="5809090008577139505">ಅರೋರಾ</translation>
 <translation id="5826644637650799838">ಕಲೆಯ ಕುರಿತು</translation>
 <translation id="5832805196449965646">ವ್ಯಕ್ತಿಯನ್ನು ಸೇರಿಸು</translation>
 <translation id="583281660410589416">ಅಪರಿಚಿತ</translation>
@@ -590,7 +591,6 @@
 <translation id="5907649332524363701">ಕೀ ಬಣ್ಣ</translation>
 <translation id="5916084858004523819">ನಿಷೇಧಿಸಲಾಗಿದೆ</translation>
 <translation id="5916664084637901428">ಆನ್‌</translation>
-<translation id="5918201491776799918">Chromebook Plus ಎಕ್ಸ್‌ಕ್ಲೂಸಿವ್ ಆರ್ಟ್‌ವರ್ಕ್ ಅನ್ನು ಆಯ್ಕೆಮಾಡಿ</translation>
 <translation id="5921506667911082617">{COUNT,plural, =1{ನಿಮ್ಮ ಫೈಲ್ ಅನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಸ್ಕ್ಯಾನ್ ಮಾಡಲಾಗಿದೆ ಮತ್ತು <ph name="LINK_BEGIN" /><ph name="FOLDER_NAME" /><ph name="LINK_END" /> ಗೆ ಉಳಿಸಲಾಗಿದೆ.}one{ನಿಮ್ಮ ಫೈಲ್‌ಗಳನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಸ್ಕ್ಯಾನ್ ಮಾಡಲಾಗಿದೆ ಮತ್ತು <ph name="LINK_BEGIN" /><ph name="FOLDER_NAME" /><ph name="LINK_END" /> ಗೆ ಉಳಿಸಲಾಗಿದೆ.}other{ನಿಮ್ಮ ಫೈಲ್‌ಗಳನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಸ್ಕ್ಯಾನ್ ಮಾಡಲಾಗಿದೆ ಮತ್ತು <ph name="LINK_BEGIN" /><ph name="FOLDER_NAME" /><ph name="LINK_END" /> ಗೆ ಉಳಿಸಲಾಗಿದೆ.}}</translation>
 <translation id="5931523347251946569">ಫೈಲ್ ಕಂಡುಬಂದಿಲ್ಲ</translation>
 <translation id="5939518447894949180">ಮರುಹೊಂದಿಸು</translation>
@@ -626,6 +626,7 @@
 <translation id="6184793017104303157">B4</translation>
 <translation id="6189418609903030344">ಬಳಕೆಯಿಂದಾಗಿ ಬ್ಯಾಟರಿ ಸಾಮರ್ಥ್ಯವು ಕಡಿಮೆಯಾಗುತ್ತದೆ</translation>
 <translation id="6191293864534840972">ದೋಷಪೂರಿತ ಹೆಸರಿನ ಸರ್ವರ್‌ಗಳು</translation>
+<translation id="6205145102504628069">ಕ್ಲೌಡ್ ಫ್ಲೋ</translation>
 <translation id="6213737986933151570">CDMA1XRTT</translation>
 <translation id="6223066887782788441">ಫುಲ್‌ಸ್ಕ್ರೀನ್‌ನಿಂದ ನಿರ್ಗಮಿಸಿ</translation>
 <translation id="6223752125779001553">ಯಾವುದೇ ಸ್ಕ್ಯಾನರ್‌ಗಳು ಲಭ್ಯವಿಲ್ಲ</translation>
@@ -636,6 +637,7 @@
 <translation id="6278428485366576908">ಥೀಮ್</translation>
 <translation id="6280912520669706465">ARC</translation>
 <translation id="6284632978374966585">ಡಾರ್ಕ್ ಥೀಮ್ ಅನ್ನು ಆನ್ ಮಾಡಿ</translation>
+<translation id="6285899124799306373">ಲಾಂಚರ್ ತೆರೆಯಿರಿ</translation>
 <translation id="6302401976930124515"><ph name="TEST_NAME" /> ಪರೀಕ್ಷೆಯನ್ನು ರದ್ದುಪಡಿಸಲಾಗಿದೆ</translation>
 <translation id="631063167932043783">Explore ಆ್ಯಪ್</translation>
 <translation id="6319207335391420837"><ph name="DEVICE_NAME" /> ನಲ್ಲಿ ಫರ್ಮ್‌‌ವೇರ್‌‌ ಅನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡಿ</translation>
@@ -651,6 +653,7 @@
 <translation id="6382182670717268353">ಸ್ಕ್ರೀನ್ ಸೇವರ್‌ನ ಪೂರ್ವವೀಕ್ಷಣೆ</translation>
 <translation id="6388847657025262518">ಸ್ಕ್ಯಾನರ್‌ನ ಡಾಕ್ಯುಮೆಂಟ್ ಫೀಡರ್ ಜಾಮ್ ಆಗಿದೆ. ಫೀಡರ್ ಅನ್ನು ಪರಿಶೀಲಿಸಿ ಹಾಗೂ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ.</translation>
 <translation id="6394634179843537518">ಫೈಲ್ ಅನ್ನು ಸೇರಿಸಿ</translation>
+<translation id="6401427872449207797">ಬ್ರೌಸರ್ ಹುಡುಕಾಟ</translation>
 <translation id="6410257289063177456">ಇಮೇಜ್ ಫೈಲ್‌ಗಳು</translation>
 <translation id="641081527798843608">ವಿಷಯದ ಹೊಂದಾಣಿಕೆ</translation>
 <translation id="6412715219990689313">ಬಿಲ್ಟ್-ಇನ್ ಕೀಬೋರ್ಡ್</translation>
@@ -666,6 +669,7 @@
 <translation id="6494974875566443634">ಕಸ್ಟಮೈಸ್ ಮಾಡುವಿಕೆ</translation>
 <translation id="6500818810472529210">Google Search ನಲ್ಲಿ ಫಲಿತಾಂಶವನ್ನು ನೋಡಿ</translation>
 <translation id="650266656685499220">ಆಲ್ಬಮ್‌ಗಳನ್ನು ರಚಿಸಲು, Google Photos ಗೆ ಹೋಗಿ</translation>
+<translation id="6505750420152840539">ಮುಂಜಾನೆಯಿಂದ ಮುಸ್ಸಂಜೆ</translation>
 <translation id="6516990319416533844">ಬ್ಯಾಟರಿಯ ಚಾರ್ಜಿಂಗ್ ವೇಗವನ್ನು ಪರೀಕ್ಷಿಸಲು, ನಿಮ್ಮ ಬ್ಯಾಟರಿ ಸ್ವಲ್ಪ ಸಮಯದವರೆಗೆ ಬರಿದಾಗಲು ಬಿಡಿ</translation>
 <translation id="6517239166834772319">ಎಕ್ಸ್‌ಪ್ಲೋರ್</translation>
 <translation id="6526200165918397681">ವಾಲ್‌ಪೇಪರ್ ಅನ್ನು ಹೊಂದಿಸಿ</translation>
@@ -704,7 +708,7 @@
 <translation id="6791471867139427246">ಕೀಬೋರ್ಡ್ ಲೈಟ್ ಬಣ್ಣ</translation>
 <translation id="6798678288485555829">ಪಠ್ಯದ ನ್ಯಾವಿಗೇಷನ್</translation>
 <translation id="680983167891198932">ಕೀ</translation>
-<translation id="6816797338148849397">ನಿಮ್ಮ ಆಯ್ಕೆಗೆ ಸಂಬಂಧಿಸಿದ ಮಾಹಿತಿ ಲಭ್ಯವಿದೆ. ಇದಕ್ಕೆ ಪ್ರವೇಶ ಪಡೆಯಲು, ಅಪ್ ಆ್ಯರೋ ಬಳಸಿ.</translation>
+<translation id="6816797338148849397">ನಿಮ್ಮ ಆಯ್ಕೆಗೆ ಸಂಬಂಧಿಸಿದ ಮಾಹಿತಿ ಲಭ್ಯವಿದೆ. ಇದಕ್ಕೆ ಆ್ಯಕ್ಸೆಸ್ ಪಡೆಯಲು, ಅಪ್ ಆ್ಯರೋ ಬಳಸಿ.</translation>
 <translation id="6838167112108853532">ಈ APN ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಅಥವಾ ತೆಗೆದುಹಾಕಲು ಸಾಧ್ಯವಿಲ್ಲ. ಸಕ್ರಿಯಗೊಳಿಸಲಾದ ಸೇರಿಸಿರುವ APN ಗಳನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ ಅಥವಾ ತೆಗೆದುಹಾಕಲಾಗಿದೆ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ.</translation>
 <translation id="6853312040151791195">ಡಿಸ್‌ಚಾರ್ಜಿಂಗ್ ರೇಟ್</translation>
 <translation id="6889786074662672253">ಮರುಪ್ರಾರಂಭಿಸುವಾಗ, ಈ ಬಾಹ್ಯ ಸಾಧನವನ್ನು ಅನ್‌ಪ್ಲಗ್ ಮಾಡಬೇಡಿ ಅಥವಾ ನಿಮ್ಮ ಕಂಪ್ಯೂಟರ್ ಅನ್ನು ಶಟ್ ಡೌನ್ ಮಾಡಬೇಡಿ. ನೀವು ಈ ವಿಂಡೋವನ್ನು ಕುಗ್ಗಿಸಬಹುದು. ಇದು ಕೆಲವು ನಿಮಿಷಗಳನ್ನು ತೆಗೆದುಕೊಳ್ಳಬಹುದು ಮತ್ತು ಈ ಸಮಯದಲ್ಲಿ ನಿಮ್ಮ ಬಾಹ್ಯ ಸಾಧನವು ಕಾರ್ಯನಿರ್ವಹಿಸದೇ ಇರಬಹುದು.</translation>
@@ -799,7 +803,6 @@
 <translation id="7656388927906093505">ಸಾಧನವು ಮೌಸ್ ಆಗಿದೆ.</translation>
 <translation id="7658239707568436148">ರದ್ದುಮಾಡಿ</translation>
 <translation id="7665800271478495366">ಅವತಾರ್ ಬದಲಾಯಿಸಿ</translation>
-<translation id="7675241868020048622">ಅರೋರಾ (ಪ್ಲಸ್ ಎಕ್ಸ್‌ಕ್ಲೂಸಿವ್)</translation>
 <translation id="7690294790491645610">ಹೊಸ ಪಾಸ್‌ವರ್ಡ್ ಖಚಿತಪಡಿಸಿ</translation>
 <translation id="7701040980221191251">ಯಾವುದೂ ಇಲ್ಲ</translation>
 <translation id="7705524343798198388">VPN</translation>
@@ -857,7 +860,6 @@
 <translation id="8138405288920084977">LTEAdvanced</translation>
 <translation id="8143951647992294073"><ph name="TOPIC_SOURCE" /> <ph name="TOPIC_SOURCE_DESC" /> ಆಯ್ಕೆಮಾಡಿ</translation>
 <translation id="8151185429379586178">ಡೆವಲಪರ್ ಟೂಲ್‌ಗಳು</translation>
-<translation id="8153923300383192510">Chromebook Plus ಎಕ್ಸ್‌ಕ್ಲೂಸಿವ್</translation>
 <translation id="8179976553408161302">Enter</translation>
 <translation id="8183974620058026102">ಲಗತ್ತಿಸಿ</translation>
 <translation id="8206859287963243715">ಸೆಲ್ಯುಲಾರ್</translation>
@@ -876,6 +878,7 @@
 <translation id="8312330582793120272">ಮಾಧ್ಯಮವನ್ನು ಪ್ಲೇ ಮಾಡಿ</translation>
 <translation id="8318753676953949627">ಯಾವುದೇ ಚಿತ್ರಗಳಿಲ್ಲ</translation>
 <translation id="8329018942023753850">ಕ್ಯಾಲ್ಕ್ಯುಲೇಟರ್ ಆ್ಯಪ್</translation>
+<translation id="8335869473001018124">ಹುಡುಕಾಟ ತೆರೆಯಿರಿ</translation>
 <translation id="8336739000755212683">ಸಾಧನದ ಖಾತೆ ಚಿತ್ರವನ್ನು ಬದಲಾಯಿಸಿ</translation>
 <translation id="8347227221149377169">ಮುದ್ರಣ ಕಾರ್ಯಗಳು</translation>
 <translation id="8351855506390808906">ಕೀ ಮ್ಯಾಪಿಂಗ್ ಟಚ್ ಪಾಯಿಂಟ್</translation>

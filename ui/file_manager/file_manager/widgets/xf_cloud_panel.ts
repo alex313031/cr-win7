@@ -16,11 +16,20 @@ import {css, customElement, html, property, query, XfBase} from './xf_base.js';
 import type {CrActionMenuElement} from 'chrome://resources/cr_elements/cr_action_menu/cr_action_menu.js';
 
 /**
+ * These type indicate static states that the cloud panel can enter. If one of
+ * these is supplied, `items` and `percentage` is ignored.
+ */
+export enum CloudPanelType {
+  OFFLINE = 'offline',
+  NOT_ENOUGH_SPACE = 'not-enough-space',
+}
+
+/**
  * The `<xf-cloud-panel>` represents the current state that the Drive bulk
  * pinning process is currently in. When files are being pinned and downloaded,
  * the `items` and `progress` attributes are used to signify that the panel is
- * in progress.
- * TODO(b/275635747): Include various error states for the panel.
+ * in progress. The `type` attribute can be used with `not-enough-space` and
+ * `offline` to signify possible error or paused states.
  */
 @customElement('xf-cloud-panel')
 export class XfCloudPanel extends XfBase {
@@ -56,6 +65,26 @@ export class XfCloudPanel extends XfBase {
     },
   })
   percentage?: number;
+
+  /**
+   * Attempts to map the supplied `type` attribute to an available value.
+   */
+  @property({
+    type: CloudPanelType,
+    reflect: true,
+    converter: {
+      fromAttribute:
+          (value: string) => {
+            if (value && value.toUpperCase() in CloudPanelType) {
+              return value as CloudPanelType;
+            }
+            console.warn(`Failed to convert ${value} to CloudPanelType`);
+            return null;
+          },
+      toAttribute: (key: keyof CloudPanelType) => key,
+    },
+  })
+  type?: CloudPanelType;
 
   /**
    * The cloud panel uses the `CrActionMenu` to provide the dialog behaviour and
@@ -139,17 +168,31 @@ export class XfCloudPanel extends XfBase {
           </progress>
           <div class="progress-description">3 minutes remaining</div>
         </div>
-        <div id="progress-finished">
+        <div class="static" id="progress-finished">
           <xf-icon type="${
         constants.ICON_TYPES.BULK_PINNING_DONE}" size="large"></xf-icon>
           <div class="status-description">
             ${str('DRIVE_ALL_FILES_SYNCED')}
           </div>
         </div>
+        <div class="static" id="progress-offline">
+        <xf-icon type="${
+        constants.ICON_TYPES.BULK_PINNING_OFFLINE}" size="large"></xf-icon>
+          <div class="status-description">
+            ${str('DRIVE_BULK_PINNING_OFFLINE')}
+          </div>
+        </div>
+        <div class="static" id="progress-not-enough-space">
+        <xf-icon type="${
+        constants.ICON_TYPES.ERROR_BANNER}" size="large"></xf-icon>
+          <div class="status-description">
+            ${str('DRIVE_BULK_PINNING_NOT_ENOUGH_SPACE')}
+          </div>
+        </div>
         <div class="divider"></div>
         <div class="menu">
           <button class="action" @click=${this.onSettingsClicked_}>${
-        str('GOOGLE_DRIVE_SETTINGS_LINK')}</div>
+        str('GOOGLE_DRIVE_SETTINGS_LINK')}</button>
         </div>
       </div>
     </cr-action-menu>`;
@@ -166,11 +209,21 @@ function getCSS() {
     }
 
     :host(:not([items][percentage])) #progress-state,
-    :host([percentage="100"]) #progress-state {
+    :host([percentage="100"]) #progress-state,
+    :host([type]) #progress-state {
       display: none;
     }
 
-    :host(:not([items][percentage="100"])) #progress-finished {
+    :host(:not([items][percentage="100"])) #progress-finished,
+    :host([type]) #progress-finished {
+      display: none;
+    }
+
+    :host(:not([type="offline"])) #progress-offline {
+      display: none;
+    }
+
+    :host(:not([type="not-enough-space"])) #progress-not-enough-space {
       display: none;
     }
 
@@ -181,15 +234,26 @@ function getCSS() {
       width: 320px;
     }
 
-    #progress-finished {
+    .static {
       align-items: center;
       display: flex;
       flex-direction: column;
     }
 
+    xf-icon {
+      padding: 27px 0px 20px;
+    }
+
     xf-icon[type="bulk_pinning_done"] {
       --xf-icon-color: var(--cros-sys-positive);
-      padding: 27px 0px 20px;
+    }
+
+    xf-icon[type="bulk_pinning_offline"] {
+      --xf-icon-color: var(--cros-sys-secondary);
+    }
+
+    xf-icon[type="error_banner"] {
+      --xf-icon-color: var(--cros-sys-error);
     }
 
     .status-description {
@@ -243,6 +307,10 @@ function getCSS() {
       background-color: var(--cros-sys-base_elevated);
       border: 0;
       text-align: left;
+    }
+
+    :host-context([dir='rtl']) button.action {
+      text-align: right;
     }
 
     .action {

@@ -5,6 +5,7 @@
 <translation id="1018219910092211213">ไม่สามารถแปลง DNS</translation>
 <translation id="1018656279737460067">ยกเลิกแล้ว</translation>
 <translation id="1022433422498218992">การควบคุมทั่วไป</translation>
+<translation id="1022628058306505708">การเคลื่อนที่ของโลก</translation>
 <translation id="1047458377670401304"><ph name="CPU_NAME" /> (<ph name="THREAD_COUNT" /> เทรด, <ph name="CPU_MAX_CLOCK_SPEED" /> GHz)</translation>
 <translation id="1047773237499189053">มีฟีเจอร์ใหม่ ใช้แป้นลูกศรขึ้นเพื่อดูข้อมูลเพิ่มเติม</translation>
 <translation id="1059913517121127803">เริ่มการสแกนไม่ได้</translation>
@@ -147,7 +148,6 @@
 <translation id="2056550196601855911">IPv4/IPv6</translation>
 <translation id="2080070583977670716">การตั้งค่าเพิ่มเติม</translation>
 <translation id="2085089206770112532">ลดความสว่างของหน้าจอ</translation>
-<translation id="209751264101900360">รุ่งเช้าจนถึงกลางคืน - การเคลื่อนตัวของเมฆ</translation>
 <translation id="2102231663024125441">การแก้ไขข้อความ</translation>
 <translation id="2105810540595158374">อุปกรณ์เป็นอุปกรณ์ควบคุมเกม</translation>
 <translation id="2119172414412204879"><ph name="BOARD_NAME" /> เวอร์ชัน <ph name="MILESTONE_VERSION" /></translation>
@@ -235,6 +235,7 @@
 <translation id="2902312830803030883">การทำงานเพิ่มเติม</translation>
 <translation id="2926057806159140518">ป้อนชื่อผู้ใช้และรหัสผ่าน หรือสแกนคิวอาร์โค้ด</translation>
 <translation id="2940811910881150316">ทดสอบอุปกรณ์ไม่ได้ เปิดฝาหน้าจออีกครั้งเพื่อทดสอบ</translation>
+<translation id="2981143481017883351">ชิ้นงานสุดพิเศษจาก Chromebook พร้อมใช้งานแล้ว</translation>
 <translation id="3008341117444806826">รีเฟรช</translation>
 <translation id="3009958530611748826">เลือกโฟลเดอร์ที่จะใช้บันทึก</translation>
 <translation id="3017079585324758401">พื้นหลัง</translation>
@@ -279,6 +280,7 @@
 <translation id="3360306038446926262">หน้าต่าง</translation>
 <translation id="3368922792935385530">เชื่อมต่อแล้ว</translation>
 <translation id="3369013195428705271">คุณแน่ใจไหมว่าต้องการล้างประวัติการพิมพ์ทั้งหมด ทั้งนี้ ระบบจะไม่ล้างงานพิมพ์ที่กำลังดำเนินอยู่</translation>
+<translation id="3386675685417744672">สุดพิเศษจาก Chromebook</translation>
 <translation id="3404249063913988450">เปิดใช้โปรแกรมรักษาหน้าจอ</translation>
 <translation id="3413935475507503304">คลิก "ถัดไป" เพื่อดำเนินการอัปเดตต่อ</translation>
 <translation id="3434107140712555581"><ph name="BATTERY_PERCENTAGE" />%</translation>
@@ -293,6 +295,7 @@
 <translation id="3484914941826596830">ขณะอัปเดตเฟิร์มแวร์ โปรดอย่าถอดปลั๊กอุปกรณ์ภายนอกเครื่องนี้หรือปิดคอมพิวเตอร์ คุณย่อหน้าต่างนี้ให้เล็กสุดได้ การอัปเดตอาจใช้เวลาสักครู่และอุปกรณ์ภายนอกอาจใช้ไม่ได้ในช่วงเวลานี้</translation>
 <translation id="3486220673238053218">คำจำกัดความ</translation>
 <translation id="3488065109653206955">เปิดการใช้งานบางส่วน</translation>
+<translation id="3502426834823382181">ดูแอปทั้งหมด</translation>
 <translation id="3510890413042482857">ส่ง<ph name="BEGIN_LINK1" />ข้อมูลการติดตามประสิทธิภาพ<ph name="END_LINK1" /></translation>
 <translation id="3517001332549868749">การอัปเดต Chrome OS</translation>
 <translation id="3527036260304016759">ไม่สำเร็จ - ข้อผิดพลาดที่ไม่รู้จัก</translation>
@@ -346,7 +349,6 @@
 <translation id="3967822245660637423">ดาวน์โหลดเสร็จสมบูรณ์</translation>
 <translation id="3969602104473960991">อัปเดตรหัสผ่าน Chrome OS แล้ว</translation>
 <translation id="397105322502079400">กำลังคำนวณ...</translation>
-<translation id="3974175076798940554">เนื้อหาสุดพิเศษของ Chromebook Plus พร้อมใช้งานแล้ว</translation>
 <translation id="39823212440917567">ระบบจะนำงานพิมพ์ที่เก่ากว่า <ph name="NUMBER_OF_DAYS" /> วันออก</translation>
 <translation id="3993704782688964914"><ph name="DEVICE_NAME" /> เป็นเวอร์ชันล่าสุดแล้ว</translation>
 <translation id="4003384961948020559">ไม่สำเร็จ - ถาดกระดาษขาออกเต็ม</translation>
@@ -357,6 +359,7 @@
 <translation id="404928562651467259">คำเตือน</translation>
 <translation id="4054683689023980771">กำลังดาวน์โหลดรูปภาพ</translation>
 <translation id="4060260348856573701">APN ใหม่</translation>
+<translation id="4079743696465895866">เลือกอาร์ตเวิร์กสุดพิเศษจาก Chromebook</translation>
 <translation id="4093865285251893588">รูปโปรไฟล์</translation>
 <translation id="409427325554347132">บันทึกรายละเอียดการทดสอบ</translation>
 <translation id="4095829376260267438">WPA2WPA3</translation>
@@ -387,7 +390,6 @@
 <translation id="4275663329226226506">สื่อ</translation>
 <translation id="4289540628985791613">ภาพรวม</translation>
 <translation id="4289849978083912975">แสดงภาพสไลด์</translation>
-<translation id="4293621540182258188">รุ่งเช้าจนถึงกลางคืน - การเคลื่อนที่ของโลก</translation>
 <translation id="4297501883039923494">หยุดพิมพ์ - ข้อผิดพลาดที่ไม่รู้จัก</translation>
 <translation id="4300073214558989"><ph name="IMAGE_COUNT" /> ภาพ</translation>
 <translation id="4311195029067684288">เต็ม</translation>
@@ -571,7 +573,6 @@
 <translation id="576835345334454681">เพิ่มความสว่างของหน้าจอ</translation>
 <translation id="57838592816432529">ปิดเสียง</translation>
 <translation id="5784136236926853061">เวลาในการตอบสนองของ HTTP สูง</translation>
-<translation id="5809090008577139505">ออโรรา</translation>
 <translation id="5826644637650799838">เกี่ยวกับงานศิลปะ</translation>
 <translation id="5832805196449965646">เพิ่มบุคคล</translation>
 <translation id="583281660410589416">ไม่รู้จัก</translation>
@@ -590,7 +591,6 @@
 <translation id="5907649332524363701">สีเต็มแป้นพิมพ์</translation>
 <translation id="5916084858004523819">ห้ามใช้</translation>
 <translation id="5916664084637901428">เปิด</translation>
-<translation id="5918201491776799918">เลือกงานศิลปะสุดพิเศษจาก Chromebook Plus</translation>
 <translation id="5921506667911082617">{COUNT,plural, =1{สแกนไฟล์และบันทึกไว้ใน <ph name="LINK_BEGIN" /><ph name="FOLDER_NAME" /><ph name="LINK_END" /> เรียบร้อยแล้ว}other{สแกนไฟล์และบันทึกไว้ใน <ph name="LINK_BEGIN" /><ph name="FOLDER_NAME" /><ph name="LINK_END" /> เรียบร้อยแล้ว}}</translation>
 <translation id="5931523347251946569">ไม่พบไฟล์</translation>
 <translation id="5939518447894949180">รีเซ็ต</translation>
@@ -626,6 +626,7 @@
 <translation id="6184793017104303157">B4</translation>
 <translation id="6189418609903030344">ความจุแบตเตอรี่จะลดลงเมื่อใช้ไปเรื่อยๆ</translation>
 <translation id="6191293864534840972">เนมเซิร์ฟเวอร์มีรูปแบบไม่ถูกต้อง</translation>
+<translation id="6205145102504628069">การเคลื่อนตัวของเมฆ</translation>
 <translation id="6213737986933151570">CDMA1XRTT</translation>
 <translation id="6223066887782788441">ออกจากหน้าจอแบบเต็ม</translation>
 <translation id="6223752125779001553">ไม่มีเครื่องสแกนที่ใช้ได้</translation>
@@ -636,6 +637,7 @@
 <translation id="6278428485366576908">ธีม</translation>
 <translation id="6280912520669706465">ARC</translation>
 <translation id="6284632978374966585">เปิดธีมมืด</translation>
+<translation id="6285899124799306373">เปิด Launcher</translation>
 <translation id="6302401976930124515">ยกเลิกการทดสอบ<ph name="TEST_NAME" />แล้ว</translation>
 <translation id="631063167932043783">แอป "สำรวจ"</translation>
 <translation id="6319207335391420837">อัปเดตเฟิร์มแวร์ใน <ph name="DEVICE_NAME" /></translation>
@@ -651,6 +653,7 @@
 <translation id="6382182670717268353">ตัวอย่างโปรแกรมรักษาหน้าจอ</translation>
 <translation id="6388847657025262518">ตัวป้อนเอกสารของเครื่องสแกนมีกระดาษติด ตรวจสอบตัวป้อนเอกสารแล้วลองอีกครั้ง</translation>
 <translation id="6394634179843537518">เพิ่มไฟล์</translation>
+<translation id="6401427872449207797">การค้นหาด้วยเบราว์เซอร์</translation>
 <translation id="6410257289063177456">ไฟล์ภาพ</translation>
 <translation id="641081527798843608">หัวเรื่องที่ตรงกัน</translation>
 <translation id="6412715219990689313">แป้นพิมพ์ในตัว</translation>
@@ -666,6 +669,7 @@
 <translation id="6494974875566443634">การกำหนดค่าเอง</translation>
 <translation id="6500818810472529210">ดูผลการค้นหาใน Google Search</translation>
 <translation id="650266656685499220">หากต้องการสร้างอัลบั้ม โปรดไปที่ Google Photos</translation>
+<translation id="6505750420152840539">รุ่งเช้าจนถึงกลางคืน</translation>
 <translation id="6516990319416533844">ปล่อยให้มีการใช้งานแบตเตอรี่อีกสักครู่เพื่อทดสอบอัตราการชาร์จแบตเตอรี่</translation>
 <translation id="6517239166834772319">สำรวจ</translation>
 <translation id="6526200165918397681">จับคู่วอลเปเปอร์ที่เข้ากัน</translation>
@@ -799,7 +803,6 @@
 <translation id="7656388927906093505">อุปกรณ์เป็นเมาส์</translation>
 <translation id="7658239707568436148">ยกเลิก</translation>
 <translation id="7665800271478495366">เปลี่ยนรูปโปรไฟล์</translation>
-<translation id="7675241868020048622">Aurora (เฉพาะ Plus)</translation>
 <translation id="7690294790491645610">ยืนยันรหัสผ่านใหม่</translation>
 <translation id="7701040980221191251">ไม่มี</translation>
 <translation id="7705524343798198388">VPN</translation>
@@ -857,7 +860,6 @@
 <translation id="8138405288920084977">LTEAdvanced</translation>
 <translation id="8143951647992294073">เลือก <ph name="TOPIC_SOURCE" /> <ph name="TOPIC_SOURCE_DESC" /></translation>
 <translation id="8151185429379586178">เครื่องมือสำหรับนักพัฒนาซอฟต์แวร์</translation>
-<translation id="8153923300383192510">ภาพพิเศษจาก Chromebook Plus</translation>
 <translation id="8179976553408161302">Enter</translation>
 <translation id="8183974620058026102">แนบ</translation>
 <translation id="8206859287963243715">โทรศัพท์มือถือ</translation>
@@ -876,6 +878,7 @@
 <translation id="8312330582793120272">เล่นสื่อ</translation>
 <translation id="8318753676953949627">ไม่มีภาพ</translation>
 <translation id="8329018942023753850">แอปเครื่องคิดเลข</translation>
+<translation id="8335869473001018124">เปิดการค้นหา</translation>
 <translation id="8336739000755212683">เปลี่ยนรูปภาพของบัญชีอุปกรณ์</translation>
 <translation id="8347227221149377169">งานพิมพ์</translation>
 <translation id="8351855506390808906">จุดสัมผัสการแมปคีย์</translation>

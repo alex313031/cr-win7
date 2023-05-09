@@ -285,7 +285,7 @@ WallpaperInfo InfoWithType(WallpaperType type) {
                      base::Time::Now());
   if (IsOnlineWallpaper(type)) {
     // Daily and Online types require asset id and collection id.
-    info.asset_id = 1234;
+    info.unit_id = 1234;
     info.collection_id = "placeholder collection";
     info.location = "https://example.com/example.jpeg";
   }
@@ -1075,7 +1075,15 @@ TEST_F(WallpaperControllerTest, ColorsCalculatedForMostRecentWallpaper) {
   EXPECT_EQ(controller_->calculated_colors()->k_mean_color, SK_ColorBLUE);
   EXPECT_FALSE(pref_manager_->GetCachedKMeanColor("old"));
   EXPECT_TRUE(pref_manager_->GetCachedKMeanColor("new"));
-  EXPECT_TRUE(controller_->GetPreviewImage());
+
+  base::RunLoop load_preview_image_loop;
+  controller_->LoadPreviewImage(base::BindLambdaForTesting(
+      [quit = load_preview_image_loop.QuitClosure()](
+          scoped_refptr<base::RefCountedMemory> image_bytes) {
+        EXPECT_TRUE(image_bytes);
+        std::move(quit).Run();
+      }));
+  load_preview_image_loop.Run();
 }
 
 TEST_F(WallpaperControllerTest, CelebiNotSavedWhenJellyIsDisabled) {
@@ -3355,6 +3363,54 @@ TEST_F(WallpaperControllerTest, ShowOneShotWallpaper) {
   EXPECT_EQ(WallpaperType::kCustomized, controller_->GetWallpaperType());
 }
 
+TEST_F(WallpaperControllerTest, ShowOobeWallpaper) {
+  SetBypassDecode();
+
+  controller_->ShowDefaultWallpaperForTesting();
+  RunAllTasksUntilIdle();
+
+  // Verify the OOBE wallpaper is shown during OOBE.
+  SetSessionState(SessionState::OOBE);
+  controller_->ReloadWallpaperForTesting(/*clear_cache=*/false);
+  RunAllTasksUntilIdle();
+  if (ash::features::IsOobeSimonEnabled()) {
+    EXPECT_TRUE(controller_->IsOobeWallpaper());
+  } else {
+    EXPECT_EQ(WallpaperType::kOneShot, controller_->GetWallpaperType());
+    EXPECT_EQ(GetWallpaperColor(), SK_ColorWHITE);
+  }
+
+  SetSessionState(SessionState::OOBE);
+  controller_->ShowSigninWallpaper();
+  RunAllTasksUntilIdle();
+  if (ash::features::IsOobeSimonEnabled()) {
+    EXPECT_TRUE(controller_->IsOobeWallpaper());
+  } else {
+    EXPECT_EQ(WallpaperType::kOneShot, controller_->GetWallpaperType());
+    EXPECT_EQ(GetWallpaperColor(), SK_ColorWHITE);
+  }
+
+  // Verify the OOBE wallpaper is replaced when session state is no
+  // longer OOBE.
+  SetSessionState(SessionState::LOGGED_IN_NOT_ACTIVE);
+  RunAllTasksUntilIdle();
+  EXPECT_FALSE(controller_->IsOobeWallpaper());
+
+  // Verify the OOBE wallpaper never shows up again when session
+  // state changes.
+  SetSessionState(SessionState::ACTIVE);
+  RunAllTasksUntilIdle();
+  EXPECT_FALSE(controller_->IsOobeWallpaper());
+
+  SetSessionState(SessionState::LOCKED);
+  RunAllTasksUntilIdle();
+  EXPECT_FALSE(controller_->IsOobeWallpaper());
+
+  SetSessionState(SessionState::LOGIN_SECONDARY);
+  RunAllTasksUntilIdle();
+  EXPECT_FALSE(controller_->IsOobeWallpaper());
+}
+
 TEST_F(WallpaperControllerTest, OnFirstWallpaperShown) {
   TestWallpaperControllerObserver observer(controller_);
   EXPECT_EQ(0, GetWallpaperCount());
@@ -3706,7 +3762,7 @@ TEST_F(WallpaperControllerTest,
 
   WallpaperInfo synced_info = {kDummyUrl, WALLPAPER_LAYOUT_CENTER_CROPPED,
                                WallpaperType::kOnline, base::Time::Now()};
-  synced_info.asset_id = kAssetId;
+  synced_info.unit_id = kUnitId;
   synced_info.collection_id = TestWallpaperControllerClient::kDummyCollectionId;
   pref_manager_->SetSyncedWallpaperInfo(kAccountId1, synced_info);
 
@@ -3728,7 +3784,7 @@ TEST_F(WallpaperControllerTest, ActiveUserPrefServiceChanged_SyncDisabled) {
   CacheOnlineWallpaper(kDummyUrl);
   WallpaperInfo synced_info = {kDummyUrl, WALLPAPER_LAYOUT_CENTER_CROPPED,
                                WallpaperType::kOnline, base::Time::Now()};
-  synced_info.asset_id = kAssetId;
+  synced_info.unit_id = kUnitId;
   synced_info.collection_id = TestWallpaperControllerClient::kDummyCollectionId;
   pref_manager_->SetSyncedWallpaperInfo(kAccountId1, synced_info);
 
@@ -3774,7 +3830,7 @@ TEST_F(WallpaperControllerTest,
   SimulateUserLogin(kAccountId1);
   WallpaperInfo synced_info = {kDummyUrl, WALLPAPER_LAYOUT_CENTER_CROPPED,
                                WallpaperType::kOnline, base::Time::Now()};
-  synced_info.asset_id = kAssetId;
+  synced_info.unit_id = kUnitId;
   synced_info.collection_id = TestWallpaperControllerClient::kDummyCollectionId;
   pref_manager_->SetSyncedWallpaperInfo(kAccountId1, synced_info);
   RunAllTasksUntilIdle();
@@ -3843,7 +3899,7 @@ TEST_F(WallpaperControllerTest, UpdateDailyRefreshWallpaper) {
 
   WallpaperInfo info = {std::string(), WALLPAPER_LAYOUT_CENTER,
                         WallpaperType::kDaily, DayBeforeYesterdayish()};
-  info.asset_id = kAssetId;
+  info.unit_id = kUnitId;
   info.collection_id = expected;
   pref_manager_->SetUserWallpaperInfo(kAccountId1, info);
 

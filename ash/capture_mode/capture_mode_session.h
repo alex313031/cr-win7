@@ -64,7 +64,7 @@ class ASH_EXPORT CaptureModeSession
       public FolderSelectionDialogController::Delegate,
       public ShellObserver {
  public:
-  // Creates the bar widget on a calculated root window. |projector_mode|
+  // Creates the bar widget on a calculated root window. `projector_mode`
   // specifies whether this session was started for the projector workflow.
   CaptureModeSession(CaptureModeController* controller,
                      CaptureModeBehavior* active_behavior,
@@ -97,6 +97,9 @@ class ASH_EXPORT CaptureModeSession
     a11y_alert_on_session_exit_ = value;
   }
   bool is_shutting_down() const { return is_shutting_down_; }
+  bool is_stopping_to_start_video_recording() const {
+    return is_stopping_to_start_video_recording_;
+  }
   void set_is_stopping_to_start_video_recording(bool value) {
     is_stopping_to_start_video_recording_ = value;
   }
@@ -420,10 +423,9 @@ class ASH_EXPORT CaptureModeSession
   void SelectDefaultRegion();
 
   // Updates the region either horizontally or vertically. Called when the arrow
-  // keys are pressed. |event_flags| are the flags from the event that triggers
+  // keys are pressed. `event_flags` are the flags from the event that triggers
   // these calls. Different modifiers will move the region more or less.
-  void UpdateRegionHorizontally(bool left, int event_flags);
-  void UpdateRegionVertically(bool up, int event_flags);
+  void UpdateRegionForArrowKeys(ui::KeyboardCode key_code, int event_flags);
 
   // Called when the parent container of camera preview may need to be updated.
   void MaybeReparentCameraPreviewWidget();

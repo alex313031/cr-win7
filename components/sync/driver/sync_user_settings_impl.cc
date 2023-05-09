@@ -60,13 +60,13 @@ SyncUserSettingsImpl::SyncUserSettingsImpl(
     SyncPrefs* prefs,
     const SyncTypePreferenceProvider* preference_provider,
     ModelTypeSet registered_model_types,
-    base::RepeatingCallback<bool()> use_transport_only_mode_callback)
+    base::RepeatingCallback<bool()> bookmarks_and_reading_list_opt_in_callback)
     : crypto_(crypto),
       prefs_(prefs),
       preference_provider_(preference_provider),
       registered_model_types_(registered_model_types),
-      use_transport_only_mode_callback_(
-          std::move(use_transport_only_mode_callback)) {
+      bookmarks_and_reading_list_opt_in_callback_(
+          std::move(bookmarks_and_reading_list_opt_in_callback)) {
   DCHECK(crypto_);
   DCHECK(prefs_);
 }
@@ -98,7 +98,7 @@ UserSelectableTypeSet SyncUserSettingsImpl::GetSelectedTypes() const {
   // opt-in.
   // TODO(crbug.com/1440628): Cleanup the temporary behaviour of an additional
   // opt in for Bookmarks and Reading Lists.
-  if (use_transport_only_mode_callback_.Run() &&
+  if (bookmarks_and_reading_list_opt_in_callback_.Run() &&
       !prefs_->IsOptedInForBookmarksAndReadingListAccountStorage()) {
     types.Remove(UserSelectableType::kBookmarks);
     types.Remove(UserSelectableType::kReadingList);
@@ -288,10 +288,13 @@ ModelTypeSet SyncUserSettingsImpl::GetPreferredDataTypes() const {
 #endif
   types.RetainAll(registered_model_types_);
 
+  // Control types (in practice, NIGORI) are always considered "preferred", even
+  // though they're technically not registered.
+  types.PutAll(ControlTypes());
+
   static_assert(46 == GetNumModelTypes(),
                 "If adding a new sync data type, update the list below below if"
                 " you want to disable the new data type for local sync.");
-  types.PutAll(ControlTypes());
   if (prefs_->IsLocalSyncEnabled()) {
     types.Remove(APP_LIST);
     types.Remove(AUTOFILL_WALLET_OFFER);

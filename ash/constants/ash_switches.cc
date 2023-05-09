@@ -856,6 +856,10 @@ const char kQsAddFakeBluetoothDevices[] = "qs-add-fake-bluetooth-devices";
 // Adds fake Cast devices to the quick settings menu for UI testing.
 const char kQsAddFakeCastDevices[] = "qs-add-fake-cast-devices";
 
+// Forces the quick settings "locale" FeatureTile to show. Normally it only
+// shows in demo mode, which does not work in the emulator.
+const char kQsShowLocaleTile[] = "qs-show-locale-tile";
+
 // The name of the per-model directory which contains per-region
 // subdirectories with regulatory label files for this model.
 // The per-model directories (if there are any) are located under
@@ -892,9 +896,6 @@ const char kShelfHotseat[] = "shelf-hotseat";
 // See `ShouldSkipRebootDueToGracePeriod` in scheduled_task_util.h.
 const char kScheduledRebootGracePeriodInSecondsForTesting[] =
     "scheduled-reboot-grace-period-in-seconds-for-testing";
-
-// App window previews when hovering over the shelf.
-const char kShelfHoverPreviews[] = "shelf-hover-previews";
 
 // If true, the developer tool overlay will be shown for the login/lock screen.
 // This makes it easier to test layout logic.
@@ -1018,10 +1019,6 @@ bool IsRevenBranding() {
 bool IsSigninFrameClientCertsEnabled() {
   return !base::CommandLine::ForCurrentProcess()->HasSwitch(
       kDisableSigninFrameClientCerts);
-}
-
-bool ShouldShowShelfHoverPreviews() {
-  return base::CommandLine::ForCurrentProcess()->HasSwitch(kShelfHoverPreviews);
 }
 
 bool ShouldTetherHostScansIgnoreWiredConnections() {

@@ -39,7 +39,6 @@
 #import "ios/chrome/app/chrome_overlay_window.h"
 #import "ios/chrome/app/deferred_initialization_runner.h"
 #import "ios/chrome/app/tests_hook.h"
-#import "ios/chrome/browser/application_context/application_context.h"
 #import "ios/chrome/browser/browsing_data/browsing_data_remove_mask.h"
 #import "ios/chrome/browser/browsing_data/browsing_data_remover.h"
 #import "ios/chrome/browser/browsing_data/browsing_data_remover_factory.h"
@@ -55,10 +54,6 @@
 #import "ios/chrome/browser/infobars/infobar_manager_impl.h"
 #import "ios/chrome/browser/mailto_handler/mailto_handler_service.h"
 #import "ios/chrome/browser/mailto_handler/mailto_handler_service_factory.h"
-#import "ios/chrome/browser/main/browser.h"
-#import "ios/chrome/browser/main/browser_list.h"
-#import "ios/chrome/browser/main/browser_list_factory.h"
-#import "ios/chrome/browser/main/browser_provider_interface.h"
 #import "ios/chrome/browser/main/browser_util.h"
 #import "ios/chrome/browser/ntp/features.h"
 #import "ios/chrome/browser/ntp/new_tab_page_tab_helper.h"
@@ -75,7 +70,15 @@
 #import "ios/chrome/browser/shared/coordinator/default_browser_promo/non_modal_default_browser_promo_scheduler_scene_agent.h"
 #import "ios/chrome/browser/shared/coordinator/layout_guide/layout_guide_scene_agent.h"
 #import "ios/chrome/browser/shared/coordinator/scene/scene_ui_provider.h"
+#import "ios/chrome/browser/shared/model/application_context/application_context.h"
+#import "ios/chrome/browser/shared/model/browser/browser.h"
+#import "ios/chrome/browser/shared/model/browser/browser_list.h"
+#import "ios/chrome/browser/shared/model/browser/browser_list_factory.h"
+#import "ios/chrome/browser/shared/model/browser/browser_provider_interface.h"
 #import "ios/chrome/browser/shared/model/browser_state/chrome_browser_state.h"
+#import "ios/chrome/browser/shared/model/web_state_list/web_state_list.h"
+#import "ios/chrome/browser/shared/model/web_state_list/web_state_list_observer_bridge.h"
+#import "ios/chrome/browser/shared/model/web_state_list/web_state_opener.h"
 #import "ios/chrome/browser/shared/public/commands/application_commands.h"
 #import "ios/chrome/browser/shared/public/commands/browser_commands.h"
 #import "ios/chrome/browser/shared/public/commands/browsing_data_commands.h"
@@ -146,9 +149,6 @@
 #import "ios/chrome/browser/web/page_placeholder_browser_agent.h"
 #import "ios/chrome/browser/web_state_list/session_metrics.h"
 #import "ios/chrome/browser/web_state_list/tab_insertion_browser_agent.h"
-#import "ios/chrome/browser/web_state_list/web_state_list.h"
-#import "ios/chrome/browser/web_state_list/web_state_list_observer_bridge.h"
-#import "ios/chrome/browser/web_state_list/web_state_opener.h"
 #import "ios/chrome/browser/window_activities/window_activity_helpers.h"
 #import "ios/chrome/common/ui/reauthentication/reauthentication_module.h"
 #import "ios/chrome/grit/ios_strings.h"
@@ -2944,21 +2944,26 @@ void InjectNTP(Browser* browser) {
   };
 
   if (self.settingsNavigationController) {
+    // Store a reference to the presentingViewController in case the user
+    // is dismissing the Signin screen and then dismisses Settings before
+    // the Signin screen is done animating, which will delay the execution of
+    // the `dismissSettings` block stopping the code from accessing
+    // the `presentingViewController` property.
+    __weak UIViewController* weakPresentingViewController =
+        [self.settingsNavigationController presentingViewController];
     ProceduralBlock dismissSettings = ^() {
-      [self.settingsNavigationController cleanUpSettings];
-      UIViewController* presentingViewController =
-          [self.settingsNavigationController presentingViewController];
-      // If presentingViewController is nil it means the VC was already
-      // dismissed by some other action like swiping down.
-      DCHECK(presentingViewController);
-      [presentingViewController dismissViewControllerAnimated:animated
-                                                   completion:completion];
-      self.settingsNavigationController = nil;
+      [weakSelf.settingsNavigationController cleanUpSettings];
+      DCHECK(weakPresentingViewController);
+      [weakPresentingViewController dismissViewControllerAnimated:animated
+                                                       completion:completion];
+      weakSelf.settingsNavigationController = nil;
     };
     // `self.signinCoordinator` can be presented on top of the settings, to
     // present the Trusted Vault reauthentication `self.signinCoordinator` has
     // to be closed first.
     if (self.signinCoordinator) {
+      // If signinCoordinator is already dismissing, completion execution will
+      // happen when it is done animating.
       [self interruptSigninCoordinatorAnimated:animated
                                     completion:dismissSettings];
     } else if (dismissSettings) {

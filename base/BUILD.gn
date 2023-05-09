@@ -1914,8 +1914,6 @@ component("base") {
 
     deps += [ "//base/win:base_win_buildflags" ]
 
-    data_deps += [ "//build/win:runtime_libs" ]
-
     if (com_init_check_hook_disabled) {
       defines += [ "COM_INIT_CHECK_HOOK_DISABLED" ]
     }
@@ -3896,11 +3894,6 @@ test("base_unittests") {
       "posix/file_descriptor_shuffle_unittest.cc",
     ]
 
-    # FilePatchWatcherImpl is not implemented. See crbug.com/851641.
-    # TODO(crbug.com/1430566): Convert this subtraction to a condition where
-    # it is added.
-    sources -= [ "files/file_path_watcher_unittest.cc" ]
-
     deps += [
       ":test_interface_impl",
       ":test_interface_natural_impl",
@@ -4238,7 +4231,6 @@ if (is_android) {
       "android/java/src/org/chromium/base/BaseFeatureList.java",
       "android/java/src/org/chromium/base/BuildInfo.java",
       "android/java/src/org/chromium/base/BundleUtils.java",
-      "android/java/src/org/chromium/base/ByteArrayGenerator.java",
       "android/java/src/org/chromium/base/Callback.java",
       "android/java/src/org/chromium/base/CallbackController.java",
       "android/java/src/org/chromium/base/CollectionUtil.java",

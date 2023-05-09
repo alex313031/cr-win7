@@ -360,7 +360,6 @@ class CORE_EXPORT LayoutObject : public GarbageCollected<LayoutObject>,
     return parent_;
   }
   bool IsDescendantOf(const LayoutObject*) const;
-  LayoutObject* NonCulledParent() const;
 
   LayoutObject* PreviousSibling() const {
     NOT_DESTROYED();
@@ -2084,6 +2083,21 @@ class CORE_EXPORT LayoutObject : public GarbageCollected<LayoutObject>,
     return true;
   }
 
+  // Return true if this is a LayoutBox without physical fragments.
+  //
+  // This may happen for certain object types in certain circumstaces [*]. Code
+  // that attempts to enter fragment traversal from a LayoutObject needs to
+  // check if the box actually has fragments before proceeding.
+  //
+  // [*] Sometimes a LayoutView is fragment-less, e.g. if the root element has
+  // display:none. Frameset children may also be fragment-less, if there are
+  // more children than defined in the frameset's grid. Table columns
+  // (LayoutNGTableColumn) never creates fragments.
+  virtual bool IsFragmentLessBox() const {
+    NOT_DESTROYED();
+    return false;
+  }
+
   // Return true if |this| produces one or more inline fragments, including
   // whitespace-only text fragments.
   virtual bool HasInlineFragments() const {
@@ -2867,11 +2881,15 @@ class CORE_EXPORT LayoutObject : public GarbageCollected<LayoutObject>,
   bool ShouldUseTransformFromContainer(const LayoutObject* container) const;
 
   // The optional |size| parameter is used if the size of the object isn't
-  // correct yet.
-  void GetTransformFromContainer(const LayoutObject* container,
-                                 const PhysicalOffset& offset_in_container,
-                                 gfx::Transform&,
-                                 const PhysicalSize* size = nullptr) const;
+  // correct yet. If |fragment_transform| is provided, we'll use that instead of
+  // using the transform stored in the PaintLayer (which is useless if a box is
+  // fragmented).
+  void GetTransformFromContainer(
+      const LayoutObject* container,
+      const PhysicalOffset& offset_in_container,
+      gfx::Transform&,
+      const PhysicalSize* size = nullptr,
+      const gfx::Transform* fragment_transform = nullptr) const;
 
   bool CreatesGroup() const {
     NOT_DESTROYED();

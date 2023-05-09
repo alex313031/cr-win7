@@ -40,6 +40,7 @@
 #include "content/public/test/test_navigation_observer.h"
 #include "content/public/test/url_loader_interceptor.h"
 #include "net/dns/mock_host_resolver.h"
+#include "net/http/http_util.h"
 #include "net/test/cert_test_util.h"
 #include "net/test/embedded_test_server/embedded_test_server.h"
 #include "net/test/embedded_test_server/http_request.h"
@@ -55,7 +56,16 @@ using security_interstitials::https_only_mode::
     kEventHistogramWithEngagementHeuristic;
 using security_interstitials::https_only_mode::
     kNavigationRequestSecurityLevelHistogram;
+using security_interstitials::https_only_mode::
+    kSiteEngagementHeuristicAccumulatedHostCountHistogram;
+using security_interstitials::https_only_mode::
+    kSiteEngagementHeuristicEnforcementDurationHistogram;
+using security_interstitials::https_only_mode::
+    kSiteEngagementHeuristicHostCountHistogram;
+using security_interstitials::https_only_mode::
+    kSiteEngagementHeuristicStateHistogram;
 using security_interstitials::https_only_mode::NavigationRequestSecurityLevel;
+using security_interstitials::https_only_mode::SiteEngagementHeuristicState;
 
 // Many of the following tests have only minor variations for HTTPS-First Mode
 // vs. HTTPS-Upgrades. These get parameterized so the tests run under both
@@ -488,12 +498,26 @@ IN_PROC_BROWSER_TEST_P(HttpsUpgradesBrowserTest,
 IN_PROC_BROWSER_TEST_P(
     HttpsUpgradesBrowserTest,
     MAYBE_UrlWithHttpScheme_BrokenSSL_ShouldInterstitial_SiteEngagement) {
+  content::WebContents* contents =
+      browser()->tab_strip_model()->GetActiveWebContents();
+  Profile* profile = Profile::FromBrowserContext(contents->GetBrowserContext());
+  content::SSLHostStateDelegate* state = profile->GetSSLHostStateDelegate();
+
+  // Set test clock.
+  auto clock = std::make_unique<base::SimpleTestClock>();
+  auto* clock_ptr = clock.get();
+  StatefulSSLHostStateDelegate* chrome_state =
+      static_cast<StatefulSSLHostStateDelegate*>(state);
+  chrome_state->SetClockForTesting(std::move(clock));
+
+  // Start the clock at standard system time.
+  clock_ptr->SetNow(base::Time::NowFromSystemTime());
+
   GURL http_url = http_server()->GetURL("bad-https.com", "/simple.html");
   GURL https_url = https_server()->GetURL("bad-https.com", "/simple.html");
   SetSiteEngagementScore(http_url, 2);
   SetSiteEngagementScore(https_url, 95);
 
-  auto* contents = browser()->tab_strip_model()->GetActiveWebContents();
   NavigateAndWaitForFallback(contents, http_url);
   EXPECT_EQ(http_url, contents->GetLastCommittedURL());
 
@@ -503,7 +527,7 @@ IN_PROC_BROWSER_TEST_P(
             contents));
   }
 
-  // // Verify that navigation event metrics were correctly recorded.
+  // Verify that navigation event metrics were correctly recorded.
   if (IsHttpUpgradingEnabled()) {
     histograms()->ExpectTotalCount(kEventHistogram, 3);
     histograms()->ExpectBucketCount(kEventHistogram, Event::kUpgradeAttempted,
@@ -522,13 +546,149 @@ IN_PROC_BROWSER_TEST_P(
                                       Event::kUpgradeFailed, 1);
       histograms()->ExpectBucketCount(kEventHistogramWithEngagementHeuristic,
                                       Event::kUpgradeCertError, 1);
+    } else {
+      histograms()->ExpectTotalCount(kEventHistogramWithEngagementHeuristic, 0);
     }
 
   } else {
     histograms()->ExpectTotalCount(kEventHistogram, 1);
     histograms()->ExpectBucketCount(kEventHistogram,
                                     Event::kUpgradeNotAttempted, 1);
+
+    histograms()->ExpectTotalCount(kEventHistogramWithEngagementHeuristic, 1);
+    histograms()->ExpectBucketCount(kEventHistogramWithEngagementHeuristic,
+                                    Event::kUpgradeNotAttempted, 1);
   }
+
+  histograms()->ExpectTotalCount(kSiteEngagementHeuristicStateHistogram, 1);
+  histograms()->ExpectBucketCount(kSiteEngagementHeuristicStateHistogram,
+                                  SiteEngagementHeuristicState::kDisabled, 0);
+  histograms()->ExpectBucketCount(kSiteEngagementHeuristicStateHistogram,
+                                  SiteEngagementHeuristicState::kEnabled, 1);
+
+  // Check host count.
+  histograms()->ExpectTotalCount(kSiteEngagementHeuristicHostCountHistogram, 1);
+  histograms()->ExpectBucketCount(kSiteEngagementHeuristicHostCountHistogram, 0,
+                                  /*count=*/0);
+  histograms()->ExpectBucketCount(kSiteEngagementHeuristicHostCountHistogram, 1,
+                                  /*count=*/1);
+  // Check accumulated host count.
+  histograms()->ExpectTotalCount(
+      kSiteEngagementHeuristicAccumulatedHostCountHistogram, 1);
+  histograms()->ExpectBucketCount(
+      kSiteEngagementHeuristicAccumulatedHostCountHistogram, 0, /*count=*/0);
+  histograms()->ExpectBucketCount(
+      kSiteEngagementHeuristicAccumulatedHostCountHistogram, 1, /*count=*/1);
+  // Check enforcement duration. Since the host isn't removed from HFM
+  // enforcement list, no duration should be recorded yet.
+  histograms()->ExpectTotalCount(
+      kSiteEngagementHeuristicEnforcementDurationHistogram, 0);
+
+  // Lower HTTPS engagement score. This disabled HFM on the site. Also advance
+  // the clock.
+  SetSiteEngagementScore(https_url, 5);
+  clock_ptr->Advance(base::Hours(1));
+  NavigateAndWaitForFallback(contents, http_url);
+  EXPECT_EQ(http_url, contents->GetLastCommittedURL());
+
+  // Event histogram shouldn't change.
+  if (IsHttpUpgradingEnabled()) {
+    if (!IsHttpInterstitialEnabled()) {
+      histograms()->ExpectTotalCount(kEventHistogramWithEngagementHeuristic, 3);
+    } else {
+      histograms()->ExpectTotalCount(kEventHistogramWithEngagementHeuristic, 0);
+    }
+  } else {
+    histograms()->ExpectTotalCount(kEventHistogramWithEngagementHeuristic, 1);
+  }
+
+  // Check host count.
+  histograms()->ExpectTotalCount(kSiteEngagementHeuristicHostCountHistogram, 2);
+  histograms()->ExpectBucketCount(kSiteEngagementHeuristicHostCountHistogram, 0,
+                                  /*count=*/1);
+  histograms()->ExpectBucketCount(kSiteEngagementHeuristicHostCountHistogram, 1,
+                                  /*count=*/1);
+  // Check accumulated host count.
+  histograms()->ExpectTotalCount(
+      kSiteEngagementHeuristicAccumulatedHostCountHistogram, 2);
+  histograms()->ExpectBucketCount(
+      kSiteEngagementHeuristicAccumulatedHostCountHistogram, 0, /*count=*/0);
+  histograms()->ExpectBucketCount(
+      kSiteEngagementHeuristicAccumulatedHostCountHistogram, 1, /*count=*/2);
+  // Check enforcement duration. Since the host isn't removed from HFM
+  // enforcement list, no duration should be recorded yet.
+  histograms()->ExpectTotalCount(
+      kSiteEngagementHeuristicEnforcementDurationHistogram, 1);
+  histograms()->ExpectTimeBucketCount(
+      kSiteEngagementHeuristicEnforcementDurationHistogram, base::Hours(1), 1);
+}
+
+// Regression test for crbug.com/1441276. Sequence of events:
+// 1. Loads http://example.com. This gets upgraded to https://example.com.
+// 2. https://example.com has an iframe for https://nonexistentsite.com. It
+//    navigates away immediately to http://example.com.
+// 3. This causes a crash in
+//    HttpsUpgradesInterceptor::MaybeCreateLoaderForResponse() for
+//    nonexistentsite.com.
+IN_PROC_BROWSER_TEST_P(HttpsUpgradesBrowserTest,
+                       LoadIFrameAndNavigateAway_ShouldNotCrash) {
+  // This test is only interesting for HTTPS-Upgrades and HTTPS-First Mode.
+  if (!IsHttpUpgradingEnabled()) {
+    return;
+  }
+
+  // Disable the testing port configuration, as this test doesn't use the
+  // EmbeddedTestServer.
+  HttpsUpgradesInterceptor::SetHttpsPortForTesting(0);
+  HttpsUpgradesInterceptor::SetHttpPortForTesting(0);
+
+  bool navigated_once = false;
+  auto url_loader_interceptor = std::make_unique<content::URLLoaderInterceptor>(
+      base::BindLambdaForTesting(
+          [&navigated_once](
+              content::URLLoaderInterceptor::RequestParams* params) {
+            if (params->url_request.url == GURL("https://example.com")) {
+              if (!navigated_once) {
+                // Load an iframe that will result in an error and immediately
+                // navigate away.
+                content::URLLoaderInterceptor::WriteResponse(
+                    "HTTP/1.1 200 OK\nContent-type: text/html\n\n",
+                    "<html>"
+                    "<iframe src='https://nonexistentsite.com'></iframe>"
+                    "<script>window.location.href = "
+                    "'http://example.com';</script></html>",
+                    params->client.get());
+                navigated_once = true;
+                return true;
+              }
+              // Return a normal response the second time this is called,
+              // otherwise the test will timeout due to navigating back and
+              // forth between http and https URLs.
+              content::URLLoaderInterceptor::WriteResponse(
+                  "HTTP/1.1 200 OK\nContent-type: text/html\n\n",
+                  "<html>Done</html>", params->client.get());
+              return true;
+            }
+
+            if (params->url_request.url == GURL("http://example.com")) {
+              content::URLLoaderInterceptor::WriteResponse(
+                  "HTTP/1.1 200 OK\nContent-type: text/html\n\n",
+                  "<html>Test</html>", params->client.get());
+              return true;
+            }
+
+            if (params->url_request.url.host() == "nonexistentsite.com") {
+              // This request must fail for the bug to trigger.
+              params->client->OnComplete(network::URLLoaderCompletionStatus(
+                  net::ERR_CONNECTION_RESET));
+              return true;
+            }
+            return false;
+          }));
+
+  GURL http_url("http://example.com");
+  auto* contents = browser()->tab_strip_model()->GetActiveWebContents();
+  NavigateAndWaitForFallback(contents, http_url);
 }
 
 // If the user triggers an HTTPS-Only Mode interstitial for a host and then

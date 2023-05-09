@@ -16,7 +16,9 @@
 #import "components/bookmarks/browser/bookmark_model.h"
 #import "components/bookmarks/browser/bookmark_node.h"
 #import "components/bookmarks/common/bookmark_features.h"
+#import "components/sync/test/test_sync_service.h"
 #import "ios/chrome/browser/bookmarks/bookmark_ios_unit_test_support.h"
+#import "ios/chrome/browser/sync/sync_setup_service_mock.h"
 #import "testing/gmock/include/gmock/gmock.h"
 #import "testing/gtest_mac.h"
 
@@ -68,8 +70,8 @@ class BookmarkIOSUtilsUnitTest : public BookmarkIOSUnitTestSupport,
     to_move.insert(f2b);
     to_move.insert(f2);
 
-    bookmark_utils_ios::MoveBookmarks(
-        to_move, GetBookmarkModelForNode(parent_folder), f1);
+    bookmark_utils_ios::MoveBookmarks(to_move, profile_bookmark_model_,
+                                      account_bookmark_model_, f1);
     EXPECT_THAT(GetBookmarkTitles(parent_folder->children()),
                 ::testing::UnorderedElementsAre(u"f1", u"b"));
     EXPECT_THAT(GetBookmarkTitles(f1->children()),
@@ -122,6 +124,49 @@ TEST_P(BookmarkIOSUtilsUnitTest, MoveNodesInAccountModel) {
   const BookmarkNode* account_mobile_node =
       account_bookmark_model_->mobile_node();
   ASSERT_NO_FATAL_FAILURE(TestMovingBookmarks(account_mobile_node));
+}
+
+TEST_P(BookmarkIOSUtilsUnitTest, MoveNodesBetweenModels) {
+  if (!IsAccountStorageEnabled()) {
+    GTEST_SKIP() << "Need account storage to move bookmarks between storages";
+  }
+  const BookmarkNode* local_or_syncable_mobile_node =
+      profile_bookmark_model_->mobile_node();
+  const BookmarkNode* f1 = AddFolder(local_or_syncable_mobile_node, u"f1");
+  AddBookmark(local_or_syncable_mobile_node, u"a");
+  const BookmarkNode* b = AddBookmark(local_or_syncable_mobile_node, u"b");
+  const BookmarkNode* f1a = AddBookmark(f1, u"f1a");
+  AddBookmark(f1, u"f1b");
+
+  const BookmarkNode* account_mobile_node =
+      account_bookmark_model_->mobile_node();
+  const BookmarkNode* c = AddBookmark(account_mobile_node, u"c");
+  const BookmarkNode* f2 = AddFolder(account_mobile_node, u"f2");
+  AddBookmark(f2, u"f2a");
+
+  std::set<const BookmarkNode*> to_move;
+  to_move.insert(f1);   // Cross-storage move.
+  to_move.insert(f1a);  // Cross-storage move, the parent is also moved.
+  to_move.insert(b);    // Cross-storage move, the parent is not moved.
+  to_move.insert(c);    // Same-storage move.
+
+  bookmark_utils_ios::MoveBookmarks(to_move, profile_bookmark_model_,
+                                    account_bookmark_model_, f2);
+
+  EXPECT_THAT(GetBookmarkTitles(local_or_syncable_mobile_node->children()),
+              ::testing::ElementsAre(u"a"));
+  EXPECT_THAT(GetBookmarkTitles(account_mobile_node->children()),
+              ::testing::ElementsAre(u"f2"));
+  EXPECT_THAT(
+      GetBookmarkTitles(f2->children()),
+      ::testing::UnorderedElementsAre(u"f2a", u"f1", u"f1a", u"b", u"c"));
+  auto it = base::ranges::find_if(
+      f2->children(), [](const auto& node) { return node->is_folder(); });
+  ASSERT_NE(it, f2->children().end());
+  const BookmarkNode* moved_f1 = it->get();
+  EXPECT_EQ(moved_f1->GetTitle(), u"f1");
+  EXPECT_THAT(GetBookmarkTitles(moved_f1->children()),
+              ::testing::ElementsAre(u"f1b"));
 }
 
 TEST_P(BookmarkIOSUtilsUnitTest, TestCreateBookmarkPath) {
@@ -316,6 +361,43 @@ TEST_P(BookmarkIOSUtilsUnitTest, TestMissingNodes) {
   EXPECT_EQ(2u, missingNodesIndices.size());
   EXPECT_EQ(2u, missingNodesIndices[0]);
   EXPECT_EQ(3u, missingNodesIndices[1]);
+}
+
+TEST_P(BookmarkIOSUtilsUnitTest, ShouldDisplayCloudSlashIconForProfileModel) {
+  syncer::TestSyncService sync_service;
+  SyncSetupServiceMock sync_setup_service(&sync_service);
+
+  // If sync-the-feature is on, including bookmarks, the icon should not be
+  // displayed.
+  ON_CALL(sync_setup_service, CanSyncFeatureStart)
+      .WillByDefault(testing::Return(true));
+  ON_CALL(sync_setup_service, IsDataTypePreferred)
+      .WillByDefault(testing::Return(true));
+  EXPECT_FALSE(bookmark_utils_ios::ShouldDisplayCloudSlashIconForProfileModel(
+      &sync_setup_service));
+
+  // If sync-the-feature is on, but bookmarks excluded, the icon should be
+  // displayed, but only if the feature is enabled (IsAccountStorageEnabled()).
+  ON_CALL(sync_setup_service, IsDataTypePreferred)
+      .WillByDefault(testing::Return(false));
+  EXPECT_EQ(IsAccountStorageEnabled(),
+            bookmark_utils_ios::ShouldDisplayCloudSlashIconForProfileModel(
+                &sync_setup_service));
+
+  // If sync-the-feature is off, same thing: the icon should be displayed, but
+  // only if the feature is enabled (IsAccountStorageEnabled()).
+  ON_CALL(sync_setup_service, CanSyncFeatureStart)
+      .WillByDefault(testing::Return(true));
+  EXPECT_EQ(IsAccountStorageEnabled(),
+            bookmark_utils_ios::ShouldDisplayCloudSlashIconForProfileModel(
+                &sync_setup_service));
+
+  // IsDataTypePreferred() shouldn't change anything if sync-the-feature is off.
+  ON_CALL(sync_setup_service, IsDataTypePreferred)
+      .WillByDefault(testing::Return(false));
+  EXPECT_EQ(IsAccountStorageEnabled(),
+            bookmark_utils_ios::ShouldDisplayCloudSlashIconForProfileModel(
+                &sync_setup_service));
 }
 
 INSTANTIATE_TEST_SUITE_P(All, BookmarkIOSUtilsUnitTest, ::testing::Bool());

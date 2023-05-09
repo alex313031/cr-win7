@@ -2683,7 +2683,16 @@ class MockWebUIProvider
 // This tests checks that window is correctly initialized when DevTools is
 // opened while navigation through history with forward and back actions.
 // (crbug.com/627407)
-IN_PROC_BROWSER_TEST_F(DevToolsTest, TestWindowInitializedOnNavigateBack) {
+#if BUILDFLAG(IS_MAC) || BUILDFLAG(IS_CHROMEOS_LACROS)
+// Flaky on MAC and lacros https://crbug.com/1443360
+#define MAYBE_TestWindowInitializedOnNavigateBack \
+  DISABLED_TestWindowInitializedOnNavigateBack
+#else
+#define MAYBE_TestWindowInitializedOnNavigateBack \
+  TestWindowInitializedOnNavigateBack
+#endif
+IN_PROC_BROWSER_TEST_F(DevToolsTest,
+                       MAYBE_TestWindowInitializedOnNavigateBack) {
   TestChromeWebUIControllerFactory test_factory;
   content::ScopedWebUIControllerFactoryRegistration factory_registration(
       &test_factory);
@@ -2692,11 +2701,11 @@ IN_PROC_BROWSER_TEST_F(DevToolsTest, TestWindowInitializedOnNavigateBack) {
                                   "  window.abc = 239;\n"
                                   "  console.log(abc);\n"
                                   "</script>");
-  test_factory.AddFactoryOverride(GURL("https://a.com/dummyurl").host(),
+  test_factory.AddFactoryOverride(GURL("chrome://foo/dummyurl").host(),
                                   &mock_provider);
 
   ASSERT_TRUE(
-      ui_test_utils::NavigateToURL(browser(), GURL("https://a.com/dummyurl")));
+      ui_test_utils::NavigateToURL(browser(), GURL("chrome://foo/dummyurl")));
   DevToolsWindow* window =
       DevToolsWindowTesting::OpenDevToolsWindowSync(GetInspectedTab(), true);
   chrome::DuplicateTab(browser());

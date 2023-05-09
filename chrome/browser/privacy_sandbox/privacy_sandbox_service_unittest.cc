@@ -32,7 +32,6 @@
 #include "components/content_settings/core/test/content_settings_test_utils.h"
 #include "components/policy/core/common/mock_policy_service.h"
 #include "components/policy/policy_constants.h"
-#include "components/privacy_sandbox/canonical_topic.h"
 #include "components/privacy_sandbox/mock_privacy_sandbox_settings.h"
 #include "components/privacy_sandbox/privacy_sandbox_features.h"
 #include "components/privacy_sandbox/privacy_sandbox_prefs.h"
@@ -127,6 +126,8 @@ const char kPrivacySandboxStartupHistogram[] =
     "Settings.PrivacySandbox.StartupState";
 
 const base::Version kFirstPartySetsVersion("1.2.3");
+
+constexpr int kTestTaxonomyVersion = 1;
 
 class TestPrivacySandboxService
     : public privacy_sandbox_test_util::PrivacySandboxServiceTestInterface {
@@ -1581,13 +1582,12 @@ TEST_F(PrivacySandboxServiceTest, GetTopTopics) {
   // Check that the service correctly de-dupes and orders top topics. Topics
   // should be alphabetically ordered.
   const privacy_sandbox::CanonicalTopic kFirstTopic =
-      privacy_sandbox::CanonicalTopic(
-          browsing_topics::Topic(24),  // "Blues"
-          privacy_sandbox::CanonicalTopic::AVAILABLE_TAXONOMY);
+      privacy_sandbox::CanonicalTopic(browsing_topics::Topic(24),  // "Blues"
+                                      kTestTaxonomyVersion);
   const privacy_sandbox::CanonicalTopic kSecondTopic =
       privacy_sandbox::CanonicalTopic(
           browsing_topics::Topic(23),  // "Music & audio"
-          privacy_sandbox::CanonicalTopic::AVAILABLE_TAXONOMY);
+          kTestTaxonomyVersion);
 
   const std::vector<privacy_sandbox::CanonicalTopic> kTopTopics = {
       kSecondTopic, kSecondTopic, kFirstTopic};
@@ -1605,13 +1605,12 @@ TEST_F(PrivacySandboxServiceTest, GetTopTopics) {
 TEST_F(PrivacySandboxServiceTest, GetBlockedTopics) {
   // Check that blocked topics are correctly alphabetically sorted and returned.
   const privacy_sandbox::CanonicalTopic kFirstTopic =
-      privacy_sandbox::CanonicalTopic(
-          browsing_topics::Topic(24),  // "Blues"
-          privacy_sandbox::CanonicalTopic::AVAILABLE_TAXONOMY);
+      privacy_sandbox::CanonicalTopic(browsing_topics::Topic(24),  // "Blues"
+                                      kTestTaxonomyVersion);
   const privacy_sandbox::CanonicalTopic kSecondTopic =
       privacy_sandbox::CanonicalTopic(
           browsing_topics::Topic(23),  // "Music & audio"
-          privacy_sandbox::CanonicalTopic::AVAILABLE_TAXONOMY);
+          kTestTaxonomyVersion);
 
   // The PrivacySandboxService assumes that the PrivacySandboxSettings service
   // dedupes blocked topics. Check that assumption here.
@@ -1629,9 +1628,8 @@ TEST_F(PrivacySandboxServiceTest, GetBlockedTopics) {
 
 TEST_F(PrivacySandboxServiceTest, SetTopicAllowed) {
   const privacy_sandbox::CanonicalTopic kTestTopic =
-      privacy_sandbox::CanonicalTopic(
-          browsing_topics::Topic(10),
-          privacy_sandbox::CanonicalTopic::AVAILABLE_TAXONOMY);
+      privacy_sandbox::CanonicalTopic(browsing_topics::Topic(10),
+                                      kTestTaxonomyVersion);
   EXPECT_CALL(*mock_browsing_topics_service(), ClearTopic(kTestTopic)).Times(1);
   privacy_sandbox_service()->SetTopicAllowed(kTestTopic, false);
   EXPECT_FALSE(privacy_sandbox_settings()->IsTopicAllowed(kTestTopic));
@@ -1712,8 +1710,8 @@ TEST_F(PrivacySandboxServiceTest, TestNoFakeTopicsPrefOff) {
           "true"}}}},
       {});
 
-  CanonicalTopic topic3(Topic(3), CanonicalTopic::AVAILABLE_TAXONOMY);
-  CanonicalTopic topic4(Topic(4), CanonicalTopic::AVAILABLE_TAXONOMY);
+  CanonicalTopic topic3(Topic(3), kTestTaxonomyVersion);
+  CanonicalTopic topic4(Topic(4), kTestTaxonomyVersion);
 
   auto* service = privacy_sandbox_service();
   EXPECT_THAT(service->GetCurrentTopTopics(), testing::IsEmpty());
@@ -1736,10 +1734,10 @@ TEST_F(PrivacySandboxServiceTest, TestFakeTopics) {
   for (const auto& feature : test_features) {
     feature_list()->Reset();
     feature_list()->InitWithFeaturesAndParameters({feature}, {});
-    CanonicalTopic topic1(Topic(1), CanonicalTopic::AVAILABLE_TAXONOMY);
-    CanonicalTopic topic2(Topic(2), CanonicalTopic::AVAILABLE_TAXONOMY);
-    CanonicalTopic topic3(Topic(3), CanonicalTopic::AVAILABLE_TAXONOMY);
-    CanonicalTopic topic4(Topic(4), CanonicalTopic::AVAILABLE_TAXONOMY);
+    CanonicalTopic topic1(Topic(1), kTestTaxonomyVersion);
+    CanonicalTopic topic2(Topic(2), kTestTaxonomyVersion);
+    CanonicalTopic topic3(Topic(3), kTestTaxonomyVersion);
+    CanonicalTopic topic4(Topic(4), kTestTaxonomyVersion);
 
     auto* service = privacy_sandbox_service();
     EXPECT_THAT(service->GetCurrentTopTopics(), ElementsAre(topic1, topic2));
@@ -4356,6 +4354,74 @@ TEST_F(PrivacySandboxServiceM1RestrictedNoticePromptTest,
           {OutputKey::kM1PromptSuppressedReason,
            static_cast<int>(
                PromptSuppressedReason::kEEAFlowCompletedBeforeRowMigration)}});
+}
+
+TEST_F(PrivacySandboxServiceM1RestrictedNoticePromptTest,
+       RecordPrivacySandbox4StartupMetrics_PromptNotSuppressed) {
+  base::HistogramTester histogram_tester;
+  const std::string privacy_sandbox_prompt_startup_histogram =
+      "Settings.PrivacySandbox.PromptStartupState";
+
+  // Ensure prompt not suppressed.
+  prefs()->SetInteger(
+      prefs::kPrivacySandboxM1PromptSuppressed,
+      static_cast<int>(PrivacySandboxService::PromptSuppressedReason::kNone));
+
+  base::test::ScopedFeatureList feature_list_notice_required;
+  std::map<std::string, std::string> notice_required_feature_param = {
+      {std::string(
+           privacy_sandbox::kPrivacySandboxSettings4ConsentRequiredName),
+       "false"},
+      {std::string(privacy_sandbox::kPrivacySandboxSettings4NoticeRequiredName),
+       "true"}};
+  feature_list_notice_required.InitAndEnableFeatureWithParameters(
+      privacy_sandbox::kPrivacySandboxSettings4, notice_required_feature_param);
+
+  // Notice flow not completed.
+  prefs()->SetBoolean(prefs::kPrivacySandboxM1RestrictedNoticeAcknowledged,
+                      false);
+  privacy_sandbox_service()->RecordPrivacySandbox4StartupMetrics();
+  histogram_tester.ExpectBucketCount(
+      privacy_sandbox_prompt_startup_histogram,
+      static_cast<int>(PrivacySandboxService::PromptStartupState::
+                           kRestrictedNoticePromptWaiting),
+      /*expected_count=*/1);
+
+  // Notice flow completed.
+  prefs()->SetBoolean(prefs::kPrivacySandboxM1RestrictedNoticeAcknowledged,
+                      true);
+  privacy_sandbox_service()->RecordPrivacySandbox4StartupMetrics();
+  histogram_tester.ExpectBucketCount(
+      privacy_sandbox_prompt_startup_histogram,
+      static_cast<int>(PrivacySandboxService::PromptStartupState::
+                           kRestrictedNoticeFlowCompleted),
+      /*expected_count=*/1);
+
+  // ROW flow completed, which implies no restricted prompt.
+  prefs()->SetBoolean(prefs::kPrivacySandboxM1RestrictedNoticeAcknowledged,
+                      false);
+  prefs()->SetBoolean(prefs::kPrivacySandboxM1RowNoticeAcknowledged, true);
+  privacy_sandbox_service()->RecordPrivacySandbox4StartupMetrics();
+  histogram_tester.ExpectBucketCount(
+      privacy_sandbox_prompt_startup_histogram,
+      static_cast<int>(
+          PrivacySandboxService::PromptStartupState::
+              kRestrictedNoticeNotShownDueToFullNoticeAcknowledged),
+      /*expected_count=*/1);
+
+  // EAA flow completed, which implies no restricted prompt.
+  prefs()->SetBoolean(prefs::kPrivacySandboxM1RestrictedNoticeAcknowledged,
+                      false);
+  prefs()->SetBoolean(prefs::kPrivacySandboxM1EEANoticeAcknowledged, true);
+  privacy_sandbox_service()->RecordPrivacySandbox4StartupMetrics();
+  histogram_tester.ExpectBucketCount(
+      privacy_sandbox_prompt_startup_histogram,
+      static_cast<int>(
+          PrivacySandboxService::PromptStartupState::
+              kRestrictedNoticeNotShownDueToFullNoticeAcknowledged),
+      // One when the ROW notice acknowledged pref was set, plus the latest
+      // call.
+      /*expected_count=*/2);
 }
 
 class PrivacySandboxServiceM1RestrictedNoticeShownToGuardianTest

@@ -18,6 +18,7 @@
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/GrYUVABackendTextures.h"
 #include "third_party/skia/include/gpu/ganesh/SkImageGanesh.h"
+#include "third_party/skia/include/gpu/graphite/YUVABackendTextures.h"
 #include "ui/gl/gl_fence.h"
 
 namespace gpu {
@@ -161,7 +162,7 @@ SkiaImageRepresentation::ScopedWriteAccess::ScopedWriteAccess(
     SkiaImageRepresentation* representation,
     std::vector<sk_sp<SkSurface>> surfaces)
     : ScopedAccessBase(representation), surfaces_(std::move(surfaces)) {
-  DCHECK(!surfaces_.empty());
+  CHECK(!surfaces_.empty());
 }
 
 SkiaImageRepresentation::ScopedWriteAccess::ScopedWriteAccess(
@@ -169,13 +170,10 @@ SkiaImageRepresentation::ScopedWriteAccess::ScopedWriteAccess(
     std::vector<sk_sp<SkPromiseImageTexture>> promise_image_textures)
     : ScopedAccessBase(representation),
       promise_image_textures_(std::move(promise_image_textures)) {
-  DCHECK(!promise_image_textures_.empty());
-#if BUILDFLAG(ENABLE_SKIA_GRAPHITE)
+  CHECK(!promise_image_textures_.empty());
   CHECK(graphite_textures_.empty());
-#endif
 }
 
-#if BUILDFLAG(ENABLE_SKIA_GRAPHITE)
 SkiaImageRepresentation::ScopedWriteAccess::ScopedWriteAccess(
     SkiaImageRepresentation* representation,
     std::vector<skgpu::graphite::BackendTexture> graphite_textures)
@@ -183,7 +181,6 @@ SkiaImageRepresentation::ScopedWriteAccess::ScopedWriteAccess(
   CHECK(!graphite_textures_.empty());
   CHECK(promise_image_textures_.empty());
 }
-#endif
 
 SkiaImageRepresentation::ScopedWriteAccess::~ScopedWriteAccess() {
   // Ensure no one uses `surfaces_` by dropping the reference before calling
@@ -197,13 +194,10 @@ SkiaImageRepresentation::ScopedReadAccess::ScopedReadAccess(
     std::vector<sk_sp<SkPromiseImageTexture>> promise_image_textures)
     : ScopedAccessBase(representation),
       promise_image_textures_(std::move(promise_image_textures)) {
-  DCHECK(!promise_image_textures_.empty());
-#if BUILDFLAG(ENABLE_SKIA_GRAPHITE)
+  CHECK(!promise_image_textures_.empty());
   CHECK(graphite_textures_.empty());
-#endif
 }
 
-#if BUILDFLAG(ENABLE_SKIA_GRAPHITE)
 SkiaImageRepresentation::ScopedReadAccess::ScopedReadAccess(
     SkiaImageRepresentation* representation,
     std::vector<skgpu::graphite::BackendTexture> graphite_textures)
@@ -211,7 +205,6 @@ SkiaImageRepresentation::ScopedReadAccess::ScopedReadAccess(
   CHECK(!graphite_textures_.empty());
   CHECK(promise_image_textures_.empty());
 }
-#endif
 
 SkiaImageRepresentation::ScopedReadAccess::~ScopedReadAccess() {
   representation()->EndReadAccess();
@@ -254,10 +247,6 @@ SkiaGaneshImageRepresentation::ScopedGaneshWriteAccess::
     NOTREACHED() << "Before ending write access TakeEndState() must be called "
                     "and the result passed to skia to make sure all layout and "
                     "ownership transitions are done.";
-
-    static std::atomic_int count = 0;
-    if (count++ < 3)
-      base::debug::DumpWithoutCrashing();
   }
 }
 
@@ -279,7 +268,6 @@ void SkiaGaneshImageRepresentation::ScopedGaneshWriteAccess::
       if (!ganesh_representation()->gr_context()->setBackendTextureState(
               promise_image_texture(plane)->backendTexture(), *end_state_)) {
         LOG(ERROR) << "setBackendTextureState() failed for plane: " << plane;
-        return;
       }
     }
   }
@@ -371,10 +359,6 @@ SkiaGaneshImageRepresentation::ScopedGaneshReadAccess::
     NOTREACHED() << "Before ending read access TakeEndState() must be called "
                     "and the result passed to skia to make sure all layout and "
                     "ownership transitions are done.";
-    static std::atomic_int count = 0;
-    if (count++ < 3) {
-      base::debug::DumpWithoutCrashing();
-    }
   }
 }
 
@@ -456,7 +440,6 @@ void SkiaGaneshImageRepresentation::ScopedGaneshReadAccess::
     if (!ganesh_representation()->gr_context()->setBackendTextureState(
             promise_image_texture(plane)->backendTexture(), *end_state_)) {
       LOG(ERROR) << "setBackendTextureState() failed for plane: " << plane;
-      return;
     }
   }
   end_state_ = nullptr;
@@ -494,7 +477,6 @@ SkiaGaneshImageRepresentation::BeginScopedReadAccess(
 ///////////////////////////////////////////////////////////////////////////////
 // SkiaGraphiteImageRepresentation
 
-#if BUILDFLAG(ENABLE_SKIA_GRAPHITE)
 SkiaGraphiteImageRepresentation::SkiaGraphiteImageRepresentation(
     SharedImageManager* manager,
     SharedImageBacking* backing,
@@ -612,7 +594,6 @@ SkiaGraphiteImageRepresentation::ScopedGraphiteReadAccess::CreateSkImage(
     SkImage::TextureReleaseProc texture_release_proc,
     SkImage::ReleaseContext release_context) {
   auto format = representation()->format();
-  auto surface_origin = representation()->surface_origin();
   auto sk_color_space =
       representation()->color_space().GetAsFullRangeRGB().ToSkColorSpace();
   auto* recorder = context_state->gpu_main_graphite_recorder();
@@ -647,8 +628,6 @@ sk_sp<SkImage> SkiaGraphiteImageRepresentation::ScopedGraphiteReadAccess::
   CHECK(format.is_multi_plane());
   CHECK_EQ(static_cast<int>(graphite_textures_.size()),
            format.NumberOfPlanes());
-
-  auto surface_origin = representation()->surface_origin();
   auto alpha_type = SkAlphaType::kOpaque_SkAlphaType;
   auto color_type =
       viz::ToClosestSkColorType(/*gpu_compositing=*/true, format, plane_index);
@@ -695,7 +674,6 @@ SkiaGraphiteImageRepresentation::BeginScopedReadAccess(
       base::PassKey<SkiaGraphiteImageRepresentation>(), this,
       graphite_textures);
 }
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // OverlayImageRepresentation

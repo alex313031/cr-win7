@@ -128,7 +128,18 @@ extern const base::FeatureParam<int> kExpandedHighEfficiencyChipThresholdBytes;
 extern const base::FeatureParam<base::TimeDelta>
     kExpandedHighEfficiencyChipDiscardedDuration;
 
-extern const base::FeatureParam<int> kDiscardedTabTreatmenOption;
+// Percentiles of PMF across all tabs on all browsers.
+extern const base::FeatureParam<int> kHighEfficiencyChartPmf25PercentileBytes;
+extern const base::FeatureParam<int> kHighEfficiencyChartPmf50PercentileBytes;
+extern const base::FeatureParam<int> kHighEfficiencyChartPmf75PercentileBytes;
+
+// Final opacity of the favicon after the discard animation completes
+extern const base::FeatureParam<double> kDiscardedTabTreatmentOpacity;
+
+// The version of the tab discard treatment on the favicon should be shown
+extern const base::FeatureParam<int> kDiscardedTabTreatmentOption;
+
+BASE_DECLARE_FEATURE(kUseDeviceBatterySaverChromeOS);
 
 enum class DiscardTabTreatmentOptions {
   kNone = 0,

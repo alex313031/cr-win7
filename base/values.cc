@@ -14,7 +14,6 @@
 #include "base/check_op.h"
 #include "base/containers/checked_iterators.h"
 #include "base/containers/cxx20_erase_vector.h"
-#include "base/cxx17_backports.h"
 #include "base/cxx20_to_address.h"
 #include "base/json/json_writer.h"
 #include "base/logging.h"
@@ -1171,14 +1170,6 @@ std::string* Value::FindStringKey(StringPiece key) {
 
 Value* Value::SetKey(StringPiece key, Value&& value) {
   return GetDict().Set(key, std::move(value));
-}
-
-Value* Value::SetBoolKey(StringPiece key, bool value) {
-  return GetDict().Set(key, value);
-}
-
-Value* Value::SetIntKey(StringPiece key, int value) {
-  return GetDict().Set(key, value);
 }
 
 Value* Value::SetStringKey(StringPiece key, StringPiece value) {

@@ -5,6 +5,7 @@
 <translation id="1018219910092211213">Nu se poate rezolva solicitarea DNS</translation>
 <translation id="1018656279737460067">Anulat</translation>
 <translation id="1022433422498218992">Comenzi generale</translation>
+<translation id="1022628058306505708">Earth Flow</translation>
 <translation id="1047458377670401304"><ph name="CPU_NAME" /> (<ph name="THREAD_COUNT" /> fire, <ph name="CPU_MAX_CLOCK_SPEED" /> GHz)</translation>
 <translation id="1047773237499189053">Funcție nouă disponibilă; folosește tasta săgeată în sus ca să afli mai multe.</translation>
 <translation id="1059913517121127803">Nu s-a putut începe scanarea</translation>
@@ -147,7 +148,6 @@
 <translation id="2056550196601855911">IPv4/IPv6</translation>
 <translation id="2080070583977670716">Mai multe setări</translation>
 <translation id="2085089206770112532">Reducerea luminozității ecranului</translation>
-<translation id="209751264101900360">Din zori până seara – Cloud Flow</translation>
 <translation id="2102231663024125441">Editarea textului</translation>
 <translation id="2105810540595158374">Dispozitivul este un controler de jocuri.</translation>
 <translation id="2119172414412204879"><ph name="BOARD_NAME" />, versiunea <ph name="MILESTONE_VERSION" /></translation>
@@ -235,6 +235,7 @@
 <translation id="2902312830803030883">Mai multe acțiuni</translation>
 <translation id="2926057806159140518">Introdu numele de utilizator și parola sau scanează codul QR</translation>
 <translation id="2940811910881150316">Nu se poate testa dispozitivul. Redeschide capacul pentru testare.</translation>
+<translation id="2981143481017883351">Sunt disponibile elemente exclusive pentru Chromebook</translation>
 <translation id="3008341117444806826">ACTUALIZEAZĂ</translation>
 <translation id="3009958530611748826">Selectează un dosar în care să salvezi</translation>
 <translation id="3017079585324758401">Fundal</translation>
@@ -279,6 +280,7 @@
 <translation id="3360306038446926262">Ferestre</translation>
 <translation id="3368922792935385530">Conectat</translation>
 <translation id="3369013195428705271">Sigur vrei să ștergi tot istoricul printărilor? Sarcinile de printare în curs nu vor fi șterse.</translation>
+<translation id="3386675685417744672">Exclusiv pe Chromebook</translation>
 <translation id="3404249063913988450">Activează screensaverul</translation>
 <translation id="3413935475507503304">Ca să continui cu actualizarea, dă clic pe Înainte.</translation>
 <translation id="3434107140712555581"><ph name="BATTERY_PERCENTAGE" />%</translation>
@@ -293,6 +295,7 @@
 <translation id="3484914941826596830">Nu deconecta dispozitivul extern și nu închide computerul în timpul actualizării firmware-ului. Poți să minimizezi fereastra. Actualizarea poate să dureze câteva minute și este posibil ca dispozitivul extern să nu funcționeze în această perioadă.</translation>
 <translation id="3486220673238053218">definiție</translation>
 <translation id="3488065109653206955">Activat parțial</translation>
+<translation id="3502426834823382181">vezi toate aplicațiile</translation>
 <translation id="3510890413042482857">Trimite <ph name="BEGIN_LINK1" />datele privind urmărirea performanței<ph name="END_LINK1" /></translation>
 <translation id="3517001332549868749">Actualizare SO Chrome</translation>
 <translation id="3527036260304016759">Nereușită – Eroare necunoscută</translation>
@@ -346,7 +349,6 @@
 <translation id="3967822245660637423">Descărcare finalizată</translation>
 <translation id="3969602104473960991">Parola sistemului de operare Chrome a fost actualizată</translation>
 <translation id="397105322502079400">Se calculează...</translation>
-<translation id="3974175076798940554">Acum sunt disponibile elemente exclusive Chromebook Plus</translation>
 <translation id="39823212440917567">Sarcinile de printare mai vechi de <ph name="NUMBER_OF_DAYS" /> zile vor fi eliminate</translation>
 <translation id="3993704782688964914"><ph name="DEVICE_NAME" /> este actualizat</translation>
 <translation id="4003384961948020559">Nereușită – Tavă de ieșire plină</translation>
@@ -357,6 +359,7 @@
 <translation id="404928562651467259">AVERTISMENT</translation>
 <translation id="4054683689023980771">Se descarcă imaginea</translation>
 <translation id="4060260348856573701">APN nou</translation>
+<translation id="4079743696465895866">Selectează opere de artă exclusive pentru Chromebook</translation>
 <translation id="4093865285251893588">Imagine de profil</translation>
 <translation id="409427325554347132">Salvează detaliile testului</translation>
 <translation id="4095829376260267438">WPA2 / WPA3</translation>
@@ -387,7 +390,6 @@
 <translation id="4275663329226226506">Media</translation>
 <translation id="4289540628985791613">Prezentare generală</translation>
 <translation id="4289849978083912975">Slideshow</translation>
-<translation id="4293621540182258188">Din zori până seara – Earth Flow</translation>
 <translation id="4297501883039923494">Oprită – Eroare necunoscută</translation>
 <translation id="4300073214558989"><ph name="IMAGE_COUNT" /> imagini</translation>
 <translation id="4311195029067684288">Maxim</translation>
@@ -571,7 +573,6 @@
 <translation id="576835345334454681">Creșterea luminozității ecranului</translation>
 <translation id="57838592816432529">Dezactivează sunetul</translation>
 <translation id="5784136236926853061">Latență mare a solicitărilor HTTP</translation>
-<translation id="5809090008577139505">Aurora</translation>
 <translation id="5826644637650799838">Despre lucrarea de artă</translation>
 <translation id="5832805196449965646">Adăugați un utilizator</translation>
 <translation id="583281660410589416">Necunoscut</translation>
@@ -590,7 +591,6 @@
 <translation id="5907649332524363701">culoarea tastelor</translation>
 <translation id="5916084858004523819">Interzis</translation>
 <translation id="5916664084637901428">Activat</translation>
-<translation id="5918201491776799918">Selectează grafica exclusivă pentru Chromebook Plus</translation>
 <translation id="5921506667911082617">{COUNT,plural, =1{Fișierul a fost scanat și salvat în <ph name="LINK_BEGIN" /><ph name="FOLDER_NAME" /><ph name="LINK_END" />.}few{Fișierele au fost scanate și salvate în <ph name="LINK_BEGIN" /><ph name="FOLDER_NAME" /><ph name="LINK_END" />.}other{Fișierele au fost scanate și salvate în <ph name="LINK_BEGIN" /><ph name="FOLDER_NAME" /><ph name="LINK_END" />.}}</translation>
 <translation id="5931523347251946569">Fișierul nu a fost găsit</translation>
 <translation id="5939518447894949180">Resetează</translation>
@@ -626,6 +626,7 @@
 <translation id="6184793017104303157">B4</translation>
 <translation id="6189418609903030344">Capacitatea bateriei scade pe măsura utilizării</translation>
 <translation id="6191293864534840972">Servere de nume cu formă incorectă</translation>
+<translation id="6205145102504628069">Cloud Flow</translation>
 <translation id="6213737986933151570">CDMA1XRTT</translation>
 <translation id="6223066887782788441">Ieși din ecranul complet</translation>
 <translation id="6223752125779001553">Niciun scaner disponibil</translation>
@@ -636,6 +637,7 @@
 <translation id="6278428485366576908">Temă</translation>
 <translation id="6280912520669706465">ARC</translation>
 <translation id="6284632978374966585">Activează tema întunecată</translation>
+<translation id="6285899124799306373">deschide lansatorul</translation>
 <translation id="6302401976930124515">Testul <ph name="TEST_NAME" /> a fost anulat</translation>
 <translation id="631063167932043783">Explorează aplicația</translation>
 <translation id="6319207335391420837">Actualizează firmware-ul pentru <ph name="DEVICE_NAME" /></translation>
@@ -651,6 +653,7 @@
 <translation id="6382182670717268353">Previzualizarea screensaverului</translation>
 <translation id="6388847657025262518">Alimentatorul de documente al scanerului este blocat. Verifică alimentatorul și încearcă din nou.</translation>
 <translation id="6394634179843537518">Adaugă un fișier</translation>
+<translation id="6401427872449207797">căutare în browser</translation>
 <translation id="6410257289063177456">Fișiere imagine</translation>
 <translation id="641081527798843608">Potrivirea subiectului</translation>
 <translation id="6412715219990689313">Tastatură integrată</translation>
@@ -666,6 +669,7 @@
 <translation id="6494974875566443634">Personalizare</translation>
 <translation id="6500818810472529210">Vezi rezultatul în Căutarea Google</translation>
 <translation id="650266656685499220">Pentru a crea albume, accesează Google Foto.</translation>
+<translation id="6505750420152840539">Din zori până seara</translation>
 <translation id="6516990319416533844">Pentru a testa rata de încărcare a bateriei, lasă bateria să se descarce o scurtă perioadă de timp</translation>
 <translation id="6517239166834772319">Explorare</translation>
 <translation id="6526200165918397681">Potrivește imaginea de fundal</translation>
@@ -799,7 +803,6 @@
 <translation id="7656388927906093505">Dispozitivul este un mouse.</translation>
 <translation id="7658239707568436148">Anulează</translation>
 <translation id="7665800271478495366">Schimbă avatarul</translation>
-<translation id="7675241868020048622">Aurora (plus exclusiv)</translation>
 <translation id="7690294790491645610">Confirmă noua parolă</translation>
 <translation id="7701040980221191251">Niciuna</translation>
 <translation id="7705524343798198388">VPN</translation>
@@ -857,7 +860,6 @@
 <translation id="8138405288920084977">LTEAdvanced</translation>
 <translation id="8143951647992294073">Selectează <ph name="TOPIC_SOURCE" /> <ph name="TOPIC_SOURCE_DESC" /></translation>
 <translation id="8151185429379586178">Instrumente dezvoltator</translation>
-<translation id="8153923300383192510">Exclusiv pe Chromebook Plus</translation>
 <translation id="8179976553408161302">Enter</translation>
 <translation id="8183974620058026102">Atașează</translation>
 <translation id="8206859287963243715">Celular</translation>
@@ -876,6 +878,7 @@
 <translation id="8312330582793120272">redă conținutul media</translation>
 <translation id="8318753676953949627">Nicio imagine</translation>
 <translation id="8329018942023753850">aplicația calculator</translation>
+<translation id="8335869473001018124">deschide căutarea</translation>
 <translation id="8336739000755212683">Schimbă imaginea contului de pe dispozitiv</translation>
 <translation id="8347227221149377169">Sarcini de printare</translation>
 <translation id="8351855506390808906">Punct de contact pentru maparea tastelor</translation>

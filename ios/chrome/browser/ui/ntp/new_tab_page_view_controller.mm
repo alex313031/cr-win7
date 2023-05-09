@@ -136,9 +136,15 @@ const CGFloat kShiftTilesUpAnimationDuration = 0.1;
 // constraints are not set before the views have been added to view hierarchy.
 @property(nonatomic, assign) BOOL viewDidFinishLoading;
 
+// YES if the NTP is in the middle of animating an omnibox focus.
+@property(nonatomic, assign) BOOL isAnimatingOmniboxFocus;
+
 @end
 
-@implementation NewTabPageViewController
+@implementation NewTabPageViewController {
+  // Background gradient when Modular Home is enabled.
+  GradientView* _backgroundGradientView;
+}
 
 - (instancetype)init {
   self = [super initWithNibName:nil bundle:nil];
@@ -184,7 +190,19 @@ const CGFloat kShiftTilesUpAnimationDuration = 0.1;
               action:@selector(handleSingleTapInView:)];
   singleTapRecognizer.delegate = self;
   [self.view addGestureRecognizer:singleTapRecognizer];
-  self.view.backgroundColor = ntp_home::NTPBackgroundColor();
+  if (IsMagicStackEnabled()) {
+    _backgroundGradientView = [[GradientView alloc]
+        initWithTopColor:[UIColor colorNamed:kSecondaryBackgroundColor]
+             bottomColor:[UIColor colorNamed:kPrimaryBackgroundColor]];
+    _backgroundGradientView.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.view addSubview:_backgroundGradientView];
+    AddSameConstraints(_backgroundGradientView, self.view);
+    [self updateModularHomeBackgroundColorForUserInterfaceStyle:
+              self.traitCollection.userInterfaceStyle];
+    self.view.backgroundColor = [UIColor colorNamed:@"ntp_background_color"];
+  } else {
+    self.view.backgroundColor = ntp_home::NTPBackgroundColor();
+  }
 
   [self registerNotifications];
 
@@ -345,6 +363,15 @@ const CGFloat kShiftTilesUpAnimationDuration = 0.1;
                       }];
 }
 
+- (void)willTransitionToTraitCollection:(UITraitCollection*)newCollection
+              withTransitionCoordinator:
+                  (id<UIViewControllerTransitionCoordinator>)coordinator {
+  if (IsMagicStackEnabled()) {
+    [self updateModularHomeBackgroundColorForUserInterfaceStyle:
+              newCollection.userInterfaceStyle];
+  }
+}
+
 - (void)traitCollectionDidChange:(UITraitCollection*)previousTraitCollection {
   [super traitCollectionDidChange:previousTraitCollection];
 
@@ -374,6 +401,18 @@ const CGFloat kShiftTilesUpAnimationDuration = 0.1;
 #pragma mark - Public
 
 - (void)focusOmnibox {
+  // Do nothing if the omnibox is already focused or is in the middle of a
+  // focus. This prevents `collectionShiftingOffset` from being reset to close
+  // to 0, which would result in the defocus animation not returning to the top
+  // of the NTP if that was the original position.
+  // This is relevant beacuse the omnibox logic signals the NTP to focus the
+  // omnibox when it becomes the keyboard first responder, but that happens
+  // during the NTP focus animation, which results in -focusOmnibox being called
+  // twice.
+  if (self.omniboxFocused || self.isAnimatingOmniboxFocus) {
+    return;
+  }
+
   // If the feed is meant to be visible and its contents have not loaded yet,
   // then any omnibox focus animations (i.e. opening app from search widget
   // action) needs to wait until it is ready. viewDidAppear: currently serves as
@@ -872,9 +911,11 @@ const CGFloat kShiftTilesUpAnimationDuration = 0.1;
     strongSelf.disableScrollAnimation = NO;
     [strongSelf.headerViewController
         completeHeaderFakeOmniboxFocusAnimationWithFinalPosition:finalPosition];
+    strongSelf.isAnimatingOmniboxFocus = NO;
   }];
 
   self.animator.interruptible = YES;
+  self.isAnimatingOmniboxFocus = YES;
   [self.animator startAnimation];
 }
 
@@ -1349,6 +1390,13 @@ const CGFloat kShiftTilesUpAnimationDuration = 0.1;
   CGPoint adjustedOffset = self.collectionView.contentOffset;
   adjustedOffset.y += self.additionalOffset;
   return adjustedOffset;
+}
+
+// Background gradient view will be used when in dark mode, the assigned
+// background color to this view's otherwise.
+- (void)updateModularHomeBackgroundColorForUserInterfaceStyle:
+    (UIUserInterfaceStyle)style {
+  _backgroundGradientView.hidden = style == UIUserInterfaceStyleLight;
 }
 
 #pragma mark - Helpers

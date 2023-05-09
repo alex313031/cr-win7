@@ -216,11 +216,13 @@ QuotaErrorOr<BucketInfo> QuotaDatabase::UpdateOrCreateBucket(
     int max_bucket_count) {
   DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
 
+  sqlite_error_code_ = 0;
   QuotaErrorOr<BucketInfo> bucket_result =
       GetBucket(params.storage_key, params.name, StorageType::kTemporary);
 
   if (!bucket_result.has_value()) {
     if (bucket_result.error() != QuotaError::kNotFound) {
+      bucket_result.error().sqlite_error = sqlite_error_code_;
       return bucket_result;
     }
     return CreateBucketInternal(params, StorageType::kTemporary,
@@ -239,15 +241,15 @@ QuotaErrorOr<BucketInfo> QuotaDatabase::UpdateOrCreateBucket(
     DCHECK(!bucket_result->is_default());
     bucket_result =
         UpdateBucketExpiration(bucket_result->id, params.expiration);
+    DCHECK(bucket_result.has_value());
   }
-  DCHECK(bucket_result.has_value());
 
   if (params.persistent && (*params.persistent != bucket_result->persistent)) {
     DCHECK(!bucket_result->is_default());
     bucket_result =
         UpdateBucketPersistence(bucket_result->id, *params.persistent);
+    DCHECK(bucket_result.has_value());
   }
-  DCHECK(bucket_result.has_value());
 
   return bucket_result;
 }
@@ -257,18 +259,13 @@ QuotaErrorOr<BucketInfo> QuotaDatabase::GetOrCreateBucketDeprecated(
     StorageType type) {
   DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
 
-  QuotaErrorOr<BucketInfo> bucket_result =
-      GetBucket(params.storage_key, params.name, type);
-
-  if (bucket_result.has_value()) {
-    return bucket_result;
-  }
-
-  if (bucket_result.error() != QuotaError::kNotFound) {
-    return bucket_result;
-  }
-
-  return CreateBucketInternal(params, type);
+  return GetBucket(params.storage_key, params.name, type)
+      .or_else([&](DetailedQuotaError error) -> QuotaErrorOr<BucketInfo> {
+        if (error != QuotaError::kNotFound) {
+          return base::unexpected(error);
+        }
+        return CreateBucketInternal(params, type);
+      });
 }
 
 QuotaErrorOr<BucketInfo> QuotaDatabase::CreateBucketForTesting(
@@ -625,8 +622,10 @@ QuotaErrorOr<mojom::BucketTableEntryPtr> QuotaDatabase::DeleteBucketData(
   return BucketTableEntryFromSqlStatement(statement);
 }
 
-QuotaErrorOr<BucketLocator> QuotaDatabase::GetLruEvictableBucket(
+QuotaErrorOr<std::set<BucketLocator>> QuotaDatabase::GetBucketsForEviction(
     StorageType type,
+    int64_t target_usage,
+    const std::map<BucketLocator, int64_t>& usage_map,
     const std::set<BucketId>& bucket_exceptions,
     SpecialStoragePolicy* special_storage_policy) {
   DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
@@ -634,6 +633,8 @@ QuotaErrorOr<BucketLocator> QuotaDatabase::GetLruEvictableBucket(
   if (open_error != QuotaError::kNone) {
     return base::unexpected(open_error);
   }
+
+  std::set<BucketLocator> buckets_to_evict;
 
   // clang-format off
   static constexpr char kSql[] =
@@ -644,6 +645,9 @@ QuotaErrorOr<BucketLocator> QuotaDatabase::GetLruEvictableBucket(
 
   sql::Statement statement(db_->GetCachedStatement(SQL_FROM_HERE, kSql));
   statement.BindInt(0, static_cast<int>(type));
+
+  // The total space used by all buckets marked for eviction.
+  int64_t total_usage = 0;
 
   while (statement.Step()) {
     absl::optional<StorageKey> read_storage_key =
@@ -665,10 +669,20 @@ QuotaErrorOr<BucketLocator> QuotaDatabase::GetLruEvictableBucket(
          special_storage_policy->IsStorageUnlimited(read_gurl))) {
       continue;
     }
-    return BucketLocator(read_bucket_id, std::move(read_storage_key).value(),
-                         type, is_default);
+
+    BucketLocator locator(read_bucket_id, std::move(read_storage_key).value(),
+                          type, is_default);
+    const auto& bucket_usage = usage_map.find(locator);
+    total_usage += (bucket_usage == usage_map.end()) ? 1 : bucket_usage->second;
+    buckets_to_evict.insert(locator);
+    if (total_usage >= target_usage) {
+      break;
+    }
   }
-  return base::unexpected(QuotaError::kNotFound);
+  if (buckets_to_evict.empty()) {
+    return base::unexpected(QuotaError::kNotFound);
+  }
+  return buckets_to_evict;
 }
 
 QuotaErrorOr<std::set<StorageKey>> QuotaDatabase::GetStorageKeysForType(
@@ -903,8 +917,11 @@ QuotaError QuotaDatabase::EnsureOpened() {
   db_->set_histogram_tag("Quota");
 
   db_->set_error_callback(base::BindRepeating(
-      [](base::RepeatingClosure full_disk_error_callback, int sqlite_error_code,
+      [](base::RepeatingClosure full_disk_error_callback,
+         int* sqlite_error_code_out, int sqlite_error_code,
          sql::Statement* statement) {
+        *sqlite_error_code_out = sqlite_error_code;
+
         sql::UmaHistogramSqliteResult("Quota.QuotaDatabaseError",
                                       sqlite_error_code);
 
@@ -914,7 +931,7 @@ QuotaError QuotaDatabase::EnsureOpened() {
           full_disk_error_callback.Run();
         }
       },
-      full_disk_error_callback_));
+      full_disk_error_callback_, &sqlite_error_code_));
 
   // Migrate an existing database from the old path.
   if (!db_file_path_.empty() && !MoveLegacyDatabase()) {

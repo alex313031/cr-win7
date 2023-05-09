@@ -1021,9 +1021,6 @@ class CONTENT_EXPORT NavigationRequest
 
   const absl::optional<base::UnguessableToken> ComputeFencedFrameNonce() const;
 
-  const absl::optional<blink::FencedFrame::DeprecatedFencedFrameMode>
-  ComputeDeprecatedFencedFrameMode() const;
-
   void RenderFallbackContentForObjectTag();
 
   // Returns the vector of web features used during the navigation, whose
@@ -1341,7 +1338,7 @@ class CONTENT_EXPORT NavigationRequest
       const network::URLLoaderCompletionStatus& status,
       bool skip_throttles,
       const absl::optional<std::string>& error_page_content);
-  void SelectFrameHostForBeginNavigationImpl();
+  void SelectFrameHostForCrossDocumentNavigationWithNoUrlLoader();
 
   // To be called whenever a navigation request fails. If |skip_throttles| is
   // true, the registered NavigationThrottle(s) won't get a chance to intercept

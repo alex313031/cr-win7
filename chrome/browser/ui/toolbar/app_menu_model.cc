@@ -39,6 +39,7 @@
 #include "chrome/browser/ui/global_error/global_error_service.h"
 #include "chrome/browser/ui/global_error/global_error_service_factory.h"
 #include "chrome/browser/ui/managed_ui.h"
+#include "chrome/browser/ui/side_panel/companion/companion_utils.h"
 #include "chrome/browser/ui/tabs/tab_strip_model.h"
 #include "chrome/browser/ui/toolbar/app_menu_icon_controller.h"
 #include "chrome/browser/ui/toolbar/bookmark_sub_menu_model.h"
@@ -222,11 +223,21 @@ class HelpMenuModel : public ui::SimpleMenuModel {
 #else
     int help_string_id = IDS_HELP_PAGE;
 #endif
-    AddItem(IDC_ABOUT, l10n_util::GetStringUTF16(IDS_ABOUT));
+    AddItemWithStringId(IDC_ABOUT, IDS_ABOUT);
+    if (features::IsChromeRefresh2023()) {
+      SetIcon(
+          GetIndexOfCommandId(IDC_ABOUT).value(),
+          ui::ImageModel::FromVectorIcon(vector_icons::kInfoRefreshIcon,
+                                         ui::kColorMenuIcon, kDefaultIconSize));
+    }
 #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
     if (base::FeatureList::IsEnabled(features::kChromeWhatsNewUI)) {
-      AddItem(IDC_CHROME_WHATS_NEW,
-              l10n_util::GetStringUTF16(IDS_CHROME_WHATS_NEW));
+      AddItemWithStringId(IDC_CHROME_WHATS_NEW, IDS_CHROME_WHATS_NEW);
+      if (features::IsChromeRefresh2023()) {
+        SetIcon(GetIndexOfCommandId(IDC_CHROME_WHATS_NEW).value(),
+                ui::ImageModel::FromVectorIcon(
+                    kReleaseAlertIcon, ui::kColorMenuIcon, kDefaultIconSize));
+      }
     }
 #endif  // BUILDFLAG(GOOGLE_CHROME_BRANDING)
     AddItemWithStringId(IDC_HELP_PAGE_VIA_MENU, help_string_id);
@@ -234,9 +245,20 @@ class HelpMenuModel : public ui::SimpleMenuModel {
       ui::ResourceBundle& rb = ui::ResourceBundle::GetSharedInstance();
       SetIcon(GetIndexOfCommandId(IDC_HELP_PAGE_VIA_MENU).value(),
               ui::ImageModel::FromImage(rb.GetNativeImageNamed(IDR_HELP_MENU)));
+    } else if (features::IsChromeRefresh2023()) {
+      SetIcon(GetIndexOfCommandId(IDC_HELP_PAGE_VIA_MENU).value(),
+              ui::ImageModel::FromVectorIcon(kHelpMenuIcon, ui::kColorMenuIcon,
+                                             kDefaultIconSize));
     }
-    if (browser->profile()->GetPrefs()->GetBoolean(prefs::kUserFeedbackAllowed))
+    if (browser->profile()->GetPrefs()->GetBoolean(
+            prefs::kUserFeedbackAllowed)) {
       AddItemWithStringId(IDC_FEEDBACK, IDS_FEEDBACK);
+      if (features::IsChromeRefresh2023()) {
+        SetIcon(GetIndexOfCommandId(IDC_FEEDBACK).value(),
+                ui::ImageModel::FromVectorIcon(kReportIcon, ui::kColorMenuIcon,
+                                               kDefaultIconSize));
+      }
+    }
   }
 };
 
@@ -1099,8 +1121,16 @@ void AppMenuModel::Build() {
   if (media_router::MediaRouterEnabled(browser()->profile()))
     AddItemWithStringId(IDC_ROUTE_MEDIA, IDS_MEDIA_ROUTER_MENU_ITEM_TITLE);
 
-  // TODO(josephjoopark): Update translate string with StringId when finalized.
   if (features::IsChromeRefresh2023()) {
+#if BUILDFLAG(GOOGLE_CHROME_BRANDING)
+    if (companion::IsCompanionFeatureEnabled()) {
+      // TODO(josephjoopark): Update CSC string with StringId when finalized.
+      AddItem(IDC_SHOW_SEARCH_COMPANION, u"Chrome Search Companion");
+    }
+#endif
+
+    // TODO(josephjoopark): Update translate string with StringId when
+    // finalized.
     AddItem(IDC_TRANSLATE_PAGE, u"Google Translate");
   }
 
@@ -1265,6 +1295,8 @@ void AppMenuModel::Build() {
     set_icon(IDC_OPTIONS, kSettingsMenuIcon);
 #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
     set_icon(IDC_HELP_MENU, kHelpMenuIcon);
+    set_icon(IDC_SHOW_SEARCH_COMPANION,
+             vector_icons::kGoogleGLogoMonochromeIcon);
 #endif
     set_icon(IDC_EXIT, kExitMenuIcon);
   }

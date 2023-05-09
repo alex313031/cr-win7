@@ -5,6 +5,7 @@
 <translation id="1018219910092211213">Det gick inte att matcha DNS</translation>
 <translation id="1018656279737460067">Avbröts</translation>
 <translation id="1022433422498218992">Allmänna kontroller</translation>
+<translation id="1022628058306505708">Earth Flow</translation>
 <translation id="1047458377670401304"><ph name="CPU_NAME" /> (<ph name="THREAD_COUNT" /> trådar, <ph name="CPU_MAX_CLOCK_SPEED" /> GHz)</translation>
 <translation id="1047773237499189053">Det finns en ny funktion. Tryck på uppåtpilen om du vill läsa mer.</translation>
 <translation id="1059913517121127803">Det gick inte att börja söka</translation>
@@ -147,7 +148,6 @@
 <translation id="2056550196601855911">IPv4/IPv6</translation>
 <translation id="2080070583977670716">Fler inställningar</translation>
 <translation id="2085089206770112532">Tangenten som minskar skärmens ljusstyrka</translation>
-<translation id="209751264101900360">Gryning till mörkrets inbrott – molnflöde</translation>
 <translation id="2102231663024125441">Textredigering</translation>
 <translation id="2105810540595158374">Enheten är en spelkontroll.</translation>
 <translation id="2119172414412204879"><ph name="BOARD_NAME" />, version <ph name="MILESTONE_VERSION" /></translation>
@@ -235,6 +235,7 @@
 <translation id="2902312830803030883">Fler åtgärder</translation>
 <translation id="2926057806159140518">Ange användarnamn och lösenord eller läs av QR-koden</translation>
 <translation id="2940811910881150316">Det gick inte att testa enheten. Öppna locket igen för att testa.</translation>
+<translation id="2981143481017883351">Nu finns det exklusiva Chromebook-tillgångar</translation>
 <translation id="3008341117444806826">UPPDATERA</translation>
 <translation id="3009958530611748826">Välj vilken mapp du vill spara i</translation>
 <translation id="3017079585324758401">Bakgrund</translation>
@@ -279,6 +280,7 @@
 <translation id="3360306038446926262">Fönster</translation>
 <translation id="3368922792935385530">Ansluten</translation>
 <translation id="3369013195428705271">Vill du rensa all utskriftshistorik? De pågående utskriftsjobben rensas inte.</translation>
+<translation id="3386675685417744672">Endast på Chromebook</translation>
 <translation id="3404249063913988450">Aktivera skärmsläckare</translation>
 <translation id="3413935475507503304">Klicka på Nästa om du vill fortsätta med uppdateringen.</translation>
 <translation id="3434107140712555581"><ph name="BATTERY_PERCENTAGE" /> %</translation>
@@ -293,6 +295,7 @@
 <translation id="3484914941826596830">Koppla inte från den externa enheten eller stäng av datorn medan firmware uppdateras. Du kan minimera fönstret. Uppdateringen kan ta en stund och din externa enhet kanske inte fungerar under tiden.</translation>
 <translation id="3486220673238053218">definition</translation>
 <translation id="3488065109653206955">Delvis aktiverat</translation>
+<translation id="3502426834823382181">visa alla appar</translation>
 <translation id="3510890413042482857">Skicka <ph name="BEGIN_LINK1" />data från resultatspårning<ph name="END_LINK1" /></translation>
 <translation id="3517001332549868749">ChromeOS-uppdatering</translation>
 <translation id="3527036260304016759">Misslyckades – okänt fel</translation>
@@ -346,7 +349,6 @@
 <translation id="3967822245660637423">Nedladdning slutförd</translation>
 <translation id="3969602104473960991">Lösenordet för Chrome OS har uppdaterats</translation>
 <translation id="397105322502079400">Beräknar ...</translation>
-<translation id="3974175076798940554">Exklusiva Chromebook Plus-tillgångar är nu tillgängliga</translation>
 <translation id="39823212440917567">Utskriftsjobb som är äldre än <ph name="NUMBER_OF_DAYS" /> dagar tas bort</translation>
 <translation id="3993704782688964914"><ph name="DEVICE_NAME" /> har nu uppdaterats</translation>
 <translation id="4003384961948020559">Misslyckades – utmatningsfacket är fullt</translation>
@@ -357,6 +359,7 @@
 <translation id="404928562651467259">VARNING</translation>
 <translation id="4054683689023980771">Laddar ned bild …</translation>
 <translation id="4060260348856573701">Nytt APN</translation>
+<translation id="4079743696465895866">Välj konstverk som endast finns på Chromebook</translation>
 <translation id="4093865285251893588">Profilbild</translation>
 <translation id="409427325554347132">Spara testinformation</translation>
 <translation id="4095829376260267438">WPA2WPA3</translation>
@@ -387,7 +390,6 @@
 <translation id="4275663329226226506">Media</translation>
 <translation id="4289540628985791613">Översikt</translation>
 <translation id="4289849978083912975">Bildspel</translation>
-<translation id="4293621540182258188">Gryning till mörkrets inbrott – flöde med jorden</translation>
 <translation id="4297501883039923494">Har stoppats – okänt fel</translation>
 <translation id="4300073214558989"><ph name="IMAGE_COUNT" /> bilder</translation>
 <translation id="4311195029067684288">Fullt</translation>
@@ -571,7 +573,6 @@
 <translation id="576835345334454681">Tangenten som ökar skärmens ljusstyrka</translation>
 <translation id="57838592816432529">Stäng av ljudet</translation>
 <translation id="5784136236926853061">Hög HTTP-latens</translation>
-<translation id="5809090008577139505">Norrsken</translation>
 <translation id="5826644637650799838">Om konsten</translation>
 <translation id="5832805196449965646">Lägg till person</translation>
 <translation id="583281660410589416">Okänd</translation>
@@ -590,7 +591,6 @@
 <translation id="5907649332524363701">tangentfärg</translation>
 <translation id="5916084858004523819">Aldrig</translation>
 <translation id="5916664084637901428">På</translation>
-<translation id="5918201491776799918">Välj exklusiv konst på Chromebook Plus</translation>
 <translation id="5921506667911082617">{COUNT,plural, =1{Filen har genomsökts och sparats i <ph name="LINK_BEGIN" /><ph name="FOLDER_NAME" /><ph name="LINK_END" />.}other{Filerna har genomsökts och sparats i <ph name="LINK_BEGIN" /><ph name="FOLDER_NAME" /><ph name="LINK_END" />.}}</translation>
 <translation id="5931523347251946569">Filen hittades inte</translation>
 <translation id="5939518447894949180">Återställ</translation>
@@ -626,6 +626,7 @@
 <translation id="6184793017104303157">B4</translation>
 <translation id="6189418609903030344">Batterikapaciteten avtar genom användning</translation>
 <translation id="6191293864534840972">Namnserveradresserna har fel format</translation>
+<translation id="6205145102504628069">Cloud Flow</translation>
 <translation id="6213737986933151570">CDMA1XRTT</translation>
 <translation id="6223066887782788441">Avsluta helskärm</translation>
 <translation id="6223752125779001553">Ingen skanner är tillgänglig</translation>
@@ -636,6 +637,7 @@
 <translation id="6278428485366576908">Tema</translation>
 <translation id="6280912520669706465">ARC</translation>
 <translation id="6284632978374966585">Aktivera mörkt tema</translation>
+<translation id="6285899124799306373">öppna appstartaren</translation>
 <translation id="6302401976930124515"><ph name="TEST_NAME" />-testet har avbrutits</translation>
 <translation id="631063167932043783">Appen Utforska</translation>
 <translation id="6319207335391420837">Uppdatera firmware på <ph name="DEVICE_NAME" /></translation>
@@ -651,6 +653,7 @@
 <translation id="6382182670717268353">Förhandsgranska skärmsläckare</translation>
 <translation id="6388847657025262518">Skannerns dokumentmatare är blockerad. Kontrollera mataren och försök igen.</translation>
 <translation id="6394634179843537518">Lägg till en fil</translation>
+<translation id="6401427872449207797">webbläsarsökning</translation>
 <translation id="6410257289063177456">Bildfiler</translation>
 <translation id="641081527798843608">Ämnesmatchning</translation>
 <translation id="6412715219990689313">Inbyggt tangentbord</translation>
@@ -666,6 +669,7 @@
 <translation id="6494974875566443634">Anpassning</translation>
 <translation id="6500818810472529210">Visa resultat på Google Sök</translation>
 <translation id="650266656685499220">Besök Google Foto om du vill skapa album</translation>
+<translation id="6505750420152840539">Dawn to dark</translation>
 <translation id="6516990319416533844">Om du vill testa batteriets laddningshastighet låter du det laddas ur under en kortare period</translation>
 <translation id="6517239166834772319">Utforska</translation>
 <translation id="6526200165918397681">Matcha bakgrund</translation>
@@ -799,7 +803,6 @@
 <translation id="7656388927906093505">Enheten är en mus.</translation>
 <translation id="7658239707568436148">Avbryt</translation>
 <translation id="7665800271478495366">Byt avatar</translation>
-<translation id="7675241868020048622">Aurora (endast för Plus)</translation>
 <translation id="7690294790491645610">Bekräfta det nya lösenordet</translation>
 <translation id="7701040980221191251">Inga</translation>
 <translation id="7705524343798198388">VPN</translation>
@@ -857,7 +860,6 @@
 <translation id="8138405288920084977">LTEAdvanced</translation>
 <translation id="8143951647992294073">Välj <ph name="TOPIC_SOURCE" /> <ph name="TOPIC_SOURCE_DESC" /></translation>
 <translation id="8151185429379586178">Verktyg för utvecklare</translation>
-<translation id="8153923300383192510">Endast på Chromebook Plus</translation>
 <translation id="8179976553408161302">Enter</translation>
 <translation id="8183974620058026102">Bifoga</translation>
 <translation id="8206859287963243715">Mobil</translation>
@@ -876,6 +878,7 @@
 <translation id="8312330582793120272">spela upp media</translation>
 <translation id="8318753676953949627">Inga bilder</translation>
 <translation id="8329018942023753850">appen kalkylator</translation>
+<translation id="8335869473001018124">öppna sökning</translation>
 <translation id="8336739000755212683">Ändra kontobilden på enheten</translation>
 <translation id="8347227221149377169">Utskriftsjobb</translation>
 <translation id="8351855506390808906">Tangentmappning: pekyta</translation>

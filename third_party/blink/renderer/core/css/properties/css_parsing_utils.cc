@@ -1902,12 +1902,14 @@ static bool ParseLABOrOKLABParameters(CSSParserTokenRange& range,
     if (CSSPrimitiveValue* value_percent =
             ConsumePercent(args, context, CSSPrimitiveValue::ValueRange::kAll);
         value_percent) {
-      lightness = std::max(0.0, value_percent->GetDoubleValue());
+      lightness =
+          std::min(100.0, std::max(0.0, value_percent->GetDoubleValue()));
     } else if (CSSPrimitiveValue* value = ConsumeNumber(
                    args, context, CSSPrimitiveValue::ValueRange::kAll);
                value) {
-      lightness = std::max(0.0, value->GetDoubleValue()) *
-                  (function_id == CSSValueID::kLab ? 1.0 : 100.0);
+      lightness =
+          std::min(100.0, std::max(0.0, value->GetDoubleValue()) *
+                              (function_id == CSSValueID::kLab ? 1.0 : 100.0));
     } else {
       return false;
     }
@@ -1949,12 +1951,14 @@ static bool ParseLCHOrOKLCHParameters(CSSParserTokenRange& range,
     if (CSSPrimitiveValue* value_percent =
             ConsumePercent(args, context, CSSPrimitiveValue::ValueRange::kAll);
         value_percent) {
-      lightness = std::max(0.0, value_percent->GetDoubleValue());
+      lightness =
+          std::min(100.0, std::max(0.0, value_percent->GetDoubleValue()));
     } else if (CSSPrimitiveValue* value = ConsumeNumber(
                    args, context, CSSPrimitiveValue::ValueRange::kAll);
                value) {
-      lightness = std::max(0.0, value->GetDoubleValue()) *
-                  (function_id == CSSValueID::kLch ? 1.0 : 100.0);
+      lightness =
+          std::min(100.0, std::max(0.0, value->GetDoubleValue()) *
+                              (function_id == CSSValueID::kLch ? 1.0 : 100.0));
     } else {
       return false;
     }
@@ -2069,7 +2073,8 @@ static CSSValue* ConsumeColorMixFunction(CSSParserTokenRange& range,
     return nullptr;
   }
 
-  CSSParserTokenRange args = ConsumeFunction(range);
+  CSSParserTokenRange range_copy = range;
+  CSSParserTokenRange args = ConsumeFunction(range_copy);
   // First argument is the colorspace
   Color::ColorSpace color_space;
   Color::HueInterpolationMethod hue_interpolation_method =
@@ -2130,6 +2135,8 @@ static CSSValue* ConsumeColorMixFunction(CSSParserTokenRange& range,
   if (!args.AtEnd()) {
     return nullptr;
   }
+
+  range = range_copy;
 
   cssvalue::CSSColorMixValue* result =
       MakeGarbageCollected<cssvalue::CSSColorMixValue>(
@@ -2334,7 +2341,9 @@ CSSValue* ConsumeColorContrast(CSSParserTokenRange& range,
                                const CSSParserContext& context,
                                bool accept_quirky_colors) {
   DCHECK_EQ(range.Peek().FunctionId(), CSSValueID::kColorContrast);
-  CSSParserTokenRange args = ConsumeFunction(range);
+
+  CSSParserTokenRange range_copy = range;
+  CSSParserTokenRange args = ConsumeFunction(range_copy);
 
   CSSValue* background_color =
       ConsumeColor(args, context, accept_quirky_colors);
@@ -2406,6 +2415,8 @@ CSSValue* ConsumeColorContrast(CSSParserTokenRange& range,
       highest_contrast_index = i;
     }
   }
+
+  range = range_copy;
 
   if (highest_contrast_index < 0) {
     // If an explicit target contrast was set and no provided colors have enough
@@ -4109,10 +4120,7 @@ CSSValue* ConsumeSelfPositionOverflowPosition(
     return ConsumeIdent(range);
   }
 
-  CSSValue* baseline = RuntimeEnabledFeatures::CSSLastBaselineEnabled()
-                           ? ConsumeBaseline(range)
-                           : ConsumeFirstBaseline(range);
-  if (baseline) {
+  if (CSSValue* baseline = ConsumeBaseline(range)) {
     return baseline;
   }
 
@@ -6528,6 +6536,12 @@ bool IsBasicShapeSupportedByOffsetPath(const CSSValueID& id) {
     case CSSValueID::kEllipse:
       return RuntimeEnabledFeatures::
           CSSOffsetPathBasicShapesCircleAndEllipseEnabled();
+    case CSSValueID::kInset:
+    case CSSValueID::kXywh:
+    case CSSValueID::kRect:
+    case CSSValueID::kPolygon:
+      return RuntimeEnabledFeatures::
+          CSSOffsetPathBasicShapesRectanglesAndPolygonEnabled();
     default:
       return false;
   }

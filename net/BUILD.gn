@@ -1267,6 +1267,7 @@ component("net") {
       "proxy_resolution/proxy_resolver_mac.cc",
       "proxy_resolution/proxy_resolver_mac.h",
     ]
+    configs += [ "//build/config/compiler:enable_arc" ]
   }
 
   if (is_win) {
@@ -2849,7 +2850,10 @@ test("net_unittests") {
   }
 
   if (is_linux) {
-    sources += [ "proxy_resolution/proxy_config_service_linux_unittest.cc" ]
+    sources += [
+      "base/network_change_notifier_linux_unittest.cc",
+      "proxy_resolution/proxy_config_service_linux_unittest.cc",
+    ]
   }
 
   if (is_linux || is_chromeos) {
@@ -3008,6 +3012,7 @@ test("net_unittests") {
 
   if (is_apple) {
     sources += [ "base/mac/url_conversions_unittest.mm" ]
+    configs += [ "//build/config/compiler:enable_arc" ]
   }
 
   if (is_mac) {

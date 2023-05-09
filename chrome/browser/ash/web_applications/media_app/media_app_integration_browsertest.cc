@@ -1270,14 +1270,17 @@ IN_PROC_BROWSER_TEST_P(MediaAppIntegrationTest, Autoplay) {
 
   constexpr char kWaitForPlayedLength[] = R"(
       (async function waitForPlayedLength() {
-        const audioElement = await waitForNode('audio');
+        const audioElement = await waitForNode('audio[src^="blob:"]');
+        console.log(`<audio> has played.length=${audioElement.played.length}.`);
         if (audioElement.played.length > 0) {
           return audioElement.played.length;
         }
+        console.log(`Wait: timeupdate on <audio src="${audioElement.src}">...`);
         // Wait for a timeupdate. If autoplay malfunctions, this will timeout.
         await new Promise(resolve => {
           audioElement.addEventListener('timeupdate', resolve, {once: true});
         });
+        console.log(`Returning. played.length=${audioElement.played.length}.`);
         return audioElement.played.length;
       })();
   )";

@@ -446,6 +446,7 @@ CaptureModeSession::CaptureModeSession(CaptureModeController* controller,
       focus_cycler_(std::make_unique<CaptureModeSessionFocusCycler>(this)),
       capture_toast_controller_(this) {
   CHECK(current_root_);
+  active_behavior->AttachToSession();
 }
 
 CaptureModeSession::~CaptureModeSession() = default;
@@ -498,7 +499,8 @@ void CaptureModeSession::Initialize() {
   ClampCaptureRegionToRootWindowSize();
 
   capture_mode_bar_widget_->Init(CreateWidgetParams(
-      parent, CaptureModeBarView::GetBounds(current_root_, active_behavior_),
+      parent,
+      capture_mode_util::GetCaptureBarBounds(current_root_, active_behavior_),
       "CaptureModeBarWidget"));
   capture_mode_bar_view_ = capture_mode_bar_widget_->SetContentsView(
       std::make_unique<CaptureModeBarView>(active_behavior_));
@@ -570,8 +572,15 @@ void CaptureModeSession::Shutdown() {
 
   // Close all widgets immediately to avoid having them show up in the captured
   // screenshots or video.
-  for (auto* widget : GetAvailableWidgets())
+  for (auto* widget : GetAvailableWidgets()) {
     widget->CloseNow();
+  }
+
+  // Clear all the contents view of all the widgets to avoid UAF.
+  capture_mode_bar_view_ = nullptr;
+  capture_mode_settings_view_ = nullptr;
+  capture_label_view_ = nullptr;
+  recording_type_menu_view_ = nullptr;
 
   if (a11y_alert_on_session_exit_) {
     capture_mode_util::TriggerAccessibilityAlert(
@@ -584,27 +593,26 @@ void CaptureModeSession::Shutdown() {
     // starting any recording. Note that we need to kill the camera preview
     // before aborting the projector session to avoid repareting the camera
     // preview widget which will lead to crash.
-    if (!controller_->is_recording_in_progress())
+    if (!controller_->is_recording_in_progress()) {
       controller_->camera_controller()->SetShouldShowPreview(false);
-
-    // Stopping the session for any reason other than starting video recording
-    // means a cancellation to an ongoing projector session (if any).
-    if (is_in_projector_mode_) {
-      ProjectorControllerImpl::Get()->OnRecordingStartAborted();
-
-      // Reset the camera selection if it was auto-selected in the
-      // projector-initiated capture mode session when the capture mode session
-      // ended before video recording starts to avoid the camera selection
-      // settings of the normal capture mode session being overridden by the
-      // projector-initiated capture mode session.
-      controller_->camera_controller()->MaybeRevertAutoCameraSelection();
-
-      // Restore the capture mode configurations that include the `type_`,
-      // `source_` and `enable_audio_recording_` when the projector-initiated
-      // session ends without starting a new recording, in case any of them were
-      // overwritten by projector.
-      controller_->MaybeRestoreCachedCaptureConfigurations();
     }
+
+    if (controller_->type() == CaptureModeType::kVideo) {
+      controller_->NotifyRecordingStartAborted();
+    }
+
+    // Reset the camera selection if it was auto-selected in the
+    // projector-initiated capture mode session when the capture mode session
+    // ended before video recording starts to avoid the camera selection
+    // settings of the normal capture mode session being overridden by the
+    // projector-initiated capture mode session.
+    controller_->camera_controller()->MaybeRevertAutoCameraSelection();
+
+    // The session is about to end and recording won't start afterwards. The
+    // active behavior may have overwritten some of the configs, we need to
+    // restore them back to their original values so that future sessions are
+    // not affected.
+    active_behavior_->DetachFromSession();
   }
 
   Shell::Get()->RemoveShellObserver(this);
@@ -743,8 +751,7 @@ void CaptureModeSession::SetSettingsMenuShown(bool shown, bool by_key_event) {
         "CaptureModeSettingsWidget"));
     capture_mode_settings_view_ =
         capture_mode_settings_widget_->SetContentsView(
-            std::make_unique<CaptureModeSettingsView>(this,
-                                                      is_in_projector_mode_));
+            std::make_unique<CaptureModeSettingsView>(this, active_behavior_));
     OnCaptureFolderMayHaveChanged();
 
     parent->layer()->StackAtTop(capture_mode_settings_widget_->GetLayer());
@@ -784,9 +791,11 @@ void CaptureModeSession::ReportSessionHistograms() {
   num_capture_region_adjusted_ = 0;
 
   RecordCaptureModeSwitchesFromInitialMode(capture_source_changed_);
-  RecordCaptureModeConfiguration(controller_->type(), source, recording_type,
-                                 controller_->GetAudioRecordingEnabled(),
-                                 is_in_projector_mode_);
+  RecordCaptureModeConfiguration(
+      controller_->type(), source, recording_type,
+      /*audio_on=*/controller_->GetEffectiveAudioRecordingMode() !=
+          AudioRecordingMode::kOff,
+      is_in_projector_mode_);
 }
 
 void CaptureModeSession::StartCountDown(
@@ -1075,19 +1084,12 @@ void CaptureModeSession::OnKeyEvent(ui::KeyEvent* event) {
     }
 
     case ui::VKEY_UP:
-    case ui::VKEY_DOWN: {
-      event->StopPropagation();
-      event->SetHandled();
-      UpdateRegionVertically(/*up=*/key_code == ui::VKEY_UP, event->flags());
-      return;
-    }
-
+    case ui::VKEY_DOWN:
     case ui::VKEY_LEFT:
     case ui::VKEY_RIGHT: {
       event->StopPropagation();
       event->SetHandled();
-      UpdateRegionHorizontally(/*left=*/key_code == ui::VKEY_LEFT,
-                               event->flags());
+      UpdateRegionForArrowKeys(key_code, event->flags());
       return;
     }
 
@@ -1577,7 +1579,7 @@ void CaptureModeSession::RefreshBarWidgetBounds() {
   // The sequence matters here since settings bounds depend on capture bar
   // bounds.
   capture_mode_bar_widget_->SetBounds(
-      CaptureModeBarView::GetBounds(current_root_, active_behavior_));
+      capture_mode_util::GetCaptureBarBounds(current_root_, active_behavior_));
   MaybeUpdateSettingsBounds();
   if (user_nudge_controller_)
     user_nudge_controller_->Reposition();
@@ -2671,82 +2673,80 @@ void CaptureModeSession::SelectDefaultRegion() {
                       /*by_user=*/true);
 }
 
-void CaptureModeSession::UpdateRegionHorizontally(bool left, int event_flags) {
+void CaptureModeSession::UpdateRegionForArrowKeys(ui::KeyboardCode key_code,
+                                                  int event_flags) {
   const FineTunePosition focused_fine_tune_position =
       focus_cycler_->GetFocusedFineTunePosition();
-  if (focused_fine_tune_position == FineTunePosition::kNone ||
-      focused_fine_tune_position == FineTunePosition::kTopCenter ||
-      focused_fine_tune_position == FineTunePosition::kBottomCenter) {
+  if (focused_fine_tune_position == FineTunePosition::kNone) {
     return;
   }
 
+  switch (key_code) {
+    case ui::VKEY_LEFT:
+    case ui::VKEY_RIGHT:
+      if (focused_fine_tune_position == FineTunePosition::kTopCenter ||
+          focused_fine_tune_position == FineTunePosition::kBottomCenter) {
+        return;
+      }
+      break;
+    case ui::VKEY_UP:
+    case ui::VKEY_DOWN:
+      if (focused_fine_tune_position == FineTunePosition::kLeftCenter ||
+          focused_fine_tune_position == FineTunePosition::kRightCenter) {
+        return;
+      }
+      break;
+    default:
+      NOTREACHED_NORETURN();
+  }
+
+  const bool horizontal =
+      key_code == ui::VKEY_LEFT || key_code == ui::VKEY_RIGHT;
   const int change = GetArrowKeyPressChange(event_flags);
   gfx::Rect new_capture_region = controller_->user_capture_region();
 
   if (focused_fine_tune_position == FineTunePosition::kCenter) {
-    new_capture_region.Offset(left ? -change : change, 0);
+    // Shift the whole capture region if we are focused on it.
+    if (horizontal) {
+      new_capture_region.Offset(key_code == ui::VKEY_LEFT ? -change : change,
+                                0);
+    } else {
+      new_capture_region.Offset(0, key_code == ui::VKEY_UP ? -change : change);
+    }
     new_capture_region.AdjustToFit(current_root_->bounds());
   } else {
     const gfx::Point location =
         capture_mode_util::GetLocationForFineTunePosition(
             new_capture_region, focused_fine_tune_position);
-    // If an affordance circle on the left side of the capture region is
-    // focused, left presses will enlarge the existing region and right presses
-    // will shrink the existing region. If it is on the right side, right
-    // presses will enlarge and left presses will shrink.
-    const bool affordance_on_left = location.x() == new_capture_region.x();
-    const bool shrink = affordance_on_left ^ left;
 
-    if (shrink && new_capture_region.width() < change)
-      return;
+    // If an affordance circle on the left/top side of the capture region is
+    // focused, left/up presses will enlarge the existing region and right/down
+    // presses will shrink the existing region. If it is on the right/bottom
+    // side, right/down presses will enlarge and left/up presses will shrink.
+    // Does nothing if shrinking will cause the new capture region to become
+    // empty.
+    gfx::Insets insets;
+    if (horizontal) {
+      const bool affordance_on_left = location.x() == new_capture_region.x();
+      const bool shrink = affordance_on_left ^ (key_code == ui::VKEY_LEFT);
+      if (shrink && new_capture_region.width() < change) {
+        return;
+      }
+      const int inset = shrink ? change : -change;
+      insets = gfx::Insets::TLBR(0, affordance_on_left ? inset : 0, 0,
+                                 affordance_on_left ? 0 : inset);
+    } else {
+      const bool affordance_on_top = location.y() == new_capture_region.y();
+      const bool shrink = affordance_on_top ^ (key_code == ui::VKEY_UP);
+      if (shrink && new_capture_region.height() < change) {
+        return;
+      }
+      const int inset = shrink ? change : -change;
+      insets = gfx::Insets::TLBR(affordance_on_top ? inset : 0, 0,
+                                 affordance_on_top ? 0 : inset, 0);
+    }
 
-    const int inset = shrink ? change : -change;
-    auto insets = gfx::Insets::TLBR(0, affordance_on_left ? inset : 0, 0,
-                                    affordance_on_left ? 0 : inset);
     new_capture_region.Inset(insets);
-    ClipRectToFit(&new_capture_region, current_root_->bounds());
-  }
-
-  UpdateCaptureRegion(new_capture_region, /*is_resizing=*/false,
-                      /*by_user=*/true);
-}
-
-void CaptureModeSession::UpdateRegionVertically(bool up, int event_flags) {
-  const FineTunePosition focused_fine_tune_position =
-      focus_cycler_->GetFocusedFineTunePosition();
-  if (focused_fine_tune_position == FineTunePosition::kNone ||
-      focused_fine_tune_position == FineTunePosition::kLeftCenter ||
-      focused_fine_tune_position == FineTunePosition::kRightCenter) {
-    return;
-  }
-
-  const int change = GetArrowKeyPressChange(event_flags);
-  gfx::Rect new_capture_region = controller_->user_capture_region();
-
-  // TODO(sammiequon): The below is similar to UpdateRegionHorizontally() except
-  // we are acting on the y-axis. Investigate if we can remove the duplication.
-  if (focused_fine_tune_position == FineTunePosition::kCenter) {
-    new_capture_region.Offset(0, up ? -change : change);
-    new_capture_region.AdjustToFit(current_root_->bounds());
-  } else {
-    const gfx::Point location =
-        capture_mode_util::GetLocationForFineTunePosition(
-            new_capture_region, focused_fine_tune_position);
-    // If an affordance circle on the top side of the capture region is
-    // focused, up presses will enlarge the existing region and down presses
-    // will shrink the existing region. If it is on the bottom side, down
-    // presses will enlarge and up presses will shrink.
-    const bool affordance_on_top = location.y() == new_capture_region.y();
-    const bool shrink = affordance_on_top ^ up;
-
-    if (shrink && new_capture_region.height() < change)
-      return;
-
-    const int inset = shrink ? change : -change;
-    auto insets = gfx::Insets::TLBR(affordance_on_top ? inset : 0, 0,
-                                    affordance_on_top ? 0 : inset, 0);
-    new_capture_region.Inset(insets);
-
     ClipRectToFit(&new_capture_region, current_root_->bounds());
   }
 

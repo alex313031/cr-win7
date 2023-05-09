@@ -21,6 +21,7 @@
 #include "chrome/browser/browsing_data/browsing_data_lifetime_policy_handler.h"
 #include "chrome/browser/enterprise/connectors/device_trust/prefs.h"
 #include "chrome/browser/enterprise/idle/idle_timeout_policy_handler.h"
+#include "chrome/browser/enterprise/reporting/legacy_tech/legacy_tech_report_policy_handler.h"
 #include "chrome/browser/first_party_sets/first_party_sets_overrides_policy_handler.h"
 #include "chrome/browser/net/disk_cache_dir_policy_handler.h"
 #include "chrome/browser/net/explicitly_allowed_network_ports_policy_handler.h"
@@ -167,6 +168,7 @@
 #include "chrome/browser/ash/policy/handlers/configuration_policy_handler_ash.h"
 #include "chrome/browser/ash/policy/handlers/lacros_availability_policy_handler.h"
 #include "chrome/browser/ash/policy/handlers/lacros_selection_policy_handler.h"
+#include "chrome/browser/ash/policy/reporting/metrics_reporting/metric_reporting_prefs.h"
 #include "chrome/browser/nearby_sharing/common/nearby_share_prefs.h"
 #include "chrome/browser/policy/default_geolocation_policy_handler.h"
 #include "chrome/browser/policy/device_login_screen_geolocation_access_level_policy_handler.h"
@@ -209,7 +211,7 @@
 
 #if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX)
 #include "chrome/browser/enterprise/idle/action.h"
-#include "components/device_signals/core/browser/pref_names.h"
+#include "components/device_signals/core/browser/pref_names.h"  // nogncheck due to crbug.com/1125897
 #endif  // BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX)
 
 #if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX) || \
@@ -827,9 +829,6 @@ const PolicyToPreferenceMapEntry kSimplePolicyMap[] = {
   { key::kAllowedDomainsForApps,
     prefs::kAllowedDomainsForApps,
     base::Value::Type::STRING },
-  { key::kSSLVersionMin,
-    prefs::kSSLVersionMin,
-    base::Value::Type::STRING },
   { key::kEnableMediaRouter,
     prefs::kEnableMediaRouter,
     base::Value::Type::BOOLEAN },
@@ -1139,12 +1138,6 @@ const PolicyToPreferenceMapEntry kSimplePolicyMap[] = {
   { key::kArcAppInstallEventLoggingEnabled,
     prefs::kArcAppInstallEventLoggingEnabled,
     base::Value::Type::BOOLEAN },
-  { key::kHindiInscriptLayoutEnabled,
-    prefs::kHindiInscriptLayoutEnabled,
-    base::Value::Type::BOOLEAN },
-  { key::kDeviceHindiInscriptLayoutEnabled,
-    prefs::kDeviceHindiInscriptLayoutEnabled,
-    base::Value::Type::BOOLEAN },
   { key::kNetworkFileSharesAllowed,
     prefs::kNetworkFileSharesAllowed,
     base::Value::Type::BOOLEAN },
@@ -1430,6 +1423,18 @@ const PolicyToPreferenceMapEntry kSimplePolicyMap[] = {
   { key::kUserAvatarCustomizationSelectorsEnabled,
     ash::user_image::prefs::kUserAvatarCustomizationSelectorsEnabled,
     base::Value::Type::BOOLEAN },
+  { key::kShowDisplaySizeScreenEnabled,
+    ash::prefs::kShowDisplaySizeScreenEnabled,
+    base::Value::Type::BOOLEAN },
+  { key::kReportAppInventory,
+    ash::reporting::kReportAppInventory,
+    base::Value::Type::LIST },
+  { key::kReportAppUsage,
+    ash::reporting::kReportAppUsage,
+    base::Value::Type::LIST },
+  { key::kReportAppUsageCollectionRateMs,
+    ash::reporting::kReportAppUsageCollectionRateMs,
+    base::Value::Type::INTEGER },
 #endif // BUILDFLAG(IS_CHROMEOS_ASH)
 
 #if BUILDFLAG(IS_LINUX)
@@ -1957,6 +1962,8 @@ std::unique_ptr<ConfigurationPolicyHandlerList> BuildHandlerList(
   handlers->AddHandler(
       std::make_unique<
           enterprise_reporting::CloudReportingFrequencyPolicyHandler>());
+  handlers->AddHandler(
+      std::make_unique<enterprise_reporting::LegacyTechReportPolicyHandler>());
   handlers->AddHandler(std::make_unique<DefaultSearchPolicyHandler>());
   handlers->AddHandler(std::make_unique<IncognitoModePolicyHandler>());
   handlers->AddHandler(

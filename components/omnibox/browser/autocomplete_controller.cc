@@ -40,7 +40,9 @@
 #include "components/history_clusters/core/config.h"
 #include "components/omnibox/browser/actions/omnibox_pedal_provider.h"
 #include "components/omnibox/browser/autocomplete_input.h"
+#include "components/omnibox/browser/autocomplete_match_type.h"
 #include "components/omnibox/browser/autocomplete_provider.h"
+#include "components/omnibox/browser/autocomplete_scoring_signals_annotator.h"
 #include "components/omnibox/browser/bookmark_provider.h"
 #include "components/omnibox/browser/bookmark_scoring_signals_annotator.h"
 #include "components/omnibox/browser/builtin_provider.h"
@@ -87,6 +89,8 @@
 #endif  // BUILDFLAG(BUILD_WITH_TFLITE_LIB)
 
 namespace {
+
+constexpr bool is_android = !!BUILDFLAG(IS_ANDROID);
 
 // Appends available autocompletion of the given type, subtype, and number to
 // the existing available autocompletions string, encoding according to the
@@ -170,26 +174,16 @@ bool ShouldPreserveDefault(bool sync_pass_done,
   // Don't preserve default in keyword mode to avoid e.g. the 'google.com'
   // suggestion being preserved and kicking the user out of keyword mode when
   // they type 'google.com  '.
-  static bool exclude_keyword_inputs =
-      OmniboxFieldTrial::
-          kAutocompleteStabilityPreserveDefaultExcludeKeywordInputs.Get();
-  if (exclude_keyword_inputs && input.prefer_keyword())
+  if (input.prefer_keyword())
     return false;
 
-  // Check if preservation is enabled for sync/async updates.
-  if (!sync_pass_done) {
-    static const int min_input_length =
-        OmniboxFieldTrial::
-            kAutocompleteStabilityPreserveDefaultForSyncUpdatesMinInputLength
-                .Get();
-    return min_input_length >= 0 &&
-           input.text().length() >= static_cast<size_t>(min_input_length);
-  } else {
-    static bool for_async_updates =
-        OmniboxFieldTrial::kAutocompleteStabilityPreserveDefaultForAsyncUpdates
-            .Get();
-    return for_async_updates;
-  }
+  // Preserve for all async updates, but only for longer inputs for sync
+  // updates. This mitigates aggressive scoring search suggestions getting
+  // 'stuck' as the default when short inputs provide low confidence.
+  if (!sync_pass_done)
+    return input.text().length() >= 3;
+  else
+    return true;
 }
 
 // The feature is checked frequently, so cache it to avoid performance costs.
@@ -994,9 +988,9 @@ void AutocompleteController::UpdateResult(
   }
 
   // Conditionally preserve the default match.
-  const AutocompleteMatch* default_match_to_preserve = nullptr;
+  absl::optional<AutocompleteMatch> default_match_to_preserve;
   if (last_default_match && ShouldPreserveDefault(sync_pass_done_, input_)) {
-    default_match_to_preserve = &last_default_match.value();
+    default_match_to_preserve = last_default_match;
   }
 
   if (!done_) {
@@ -1012,23 +1006,29 @@ void AutocompleteController::UpdateResult(
     // If not all providers are done, merge the old and new matches before
     // sorting.
     result_.TransferOldMatches(input_, &old_matches_to_reuse);
-    static bool preserve_default_after_transfer =
-        OmniboxFieldTrial::kAutocompleteStabilityPreserveDefaultAfterTransfer
-            .Get();
-
-    if (!preserve_default_after_transfer) {
-      default_match_to_preserve = nullptr;
-    }
-
   } else if (OmniboxFieldTrial::IsMlUrlScoringEnabled()) {
     // The async scoring model is only run once all the providers are done. Use
     // a WeakPtr since the model is not owned and `this` may no longer be alive.
     // `SortCullAndAnnotateResult()` is called when the model is done.
     // TODO(crbug.com/1405555): Deduplicate the matches before running the
-    //  model in order to combine the signals. Optionally also trim the matches
-    //  prior to running the model.
-    // TODO(crbug.com/1405555): Investigate preserving the would-be default
-    //  match from the legacy system when reranking the matches using the model.
+    //  model in order to combine the signals.
+
+    // When the preserve default feature param is enabled, the default match
+    // that would have been shown before ML scoring is preserved. In this case,
+    // call `SortAndCull()` before the ML model is invoked to determine what
+    // this default match would've been. This also limits the potential
+    // suggestions to only what would've been shown in the legacy system.
+    if (OmniboxFieldTrial::GetMLConfig()
+            .ml_url_scoring_rerank_final_matches_only) {
+      result_.SortAndCull(input_, template_url_service_,
+                          triggered_feature_service_,
+                          default_match_to_preserve);
+      if (result_.default_match() &&
+          OmniboxFieldTrial::GetMLConfig().ml_url_scoring_preserve_default) {
+        default_match_to_preserve = *result_.default_match();
+      }
+    }
+
     RunUrlScoringModel(base::BindOnce(
         &AutocompleteController::SortCullAndAnnotateResult,
         weak_ptr_factory_.GetWeakPtr(), last_default_match,
@@ -1050,7 +1050,7 @@ void AutocompleteController::SortCullAndAnnotateResult(
     const absl::optional<AutocompleteMatch>& last_default_match,
     const std::u16string& last_default_associated_keyword,
     bool force_notify_default_match_changed,
-    const AutocompleteMatch* default_match_to_preserve) {
+    absl::optional<AutocompleteMatch> default_match_to_preserve) {
   result_.SortAndCull(input_, template_url_service_, triggered_feature_service_,
                       default_match_to_preserve);
 
@@ -1058,26 +1058,7 @@ void AutocompleteController::SortCullAndAnnotateResult(
   result_.Validate();
 #endif  // DCHECK_IS_ON()
 
-  if (!input_.IsZeroSuggest()) {
-    bool perform_tab_match = true;
-#if BUILDFLAG(IS_ANDROID)
-    // Do not look for matching tabs on Android unless we collected all the
-    // suggestions. Tab matching is an expensive process with multiple JNI calls
-    // involved. Run it only when all the suggestions are collected.
-    perform_tab_match &= done_;
-#endif
-    if (perform_tab_match) {
-      result_.ConvertOpenTabMatches(provider_client_.get(), &input_);
-    }
-
-    result_.AttachPedalsToMatches(input_, *provider_client_);
-
-#if !BUILDFLAG(IS_IOS)
-    // HistoryClusters is not enabled on iOS.
-    AttachHistoryClustersActions(provider_client_->GetHistoryClustersService(),
-                                 provider_client_->GetPrefs(), result_);
-#endif
-  }
+  AttachActions();
 
   UpdateKeywordDescriptions(&result_);
   UpdateAssociatedKeywords(&result_);
@@ -1127,6 +1108,26 @@ void AutocompleteController::SortCullAndAnnotateResult(
 
   DelayedNotifyChanged(force_notify_default_match_changed ||
                        notify_default_match);
+}
+
+void AutocompleteController::AttachActions() {
+  if (!input_.IsZeroSuggest()) {
+    // Do not look for matching tabs on Android unless we collected all the
+    // suggestions. Tab matching is an expensive process with multiple JNI calls
+    // involved. Run it only when all the suggestions are collected.
+    bool perform_tab_match = is_android ? done_ : true;
+    if (perform_tab_match) {
+      result_.ConvertOpenTabMatches(provider_client_.get(), &input_);
+    }
+
+    result_.AttachPedalsToMatches(input_, *provider_client_);
+
+#if !BUILDFLAG(IS_IOS)
+    // HistoryClusters is not enabled on iOS.
+    AttachHistoryClustersActions(provider_client_->GetHistoryClustersService(),
+                                 provider_client_->GetPrefs(), result_);
+#endif
+  }
 }
 
 void AutocompleteController::UpdateAssociatedKeywords(
@@ -1539,6 +1540,13 @@ void AutocompleteController::RunUrlScoringModel(
        match_index++) {
     auto* match = result_.match_at(match_index);
     if (match->scoring_signals.has_value()) {
+      // Only eligible matches should have scoring signals.
+      DCHECK(match->MatchOrDuplicateMeets([](const auto& match) {
+        return AutocompleteScoringSignalsAnnotator::IsEligibleMatch(match);
+      })) << "Unexpected "
+          << AutocompleteMatchType::ToString(match->type) << " match at index "
+          << match_index << " sent to the scoring model.";
+
       // Run the model for matches with scoring signals.
       provider_client_->GetAutocompleteScoringModelService()
           ->ScoreAutocompleteUrlMatch(&scoring_model_task_tracker_,

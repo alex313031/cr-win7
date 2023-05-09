@@ -4,9 +4,11 @@
 
 #include "base/run_loop.h"
 #include "base/test/bind.h"
+#include "base/test/metrics/histogram_tester.h"
 #include "chrome/services/qrcode_generator/public/cpp/qrcode_generator_service.h"
 #include "chrome/services/qrcode_generator/public/mojom/qrcode_generator.mojom.h"
 #include "chrome/test/base/in_process_browser_test.h"
+#include "components/metrics/content/subprocess_metrics_provider.h"
 #include "content/public/test/browser_test.h"
 #include "ui/base/test/skia_gold_pixel_diff.h"
 
@@ -28,6 +30,7 @@ class QrCodeGeneratorServicePixelTest : public PlatformBrowserTest {
     request->render_module_style = module_style;
     request->render_locator_style = locator_style;
 
+    base::HistogramTester histograms;
     mojom::GenerateQRCodeResponsePtr response;
     base::RunLoop run_loop;
     QRImageGenerator generator;
@@ -54,6 +57,14 @@ class QrCodeGeneratorServicePixelTest : public PlatformBrowserTest {
     // The bitmap size should be a multiple of the QR size.
     ASSERT_EQ(response->bitmap.width() % response->data_size.width(), 0);
     ASSERT_EQ(response->bitmap.height() % response->data_size.height(), 0);
+
+    // Verify that the expected UMA metrics got logged.
+    metrics::SubprocessMetricsProvider::MergeHistogramDeltasForTesting();
+    histograms.ExpectTotalCount("Sharing.QRCodeGeneration.Duration", 1);
+    histograms.ExpectTotalCount(
+        "Sharing.QRCodeGeneration.Duration.BytesToQrPixels", 1);
+    histograms.ExpectTotalCount(
+        "Sharing.QRCodeGeneration.Duration.QrPixelsToQrImage", 1);
 
 #if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_MAC) || BUILDFLAG(IS_LINUX) || \
     BUILDFLAG(IS_CHROMEOS_LACROS)

@@ -636,8 +636,6 @@ DetermineWhetherToForbidTrustTokenOperation(
     const RenderFrameHostImpl* frame,
     const blink::mojom::CommitNavigationParams& commit_params,
     const url::Origin& subframe_origin,
-    absl::optional<blink::FencedFrame::DeprecatedFencedFrameMode>
-        fenced_frame_mode_for_navigation,
     const network::mojom::TrustTokenOperationType& operation) {
   std::unique_ptr<blink::PermissionsPolicy> subframe_policy;
   // TODO(https://crbug.com/1430514): Add WPT to test how TrustTokens behave in
@@ -648,9 +646,14 @@ DetermineWhetherToForbidTrustTokenOperation(
     // inheriting from its parent. Note that the parent policies must allow the
     // required policies, which is checked separately in
     // NavigationRequest::CheckPermissionsPoliciesForFencedFrames.
-    CHECK(fenced_frame_mode_for_navigation);
+    const absl::optional<FencedFrameProperties>& fenced_frame_properties =
+        frame->frame_tree_node()->GetFencedFrameProperties();
+    base::span<const blink::mojom::PermissionsPolicyFeature> permissions;
+    if (fenced_frame_properties) {
+      permissions = fenced_frame_properties->required_permissions_to_load;
+    }
     subframe_policy = blink::PermissionsPolicy::CreateForFencedFrame(
-        subframe_origin, fenced_frame_mode_for_navigation.value());
+        subframe_origin, permissions);
   } else {
     // For main frame loads, the frame's permissions policy is determined
     // entirely by response headers, which are provided by the renderer.
@@ -1221,13 +1224,11 @@ class RenderFrameHostImpl::SubresourceLoaderFactoriesConfig {
           DetermineWhetherToForbidTrustTokenOperation(
               navigation_request.GetRenderFrameHost(),
               navigation_request.commit_params(), result.origin(),
-              navigation_request.ComputeDeprecatedFencedFrameMode(),
               network::mojom::TrustTokenOperationType::kRedemption);
       result.trust_token_issuance_policy_ =
           DetermineWhetherToForbidTrustTokenOperation(
               navigation_request.GetRenderFrameHost(),
               navigation_request.commit_params(), result.origin(),
-              navigation_request.ComputeDeprecatedFencedFrameMode(),
               network::mojom::TrustTokenOperationType::kIssuance);
 
       if (navigation_request.GetIsThirdPartyCookiesUserBypassEnabled()) {
@@ -5982,8 +5983,26 @@ void RenderFrameHostImpl::AllowBindings(int bindings_flags) {
 
   int webui_bindings = bindings_flags & kWebUIBindingsPolicyMask;
 
-  // TODO(nasko): Ensure callers that specify non-zero WebUI bindings are
-  // doing so on a RenderFrameHost that has WebUI associated with it.
+  // Ensure callers that specify non-zero WebUI bindings are doing so on a
+  // RenderFrameHost that has WebUI associated with it. If we run the renderer
+  // code in-process, the security invariant cannot be enforced, therefore it
+  // should be skipped in that case.
+  if (webui_bindings != BINDINGS_POLICY_NONE &&
+      !RenderProcessHost::run_renderer_in_process() &&
+      base::FeatureList::IsEnabled(kEnsureAllowBindingsIsAlwaysForWebUI)) {
+    ProcessLock process_lock = GetProcess()->GetProcessLock();
+    if (!process_lock.is_locked_to_site() ||
+        !base::Contains(URLDataManagerBackend::GetWebUISchemes(),
+                        process_lock.lock_url().scheme())) {
+      // TODO(nasko): Convert this to CHECK once it has had enough time to
+      // ensure this branch is not hit in production.
+      SCOPED_CRASH_KEY_STRING256("AllowBindings", "process_lock",
+                                 process_lock.ToString());
+      NOTREACHED() << "Calling AllowBindings for a process not locked to WebUI:"
+                   << process_lock;
+      base::debug::DumpWithoutCrashing();
+    }
+  }
 
   // The bindings being granted here should not differ from the bindings that
   // the associated WebUI requires.
@@ -9505,6 +9524,15 @@ void RenderFrameHostImpl::RecordNavigationSuddenTerminationHandlers() {
       NavigationSuddenTerminationDisablerType::kMaxValue * 2);
 }
 
+const absl::optional<base::UnguessableToken>&
+RenderFrameHostImpl::GetDevToolsNavigationToken() {
+  // We shouldn't need to call this method while a RFH is speculative or pending
+  // commit - there is a navigation in progress and its value will change
+  // shortly.
+  CHECK_GT(lifecycle_state(), LifecycleStateImpl::kPendingCommit);
+  return document_associated_data_->devtools_navigation_token();
+}
+
 void RenderFrameHostImpl::CommitNavigation(
     NavigationRequest* navigation_request,
     blink::mojom::CommonNavigationParamsPtr common_params,
@@ -11019,18 +11047,19 @@ void RenderFrameHostImpl::CreateWebUsbService(
 
 void RenderFrameHostImpl::ResetPermissionsPolicy() {
   if (IsFencedFrameRoot()) {
-    const absl::optional<FencedFrameProperties>& properties =
-        frame_tree_node()->GetFencedFrameProperties();
     // Fenced frames have a list of required permission policies to load and
     // can't be granted extra policies, so use the required policies instead of
     // inheriting from its parent. Note that the parent policies must allow the
     // required policies, which is checked separately in
     // NavigationRequest::CheckPermissionsPoliciesForFencedFrames.
+    const absl::optional<FencedFrameProperties>& fenced_frame_properties =
+        frame_tree_node()->GetFencedFrameProperties();
+    base::span<const blink::mojom::PermissionsPolicyFeature> permissions;
+    if (fenced_frame_properties) {
+      permissions = fenced_frame_properties->required_permissions_to_load;
+    }
     permissions_policy_ = blink::PermissionsPolicy::CreateForFencedFrame(
-        last_committed_origin_,
-        properties.has_value() &&
-            properties->mode_ ==
-                blink::FencedFrame::DeprecatedFencedFrameMode::kOpaqueAds);
+        last_committed_origin_, permissions);
     return;
   }
 
@@ -12499,6 +12528,9 @@ bool RenderFrameHostImpl::DidCommitNavigationInternal(
                navigation_request->GetDocumentToken());
     }
 
+    document_associated_data_->set_devtools_navigation_token(
+        navigation_request->devtools_navigation_token());
+
     const absl::optional<FencedFrameProperties>& fenced_frame_properties =
         navigation_request->ComputeFencedFrameProperties();
     // On navigations of fenced frame/urn iframe roots initiated within the
@@ -13063,20 +13095,6 @@ void RenderFrameHostImpl::SendCommitNavigation(
   //    still exists at this point (unless explicitly removed from the DOM
   //    otherwise).
   MaybeSendFencedFrameReportingBeacon(*navigation_request);
-
-  // TODO(crbug.com/1430232): Remove this once we know the cause of the
-  // associated CHECK failure.
-  if (common_params->initiator_base_url &&
-      (!blink::features::IsNewBaseUrlInheritanceBehaviorEnabled() ||
-       (!common_params->url.IsAboutBlank() &&
-        !common_params->url.IsAboutSrcdoc()))) {
-    SCOPED_CRASH_KEY_BOOL(
-        "new_base_url", "new_base_url_enabled",
-        blink::features::IsNewBaseUrlInheritanceBehaviorEnabled());
-    SCOPED_CRASH_KEY_BOOL("new_base_url", "url_is_empty",
-                          common_params->initiator_base_url->is_empty());
-    base::debug::DumpWithoutCrashing();
-  }
 
   commit_params->commit_sent = base::TimeTicks::Now();
   navigation_client->CommitNavigation(
