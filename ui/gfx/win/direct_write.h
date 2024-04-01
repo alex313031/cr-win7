@@ -6,17 +6,23 @@
 #define UI_GFX_WIN_DIRECT_WRITE_H_
 
 #include <dwrite.h>
-
+#include "base/component_export.h"
 #include "base/strings/string_piece.h"
 #include "third_party/abseil-cpp/absl/types/optional.h"
 #include "ui/gfx/gfx_export.h"
 
 namespace gfx {
 namespace win {
+	
+// Returns whether DirectWrite font rendering should be used.
+GFX_EXPORT bool ShouldUseDirectWrite();
 
 GFX_EXPORT void InitializeDirectWrite();
 
-// Creates a DirectWrite factory.
+// Returns true if we are using DirectWrite for font metrics and rendering.
+GFX_EXPORT bool IsDirectWriteEnabled();
+
+// Creates a DirectWrite factory, if using DirectWrite.
 GFX_EXPORT void CreateDWriteFactory(IDWriteFactory** factory);
 
 // Returns the global DirectWrite factory.

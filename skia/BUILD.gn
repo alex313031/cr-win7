@@ -109,14 +109,14 @@ config("skia_config") {
     defines += [ "SK_DISABLE_LEGACY_INIT_DECODERS" ]
   }
 
-  if (is_component_build) {
+ # if (is_component_build) {
     defines += [ "SKIA_DLL" ]
     if (is_win) {
       defines += [ "SKCMS_API=__declspec(dllexport)" ]
     } else {
       defines += [ "SKCMS_API=__attribute__((visibility(\"default\")))" ]
     }
-  }
+ # }
 
   if (is_android) {
     defines += [
@@ -437,6 +437,7 @@ component("skia") {
   if (is_win) {
     # See SK_TYPEFACE_FACTORY_DIRECTWRITE
     sources += [
+      "//third_party/skia/src/ports/SkFontHost_win.cpp",
       "//third_party/skia/src/ports/SkFontMgr_win_dw.cpp",
       "//third_party/skia/src/ports/SkOSFile_win.cpp",
       "//third_party/skia/src/ports/SkRemotableFontMgr_win_dw.cpp",
