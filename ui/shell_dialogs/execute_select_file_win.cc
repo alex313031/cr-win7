@@ -12,10 +12,12 @@
 #include <memory>
 
 #include "base/check.h"
+#include "base/command_line.h"
 #include "base/feature_list.h"
 #include "base/files/file.h"
 #include "base/files/file_util.h"
 #include "base/functional/callback.h"
+#include "base/logging.h"
 #include "base/strings/string_util.h"
 #include "base/threading/hang_watcher.h"
 #include "base/win/com_init_util.h"
@@ -196,8 +198,11 @@ bool ConfigureDialog_Legacy(OPENFILENAME_NT4W* open_file_name,
   filter_buffer.clear();
 
  for (const auto& filter_spec : filter) {
-	std::u16string filter_str = filter_spec.extension_spec;
+	std::u16string filter_str = filter_spec.description;
     filter_buffer.append(filter_str);
+	filter_buffer.push_back(0);
+	filter_str = filter_spec.extension_spec;
+	filter_buffer.append(filter_str);
 	filter_buffer.push_back(0);
   }
   filter_buffer.push_back(0);
@@ -313,8 +318,9 @@ GetFilters(const OPENFILENAME* openfilename) {
   std::vector<std::tuple<std::u16string, std::u16string>> filters;
 
   const char16_t* display_string = (char16_t*)openfilename->lpstrFilter;
-  if (!display_string)
+  if (!display_string) {
     return filters;
+  }
 
   while (*display_string) {
     const char16_t* display_string_end = display_string;
@@ -354,7 +360,7 @@ std::wstring AppendExtensionIfNeeded(const std::wstring& filename,
                                      const std::wstring& suggested_ext) {
   DCHECK(!filename.empty());
   std::wstring return_value = filename;
-
+  LOG(ERROR) << filter_selected;
   // If we wanted a specific extension, but the user's filename deleted it or
   // changed it to something that the system doesn't understand, re-append.
   // Careful: Checking net::GetMimeTypeFromExtension() will only find
@@ -497,14 +503,14 @@ bool RunSaveFileDialog(HWND owner,
 	  open_file_name.lpstrDefExt = &def_ext[0];
 
 	  BOOL success = ::GetSaveFileNameW((OPENFILENAMEW*)&open_file_name);
-	  
-	  if(open_file_name.lpstrFilter) {
+	  BaseShellDialogImpl::DisableOwner(owner);
+	  if (!success) {
+		if(open_file_name.lpstrFilter) {
 		  ::HeapFree(::GetProcessHeap(), 0, (LPVOID)open_file_name.lpstrFilter);
 		  open_file_name.lpstrFilter = nullptr;
-	  }
-	  BaseShellDialogImpl::DisableOwner(owner);
-	  if (!success)
+	    }
 		return false;
+	  }
 
 	  // Return the user's choice.
 	  //*path = base::FilePath(open_file_name.lpstrFile);
@@ -524,7 +530,8 @@ bool RunSaveFileDialog(HWND owner,
 	  // Get the extension that was suggested to the user (when the Save As dialog
 	  // was opened).
 	  std::wstring suggested_ext = GetExtensionWithoutLeadingDot(default_path.Extension());
-
+      LOG(ERROR) << suggested_ext;
+	  LOG(ERROR) << filter_selected;
 	  // If we can't get the extension from the default_path, we use the default
 	  // extension passed in. This is to cover cases like when saving a web page,
 	  // where we get passed in a name without an extension and a default extension
@@ -534,6 +541,11 @@ bool RunSaveFileDialog(HWND owner,
 
 	  *path = base::FilePath(
 		  AppendExtensionIfNeeded(base::FilePath(open_file_name.lpstrFile).value(), std::wstring(filter_selected.begin(), filter_selected.end()), suggested_ext));
+		  
+	if(open_file_name.lpstrFilter) {
+		::HeapFree(::GetProcessHeap(), 0, (LPVOID)open_file_name.lpstrFilter);
+		open_file_name.lpstrFilter = nullptr;
+	}
 	  return true;	  
   }
 }
